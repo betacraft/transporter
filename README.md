@@ -10,7 +10,8 @@ This library is in it's nascent phases and being actively developed in RainingCl
 
 ### Architecture
 
-```                                           +------------+
+```
+                                              +------------+
                                |              | raw socket |
                                |              +------------+
     +------------+             |              | netty 3.x  |
