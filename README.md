@@ -195,4 +195,4 @@ public interface ITransportSession<M> {
 
 ### Info
 
-For any other help or info, I am available on akshay@rainingclouds.com.
+For any other help or info, you can mail us at akshay@rainingclouds.com.
