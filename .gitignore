@@ -1,0 +1,8 @@
+#idea workspace metadata folder
+.idea/*
+# output files
+*/target/*
+*.devicelog
+target/*
+*.log
+*.out
