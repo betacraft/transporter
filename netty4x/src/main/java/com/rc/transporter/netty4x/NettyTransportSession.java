@@ -54,9 +54,9 @@ public class NettyTransportSession<M> extends SimpleChannelInboundHandler<Object
      */
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        super.channelInactive(ctx);
         transportSession.onDisconnected();
         this.nettyChannel.close();
+        super.channelInactive(ctx);
     }
 
     /**
@@ -67,8 +67,7 @@ public class NettyTransportSession<M> extends SimpleChannelInboundHandler<Object
      */
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        super.exceptionCaught(ctx, cause);
         transportSession.onError(cause);
-        this.nettyChannel.close();
+        this.nettyChannel.closeChannel();
     }
 }

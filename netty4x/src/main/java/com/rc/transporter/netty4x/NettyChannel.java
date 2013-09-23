@@ -23,17 +23,17 @@ public final class NettyChannel extends TransportChannel {
 
     @Override
     public void sendData(Object data) {
-        if (this.nettyChannelHandlerContext.channel().isOpen() && !this.channelClosed.get())
-            this.nettyChannelHandlerContext.writeAndFlush(data);
+        this.nettyChannelHandlerContext.writeAndFlush(data);
     }
 
     @Override
-    public void close() {
-        super.close();
+    protected void closeChannel() {
         if (this.channelClosed.get())
             return;
         this.channelClosed.set(true);
         this.nettyChannelHandlerContext.disconnect();
         this.nettyChannelHandlerContext.close();
     }
+
+
 }

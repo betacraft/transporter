@@ -28,6 +28,7 @@ public abstract class TransportChannel {
         this.channelStateListener = channelStateListener;
     }
 
+
     /**
      * Method to push data on channel
      *
@@ -35,10 +36,13 @@ public abstract class TransportChannel {
      */
     public abstract void sendData(Object data);
 
+    protected abstract void closeChannel();
+
     /**
      * Method to close channel
      */
     public void close() {
+        closeChannel();
         if (this.channelStateListener == null)
             return;
         this.channelStateListener.onClose();
