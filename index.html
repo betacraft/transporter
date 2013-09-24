@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Transporter : An abstraction library for transport frameworks" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Transporter</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/RainingClouds/transporter">View on GitHub</a>
+
+          <h1 id="project_title">Transporter</h1>
+          <h2 id="project_tagline">An abstraction library for transport frameworks</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/RainingClouds/transporter/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/RainingClouds/transporter/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h2>
+<a name="transporter" class="anchor" href="#transporter"><span class="octicon octicon-link"></span></a>Transporter</h2>
+
+<p>Transporter library allows to keep your business logic separate from the underlying communication framework
+being used in your system components. So it doesn't matter if you are using  raw sockets, netty4.x, netty3.x, socketio
+or websockets. Transporter is designed in a way that adding or switching between these frameworks is less painful and
+is with minimum code hit.</p>
+
+<p>This library is in it's nascent phases and being actively developed in RainingClouds.</p>
+
+<h2>
+<a name="architecture" class="anchor" href="#architecture"><span class="octicon octicon-link"></span></a>Architecture</h2>
+
+<pre><code>                                              +------------+
+                               |              | raw socket |
+                               |              +------------+
+    +------------+             |              | netty 3.x  |
+    | Your       |      +------+------+       +------------+
+    | Business   |  &lt;-&gt; | Transporter |  &lt;-&gt;  | netty 4.x  |
+    | Logic      |      +------+------+       +------------+
+    +------------+             |              |  socketio  |
+                               |              +------------+
+                               |              |    ...     |
+</code></pre>
+
+<p>So ideally this library acts as an interface between your business logic and transport layer. Right now netty4x
+implementation is available and soon netty3x will be pushed.</p>
+
+<h2>
+<a name="components" class="anchor" href="#components"><span class="octicon octicon-link"></span></a>Components</h2>
+
+<h4>
+<a name="itransportserver" class="anchor" href="#itransportserver"><span class="octicon octicon-link"></span></a>ITransportServer</h4>
+
+<p>Contract for writing transport server</p>
+
+<pre><code>public interface ITransportServer {
+    /**
+     * Transport server listener to listen various events related with server lifecycle
+     */
+    public interface ITransportServerListener {
+        /**
+         * Callback called when server is closed
+         */
+        public void onClosed();
+    }
+
+    /**
+     * Method to start server
+     *
+     * @param hostname                hostname
+     * @param port                    port on which server needs to be started
+     * @param transportServerListener @ITransportServerListener listener to listen the state of the server
+     * @param transportSession        @ITransportSession session routine that will be associated with each connection received
+     *                                on this server
+     * @throws Exception throws exception if any during starting the server
+     */
+    public void start(final String hostname, final int port,
+                      final ITransportServerListener transportServerListener, final ITransportSession transportSession)
+            throws Exception;
+
+}
+</code></pre>
+
+<p>Sample netty4x server:
+(for details refer netty4x project)</p>
+
+<pre><code>public final class NettyTransportServer implements ITransportServer {
+    /**
+     * Logger
+     */
+    private static final Logger logger = LoggerFactory.getLogger(NettyTransportServer.class);
+    /**
+     * Server config
+     */
+    private NettyTransportServerConfig serverConfig;
+    /**
+     * Constructor
+     *
+     * @param config netty server config
+     */
+    public NettyTransportServer(final NettyTransportServerConfig config) {
+        this.serverConfig = config;
+    }
+
+
+    /**
+     * Starting server
+     *
+     * @param hostname                hostname
+     * @param port                    port on which server needs to be started
+     * @param transportServerListener @ITransportServerListener listener to listen the state of the server
+     * @param nettyTransportSession   @ITransportSession associated with each connection being received on this server
+     */
+    @Override
+    public void start(final String hostname, final int port, final ITransportServerListener transportServerListener,
+                      final ITransportSession nettyTransportSession) {
+        try {
+            ServerBootstrap serverBootstrap = new ServerBootstrap();
+            serverBootstrap.group(this.serverConfig.getBossGroup(), this.serverConfig.getWorkerGroup())
+                    .channel(NioServerSocketChannel.class)
+                    .childHandler(new ChannelInitializer() {
+                        /**
+                         * This method will be called once the {@link io.netty.channel.Channel} was registered. After the method returns this instance
+                         * will be removed from the {@link io.netty.channel.ChannelPipeline} of the {@link io.netty.channel.Channel}.
+                         *
+                         * @param ch the {@link io.netty.channel.Channel} which was registered.
+                         * @throws Exception is thrown if an error occours. In that case the {@link io.netty.channel.Channel} will be closed.
+                         */
+                        @Override
+                        protected void initChannel(Channel ch) throws Exception {
+                            ChannelPipeline pipeline = ch.pipeline();
+                            for (Map.Entry&lt;String, ChannelHandler&gt; pipelineEntry : serverConfig.getPipeline().entrySet()) {
+                                pipeline.addLast(pipelineEntry.getKey(), pipelineEntry.getValue());
+                            }
+                            pipeline.addLast("handler", new NettyTransportSession(nettyTransportSession));
+                        }
+                    });
+
+            // setting up options
+            for (Map.Entry&lt;ChannelOption, Object&gt; entry : this.serverConfig.getChannelOptions().entrySet()) {
+                serverBootstrap.option(entry.getKey(), entry.getValue());
+            }
+            // setting up child options
+            for (Map.Entry&lt;ChannelOption, Object&gt; entry : this.serverConfig.getChildChannelOptions().entrySet()) {
+                serverBootstrap.childOption(entry.getKey(), entry.getValue());
+            }
+            // bind server
+            serverBootstrap.bind(hostname, port).sync().channel().closeFuture().sync().addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture future) throws Exception {
+                    transportServerListener.onClosed();
+                }
+            });
+        } catch (ChannelException exception) {
+            exception.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            this.serverConfig.getBossGroup().shutdownGracefully();
+            this.serverConfig.getWorkerGroup().shutdownGracefully();
+        }
+    }
+}
+</code></pre>
+
+<h4>
+<a name="itransportclient" class="anchor" href="#itransportclient"><span class="octicon octicon-link"></span></a>ITransportClient</h4>
+
+<p>Contract for writing client.</p>
+
+<pre><code>public interface ITransportClient&lt;M&gt; {
+    /**
+     * Method to initialize connection with @ITransportServer or other server
+     *
+     * @param host             hostname
+     * @param port             port
+     * @param transportSession @TransportSession to listen to the events associated wtih session
+     */
+    public void connect(final String host, final int port, TransportSession&lt;M&gt; transportSession);
+}
+</code></pre>
+
+<h4>
+<a name="itransportsession" class="anchor" href="#itransportsession"><span class="octicon octicon-link"></span></a>ITransportSession</h4>
+
+<p>Contract for associating with a connection.</p>
+
+<pre><code>public interface ITransportSession&lt;M&gt; {
+
+    /**
+     * Callback called when connection is received in session
+     *
+     * @param channel @TransportChannel associated with this session
+     */
+    public void onConnected(TransportChannel channel);
+
+    /**
+     * Callback called when connection is disconnected
+     */
+    public void onDisconnected();
+
+    /**
+     * Callback called when error is caused in session
+     *
+     * @param cause Error cause
+     */
+    public void onError(Throwable cause);
+
+    /**
+     * Callback called when data is available
+     *
+     * @param data data
+     */
+    public void onData(M data);
+}
+
+</code></pre>
+
+<h3>
+<a name="info" class="anchor" href="#info"><span class="octicon octicon-link"></span></a>Info</h3>
+
+<p>For any other help or info, you can mail us at <a href="mailto:akshay@rainingclouds.com">akshay@rainingclouds.com</a>.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Transporter maintained by <a href="https://github.com/RainingClouds">RainingClouds</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
