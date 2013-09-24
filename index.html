@@ -1,36 +1,33 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-
   <head>
-    <meta charset='utf-8' />
-    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
-    <meta name="description" content="Transporter : An abstraction library for transport frameworks" />
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Transporter by RainingClouds</title>
 
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
-
-    <title>Transporter</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
   </head>
-
   <body>
+    <div class="wrapper">
+      <header>
+        <h1>Transporter</h1>
+        <p>An abstraction library for transport frameworks</p>
 
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/RainingClouds/transporter">View on GitHub</a>
+        <p class="view"><a href="https://github.com/RainingClouds/transporter">View the Project on GitHub <small>RainingClouds/transporter</small></a></p>
 
-          <h1 id="project_title">Transporter</h1>
-          <h2 id="project_tagline">An abstraction library for transport frameworks</h2>
 
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/RainingClouds/transporter/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/RainingClouds/transporter/tarball/master">Download this project as a tar.gz file</a>
-            </section>
-        </header>
-    </div>
-
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
+        <ul>
+          <li><a href="https://github.com/RainingClouds/transporter/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/RainingClouds/transporter/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/RainingClouds/transporter">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
         <h2>
 <a name="transporter" class="anchor" href="#transporter"><span class="octicon octicon-link"></span></a>Transporter</h2>
 
@@ -63,11 +60,11 @@ implementation is available and soon netty3x will be pushed.</p>
 <a name="components" class="anchor" href="#components"><span class="octicon octicon-link"></span></a>Components</h2>
 
 <h4>
-<a name="itransportserver" class="anchor" href="#itransportserver"><span class="octicon octicon-link"></span></a>ITransportServer</h4>
+<a name="transportserver" class="anchor" href="#transportserver"><span class="octicon octicon-link"></span></a>TransportServer</h4>
 
 <p>Contract for writing transport server</p>
 
-<pre><code>public interface ITransportServer {
+<pre><code>public abstract class TransportServer {
     /**
      * Transport server listener to listen various events related with server lifecycle
      */
@@ -76,6 +73,18 @@ implementation is available and soon netty3x will be pushed.</p>
          * Callback called when server is closed
          */
         public void onClosed();
+    }
+
+    /**
+     * Constructor for the server with shutdown hook to cleanup properly before process shutsdown
+     */
+    protected TransportServer() {
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            @Override
+            public void run() {
+                close();
+            }
+        }));
     }
 
     /**
@@ -88,17 +97,21 @@ implementation is available and soon netty3x will be pushed.</p>
      *                                on this server
      * @throws Exception throws exception if any during starting the server
      */
-    public void start(final String hostname, final int port,
-                      final ITransportServerListener transportServerListener, final ITransportSession transportSession)
+    public abstract void start(final String hostname, final int port,
+                               final ITransportServerListener transportServerListener, final ITransportSession transportSession)
             throws Exception;
 
+    /**
+     * Method to close server
+     */
+    protected abstract void close();
 }
 </code></pre>
 
 <p>Sample netty4x server:
 (for details refer netty4x project)</p>
 
-<pre><code>public final class NettyTransportServer implements ITransportServer {
+<pre><code>public final class NettyTransportServer extends TransportServer {
     /**
      * Logger
      */
@@ -107,12 +120,14 @@ implementation is available and soon netty3x will be pushed.</p>
      * Server config
      */
     private NettyTransportServerConfig serverConfig;
+
     /**
      * Constructor
      *
      * @param config netty server config
      */
     public NettyTransportServer(final NettyTransportServerConfig config) {
+        super();
         this.serverConfig = config;
     }
 
@@ -127,7 +142,7 @@ implementation is available and soon netty3x will be pushed.</p>
      */
     @Override
     public void start(final String hostname, final int port, final ITransportServerListener transportServerListener,
-                      final ITransportSession nettyTransportSession) {
+                      final ITransportSession nettyTransportSession) throws Exception {
         try {
             ServerBootstrap serverBootstrap = new ServerBootstrap();
             serverBootstrap.group(this.serverConfig.getBossGroup(), this.serverConfig.getWorkerGroup())
@@ -149,7 +164,6 @@ implementation is available and soon netty3x will be pushed.</p>
                             pipeline.addLast("handler", new NettyTransportSession(nettyTransportSession));
                         }
                     });
-
             // setting up options
             for (Map.Entry&lt;ChannelOption, Object&gt; entry : this.serverConfig.getChannelOptions().entrySet()) {
                 serverBootstrap.option(entry.getKey(), entry.getValue());
@@ -167,12 +181,25 @@ implementation is available and soon netty3x will be pushed.</p>
             });
         } catch (ChannelException exception) {
             exception.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            throw exception;
+        } catch (InterruptedException exception) {
+            exception.printStackTrace();
+            throw exception;
+        } catch (Exception exception) {
+            throw exception;
         } finally {
             this.serverConfig.getBossGroup().shutdownGracefully();
             this.serverConfig.getWorkerGroup().shutdownGracefully();
         }
+    }
+
+    /**
+     * Method to close server
+     */
+    @Override
+    protected void close() {
+        this.serverConfig.getBossGroup().shutdownGracefully();
+        this.serverConfig.getWorkerGroup().shutdownGracefully();
     }
 }
 </code></pre>
@@ -235,17 +262,12 @@ implementation is available and soon netty3x will be pushed.</p>
 
 <p>For any other help or info, you can mail us at <a href="mailto:akshay@rainingclouds.com">akshay@rainingclouds.com</a>.</p>
       </section>
-    </div>
-
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p class="copyright">Transporter maintained by <a href="https://github.com/RainingClouds">RainingClouds</a></p>
-        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/RainingClouds">RainingClouds</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
       </footer>
     </div>
-
+    <script src="javascripts/scale.fix.js"></script>
     
-
   </body>
 </html>
