@@ -1,7 +1,7 @@
 package com.rc.transporter.netty4x;
 
-import com.rc.transporter.core.ITransportServer;
 import com.rc.transporter.core.ITransportSession;
+import com.rc.transporter.core.TransportServer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -16,7 +16,7 @@ import java.util.Map;
  * Date  : 9/23/13
  * Time  : 3:54 AM
  */
-public final class NettyTransportServer implements ITransportServer {
+public final class NettyTransportServer extends TransportServer {
     /**
      * Logger
      */
@@ -32,6 +32,7 @@ public final class NettyTransportServer implements ITransportServer {
      * @param config netty server config
      */
     public NettyTransportServer(final NettyTransportServerConfig config) {
+        super();
         this.serverConfig = config;
     }
 
@@ -68,7 +69,6 @@ public final class NettyTransportServer implements ITransportServer {
                             pipeline.addLast("handler", new NettyTransportSession(nettyTransportSession));
                         }
                     });
-
             // setting up options
             for (Map.Entry<ChannelOption, Object> entry : this.serverConfig.getChannelOptions().entrySet()) {
                 serverBootstrap.option(entry.getKey(), entry.getValue());
@@ -96,5 +96,14 @@ public final class NettyTransportServer implements ITransportServer {
             this.serverConfig.getBossGroup().shutdownGracefully();
             this.serverConfig.getWorkerGroup().shutdownGracefully();
         }
+    }
+
+    /**
+     * Method to close server
+     */
+    @Override
+    protected void close() {
+        this.serverConfig.getBossGroup().shutdownGracefully();
+        this.serverConfig.getWorkerGroup().shutdownGracefully();
     }
 }

@@ -1,12 +1,12 @@
 package com.rc.transporter.core;
 
 /**
- * Transport server interface
+ * Transport server
  * Author: akshay
  * Date  : 9/23/13
  * Time  : 3:52 AM
  */
-public interface ITransportServer {
+public abstract class TransportServer {
     /**
      * Transport server listener to listen various events related with server lifecycle
      */
@@ -15,6 +15,18 @@ public interface ITransportServer {
          * Callback called when server is closed
          */
         public void onClosed();
+    }
+
+    /**
+     * Constructor for the server with shutdown hook to cleanup properly before process shutsdown
+     */
+    protected TransportServer() {
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            @Override
+            public void run() {
+                close();
+            }
+        }));
     }
 
     /**
@@ -27,8 +39,12 @@ public interface ITransportServer {
      *                                on this server
      * @throws Exception throws exception if any during starting the server
      */
-    public void start(final String hostname, final int port,
-                      final ITransportServerListener transportServerListener, final ITransportSession transportSession)
+    public abstract void start(final String hostname, final int port,
+                               final ITransportServerListener transportServerListener, final ITransportSession transportSession)
             throws Exception;
 
+    /**
+     * Method to close server
+     */
+    protected abstract void close();
 }

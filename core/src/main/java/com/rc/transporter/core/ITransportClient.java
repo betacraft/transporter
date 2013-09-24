@@ -8,7 +8,7 @@ package com.rc.transporter.core;
  */
 public interface ITransportClient<M> {
     /**
-     * Method to initialize connection with @ITransportServer or other server
+     * Method to initialize connection with @TransportServer or other server
      *
      * @param host             hostname
      * @param port             port
