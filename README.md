@@ -53,9 +53,11 @@ public interface ITransportServer {
      * @param transportServerListener @ITransportServerListener listener to listen the state of the server
      * @param transportSession        @ITransportSession session routine that will be associated with each connection received
      *                                on this server
+     * @throws Exception throws exception if any during starting the server
      */
     public void start(final String hostname, final int port,
-                      final ITransportServerListener transportServerListener, final ITransportSession transportSession);
+                      final ITransportServerListener transportServerListener, final ITransportSession transportSession)
+            throws Exception;
 
 }
 ```
