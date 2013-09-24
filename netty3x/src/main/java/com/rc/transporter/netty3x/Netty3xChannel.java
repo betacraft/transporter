@@ -12,12 +12,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Time  : 1:56 AM
  */
 public final class Netty3xChannel extends TransportChannel {
-
+    /**
+     * Channel associated with this transport
+     */
     private Channel channel;
-
-
+    /**
+     * Flag to check if channel is closed
+     */
     private AtomicBoolean isChannelClosed = new AtomicBoolean(false);
 
+    /**
+     * Constructor
+     *
+     * @param channelHandlerContext @ChannelHandlerContext associated with this channel
+     */
     public Netty3xChannel(final ChannelHandlerContext channelHandlerContext) {
         this.channel = channelHandlerContext.getChannel();
     }
@@ -33,6 +41,9 @@ public final class Netty3xChannel extends TransportChannel {
 
     }
 
+    /**
+     * Method to close channel
+     */
     @Override
     protected void closeChannel() {
         if (this.isChannelClosed.get())

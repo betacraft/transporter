@@ -14,5 +14,11 @@ public interface ITransportClient<M> {
      * @param port             port
      * @param transportSession @TransportSession to listen to the events associated wtih session
      */
-    public void connect(final String host, final int port, TransportSession<M> transportSession);
+    public void connect(final String host, final int port, TransportSession<M> transportSession) throws Exception;
+
+    /**
+     * Method to close client
+     */
+    public void close();
+
 }

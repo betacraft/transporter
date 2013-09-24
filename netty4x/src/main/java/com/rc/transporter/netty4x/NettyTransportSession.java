@@ -11,13 +11,21 @@ import io.netty.channel.SimpleChannelInboundHandler;
  * Time  : 3:44 AM
  */
 public class NettyTransportSession<M> extends SimpleChannelInboundHandler<Object> {
-
-
+    /**
+     * @NettyChannel associated with this session
+     */
     private NettyChannel nettyChannel;
-
+    /**
+     * Underlying @ITransportSession
+     */
     private ITransportSession<M> transportSession;
 
 
+    /**
+     * Constructor
+     *
+     * @param transportSession @ITransportSession which receives event
+     */
     public NettyTransportSession(ITransportSession<M> transportSession) {
         this.transportSession = transportSession;
     }

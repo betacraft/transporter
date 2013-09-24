@@ -11,21 +11,38 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Time  : 3:57 AM
  */
 public final class NettyChannel extends TransportChannel {
-
+    /**
+     * @ChannelHandlerContext for this channel
+     */
     private ChannelHandlerContext nettyChannelHandlerContext;
 
+    /**
+     * Flag to check if channel closed
+     */
     private AtomicBoolean channelClosed = new AtomicBoolean(false);
 
+    /**
+     * Constructor
+     *
+     * @param nettyChannelHandlerContext @ChannelHandlerContext associated with this instance
+     */
     public NettyChannel(ChannelHandlerContext nettyChannelHandlerContext) {
         this.nettyChannelHandlerContext = nettyChannelHandlerContext;
     }
 
-
+    /**
+     * Method to push data on channel
+     *
+     * @param data data to be pushed
+     */
     @Override
     public void sendData(Object data) {
         this.nettyChannelHandlerContext.writeAndFlush(data);
     }
 
+    /**
+     * Method to close this channel
+     */
     @Override
     protected void closeChannel() {
         if (this.channelClosed.get())
