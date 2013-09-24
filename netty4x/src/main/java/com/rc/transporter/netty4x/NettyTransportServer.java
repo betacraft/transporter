@@ -25,6 +25,7 @@ public final class NettyTransportServer implements ITransportServer {
      * Server config
      */
     private NettyTransportServerConfig serverConfig;
+
     /**
      * Constructor
      *
@@ -45,7 +46,7 @@ public final class NettyTransportServer implements ITransportServer {
      */
     @Override
     public void start(final String hostname, final int port, final ITransportServerListener transportServerListener,
-                      final ITransportSession nettyTransportSession) {
+                      final ITransportSession nettyTransportSession) throws Exception {
         try {
             ServerBootstrap serverBootstrap = new ServerBootstrap();
             serverBootstrap.group(this.serverConfig.getBossGroup(), this.serverConfig.getWorkerGroup())
@@ -85,8 +86,12 @@ public final class NettyTransportServer implements ITransportServer {
             });
         } catch (ChannelException exception) {
             exception.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            throw exception;
+        } catch (InterruptedException exception) {
+            exception.printStackTrace();
+            throw exception;
+        } catch (Exception exception) {
+            throw exception;
         } finally {
             this.serverConfig.getBossGroup().shutdownGracefully();
             this.serverConfig.getWorkerGroup().shutdownGracefully();
