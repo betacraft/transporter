@@ -75,14 +75,12 @@ public abstract class TransportServer {
      * Method to close server
      */
     protected abstract void close();
-
-
 }
 ```
 Sample netty4x server:
 (for details refer netty4x project)
 ```
-public final class NettyTransportServer implements ITransportServer {
+public final class NettyTransportServer extends TransportServer {
     /**
      * Logger
      */
@@ -91,12 +89,14 @@ public final class NettyTransportServer implements ITransportServer {
      * Server config
      */
     private NettyTransportServerConfig serverConfig;
+
     /**
      * Constructor
      *
      * @param config netty server config
      */
     public NettyTransportServer(final NettyTransportServerConfig config) {
+        super();
         this.serverConfig = config;
     }
 
@@ -111,7 +111,7 @@ public final class NettyTransportServer implements ITransportServer {
      */
     @Override
     public void start(final String hostname, final int port, final ITransportServerListener transportServerListener,
-                      final ITransportSession nettyTransportSession) {
+                      final ITransportSession nettyTransportSession) throws Exception {
         try {
             ServerBootstrap serverBootstrap = new ServerBootstrap();
             serverBootstrap.group(this.serverConfig.getBossGroup(), this.serverConfig.getWorkerGroup())
@@ -133,7 +133,6 @@ public final class NettyTransportServer implements ITransportServer {
                             pipeline.addLast("handler", new NettyTransportSession(nettyTransportSession));
                         }
                     });
-
             // setting up options
             for (Map.Entry<ChannelOption, Object> entry : this.serverConfig.getChannelOptions().entrySet()) {
                 serverBootstrap.option(entry.getKey(), entry.getValue());
@@ -151,12 +150,25 @@ public final class NettyTransportServer implements ITransportServer {
             });
         } catch (ChannelException exception) {
             exception.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            throw exception;
+        } catch (InterruptedException exception) {
+            exception.printStackTrace();
+            throw exception;
+        } catch (Exception exception) {
+            throw exception;
         } finally {
             this.serverConfig.getBossGroup().shutdownGracefully();
             this.serverConfig.getWorkerGroup().shutdownGracefully();
         }
+    }
+
+    /**
+     * Method to close server
+     */
+    @Override
+    protected void close() {
+        this.serverConfig.getBossGroup().shutdownGracefully();
+        this.serverConfig.getWorkerGroup().shutdownGracefully();
     }
 }
 ```
