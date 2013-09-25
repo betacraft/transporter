@@ -1,6 +1,5 @@
 package com.rc.transporter.netty4x;
 
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 
@@ -23,29 +22,27 @@ public class NettyTransportClientConfig {
      */
     private Map<ChannelOption, Object> channelOptions;
     /**
-     * Pipeline
+     * Channel initializer
      */
-    private Map<String, ChannelHandler> pipeline;
+    private NettyChannelInitializer channelInitializer;
+
 
     /**
-     * Getter for @pipeline
+     * Getter for @channelInitializer
      *
      * @return
      */
-    public Map<String, ChannelHandler> getPipeline() {
-        return pipeline;
+    public NettyChannelInitializer getChannelInitializer() {
+        return channelInitializer;
     }
 
     /**
-     * Method to add a pipeline handler
+     * Setter for @channelInitializer
      *
-     * @param handlerName     name of the handler
-     * @param pipelineHandler @ChannelHandler
-     * @return
+     * @param channelInitializer
      */
-    public NettyTransportClientConfig addPipelineHandler(String handlerName, ChannelHandler pipelineHandler) {
-        this.pipeline.put(handlerName, pipelineHandler);
-        return this;
+    public void setChannelInitializer(NettyChannelInitializer channelInitializer) {
+        this.channelInitializer = channelInitializer;
     }
 
     /**
@@ -112,32 +109,18 @@ public class NettyTransportClientConfig {
      * Default constructor
      */
     protected NettyTransportClientConfig() {
-        this.pipeline = new HashMap<String, ChannelHandler>();
+
         this.channelOptions = new HashMap<ChannelOption, Object>();
     }
 
     /**
      * Constructor
      *
-     * @param framer   @ChannelHandler for framing incoming/outgoing  data
-     * @param encoder  @ChannelHandler for encoding outgoing data
-     * @param decoder  @ChannelHandler for decoding incoming data
-     * @param pipeline Other @ChannelHandler for the pipeline
+     * @param channelInitializer @ChannelInitializer for channel
      */
-    protected NettyTransportClientConfig(final ChannelHandler framer,
-                                         final ChannelHandler encoder,
-                                         final ChannelHandler decoder,
-                                         final ChannelHandler[] pipeline) {
+    protected NettyTransportClientConfig(final NettyChannelInitializer channelInitializer) {
         this.workerGroup = new NioEventLoopGroup(0);
-        this.pipeline = new HashMap<String, ChannelHandler>();
-        if (framer != null)
-            this.pipeline.put("framer", framer);
-        if (decoder != null)
-            this.pipeline.put("decoder", decoder);
-        if (encoder != null)
-            this.pipeline.put("encoder", encoder);
-        for (ChannelHandler channelHandler : pipeline)
-            this.pipeline.put("handler", channelHandler);
+        this.channelInitializer = channelInitializer;
         // initializing default channel options
         this.channelOptions = new HashMap<ChannelOption, Object>();
         this.channelOptions.put(ChannelOption.TCP_NODELAY, true);
@@ -148,85 +131,32 @@ public class NettyTransportClientConfig {
     /**
      * Constructor
      *
-     * @param workerGroup @NioEventLoopGroup for worker
-     * @param framer      @ChannelHandler for framing incoming/outgoing  data
-     * @param encoder     @ChannelHandler for encoding outgoing data
-     * @param decoder     @ChannelHandler for decoding incoming data
-     * @param pipeline    Other @ChannelHandler for the pipeline
+     * @param workerGroup        @NioEventLoopGroup for worker
+     * @param channelInitializer @ChannelInitializer associated with channel
      */
     public NettyTransportClientConfig(final NioEventLoopGroup workerGroup,
-                                      final ChannelHandler framer,
-                                      final ChannelHandler encoder,
-                                      final ChannelHandler decoder,
-                                      final ChannelHandler[] pipeline) {
+                                      final NettyChannelInitializer channelInitializer) {
         this.workerGroup = workerGroup;
-        this.pipeline = new HashMap<String, ChannelHandler>();
-        if (framer != null)
-            this.pipeline.put("framer", framer);
-        if (decoder != null)
-            this.pipeline.put("decoder", decoder);
-        if (encoder != null)
-            this.pipeline.put("encoder", encoder);
-        for (ChannelHandler channelHandler : pipeline)
-            this.pipeline.put("handler", channelHandler);
-        if (this.pipeline.size() == 0)
-            throw new IllegalStateException("Pipeline length is zero");
+        this.channelInitializer = channelInitializer;
         // initializing default channel options
         this.channelOptions = new HashMap<ChannelOption, Object>();
         this.channelOptions.put(ChannelOption.TCP_NODELAY, true);
         this.channelOptions.put(ChannelOption.SO_KEEPALIVE, true);
     }
 
-
-    /**
-     * Factory for config with no framer
-     *
-     * @param encoder  @ChannelHandler for encoding outgoing data
-     * @param decoder  @ChannelHandler for decoding incoming data
-     * @param pipeline Other @ChannelHandler for the pipeline
-     * @return
-     */
-    public static NettyTransportClientConfig getDefaultWithNoFramer(final ChannelHandler encoder,
-                                                                    final ChannelHandler decoder,
-                                                                    final ChannelHandler... pipeline) {
-        return new NettyTransportClientConfig(null, encoder, decoder, pipeline);
-
-    }
 
     /**
      * Factory
      *
-     * @param workerGroup @NioEventLoopGroup for worker
-     * @param framer      @ChannelHandler for framing incoming/outgoing  data
-     * @param encoder     @ChannelHandler for encoding outgoing data
-     * @param decoder     @ChannelHandler for decoding incoming data
-     * @param pipeline    Other @ChannelHandler for the pipeline
+     * @param workerGroup        @NioEventLoopGroup for worker
+     * @param channelInitializer @ChannelInitializer associated with channel
      * @return
      */
     public static NettyTransportClientConfig getDefault(final NioEventLoopGroup workerGroup,
-                                                        final ChannelHandler framer,
-                                                        final ChannelHandler encoder,
-                                                        final ChannelHandler decoder,
-                                                        final ChannelHandler... pipeline) {
-        return new NettyTransportClientConfig(workerGroup, framer, encoder, decoder, pipeline);
+                                                        final NettyChannelInitializer channelInitializer) {
+        return new NettyTransportClientConfig(workerGroup, channelInitializer);
     }
 
-    /**
-     * Factory
-     *
-     * @param framer   @ChannelHandler for framing incoming/outgoing  data
-     * @param encoder  @ChannelHandler for encoding outgoing data
-     * @param decoder  @ChannelHandler for decoding incoming data
-     * @param pipeline Other @ChannelHandler for the pipeline
-     * @return
-     */
-
-    public static NettyTransportClientConfig getDefault(final ChannelHandler framer,
-                                                        final ChannelHandler encoder,
-                                                        final ChannelHandler decoder,
-                                                        final ChannelHandler... pipeline) {
-        return new NettyTransportClientConfig(framer, encoder, decoder, pipeline);
-    }
 
     /**
      * Factory for clean slate

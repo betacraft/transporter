@@ -3,7 +3,7 @@ package com.rc.transporter.netty4x;
 import com.rc.transporter.core.ITransportClient;
 import com.rc.transporter.core.TransportSession;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.*;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
 import java.util.Map;
@@ -41,26 +41,11 @@ public class NettyTransportClient<M> implements ITransportClient<M> {
     @Override
     public void connect(final String host, final int port, final TransportSession<M> transportSession) throws Exception {
         try {
+            this.clientConfig.getChannelInitializer().addLast(new NettyTransportSession<M>(transportSession));
             Bootstrap bootstrap = new Bootstrap()
                     .group(this.clientConfig.getWorkerGroup())
                     .channel(NioSocketChannel.class)
-                    .handler(new ChannelInitializer() {
-                        /**
-                         * This method will be called once the {@link io.netty.channel.Channel} was registered. After the method returns this instance
-                         * will be removed from the {@link io.netty.channel.ChannelPipeline} of the {@link io.netty.channel.Channel}.
-                         *
-                         * @param ch the {@link io.netty.channel.Channel} which was registered.
-                         * @throws Exception is thrown if an error occours. In that case the {@link io.netty.channel.Channel} will be closed.
-                         */
-                        @Override
-                        protected void initChannel(Channel ch) throws Exception {
-                            ChannelPipeline pipeline = ch.pipeline();
-                            for (Map.Entry<String, ChannelHandler> pipelineEntry : clientConfig.getPipeline().entrySet()) {
-                                pipeline.addLast(pipelineEntry.getKey(), pipelineEntry.getValue());
-                            }
-                            pipeline.addLast(new NettyTransportSession<M>(transportSession));
-                        }
-                    });
+                    .handler(this.clientConfig.getChannelInitializer());
             // setting all options
             for (Map.Entry<ChannelOption, Object> channelOption : this.clientConfig.getChannelOptions().entrySet()) {
                 bootstrap.option(channelOption.getKey(), channelOption.getValue());

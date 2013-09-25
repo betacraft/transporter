@@ -1,6 +1,5 @@
 package com.rc.transporter.netty4x;
 
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 
@@ -94,16 +93,10 @@ public final class NettyTransportServerConfig extends NettyTransportClientConfig
     /**
      * Constructor
      *
-     * @param framer   @ChannelHandler for framing incoming/outgoing  data
-     * @param encoder  @ChannelHandler for encoding outgoing data
-     * @param decoder  @ChannelHandler for decoding incoming data
-     * @param pipeline Other @ChannelHandler for the pipeline
+     * @param channelInitializer @ChannelInitializer for connections
      */
-    private NettyTransportServerConfig(final ChannelHandler framer,
-                                       final ChannelHandler encoder,
-                                       final ChannelHandler decoder,
-                                       final ChannelHandler... pipeline) {
-        super(framer, encoder, decoder, pipeline);
+    private NettyTransportServerConfig(final NettyChannelInitializer channelInitializer) {
+        super(channelInitializer);
         this.bossGroup = new NioEventLoopGroup(0);
         // Add so backlogs for servers
         addChannelOption(ChannelOption.SO_BACKLOG, 100);
@@ -113,35 +106,15 @@ public final class NettyTransportServerConfig extends NettyTransportClientConfig
 
     }
 
-    /**
-     * Get transport server config which does not have any framer
-     *
-     * @param encoder  @ChannelHandler for encoding outgoing data
-     * @param decoder  @ChannelHandler for decoding incoming data
-     * @param pipeline Other @ChannelHandler for the pipeline
-     * @return instance of @NettyTransportServerConfig
-     */
-    public static NettyTransportServerConfig getDefaultWithNoFramer(
-            final ChannelHandler encoder,
-            final ChannelHandler decoder,
-            final ChannelHandler... pipeline) {
-        return new NettyTransportServerConfig(null, encoder, decoder, pipeline);
-    }
 
     /**
      * Get transport server config with specified framer
      *
-     * @param framer   @ChannelHandler for framing incoming/outgoing  data
-     * @param encoder  @ChannelHandler for encoding outgoing data
-     * @param decoder  @ChannelHandler for decoding incoming data
-     * @param pipeline Other @ChannelHandler for the pipeline
+     * @param channelInitializer @ChannelInitializer for connections
      * @return instance of @NettyTransportServerConfig
      */
-    public static NettyTransportServerConfig getDefault(final ChannelHandler framer,
-                                                        final ChannelHandler encoder,
-                                                        final ChannelHandler decoder,
-                                                        final ChannelHandler... pipeline) {
-        return new NettyTransportServerConfig(framer, encoder, decoder, pipeline);
+    public static NettyTransportServerConfig getDefault(final NettyChannelInitializer channelInitializer) {
+        return new NettyTransportServerConfig(channelInitializer);
     }
 
     /**

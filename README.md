@@ -126,11 +126,11 @@ public final class NettyTransportServer extends TransportServer {
                          */
                         @Override
                         protected void initChannel(Channel ch) throws Exception {
-                            ChannelPipeline pipeline = ch.pipeline();
+                            ChannelPipeline sharablePipeline = ch.sharablePipeline();
                             for (Map.Entry<String, ChannelHandler> pipelineEntry : serverConfig.getPipeline().entrySet()) {
-                                pipeline.addLast(pipelineEntry.getKey(), pipelineEntry.getValue());
+                                sharablePipeline.addLast(pipelineEntry.getKey(), pipelineEntry.getValue());
                             }
-                            pipeline.addLast("handler", new NettyTransportSession(nettyTransportSession));
+                            sharablePipeline.addLast("handler", new NettyTransportSession(nettyTransportSession));
                         }
                     });
             // setting up options

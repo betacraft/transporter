@@ -3,7 +3,10 @@ package com.rc.transporter.netty4x;
 import com.rc.transporter.core.ITransportSession;
 import com.rc.transporter.core.TransportServer;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.*;
+import io.netty.channel.ChannelException;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,26 +61,10 @@ public final class NettyTransportServer extends TransportServer {
             for (Map.Entry<ChannelOption, Object> entry : this.serverConfig.getChildChannelOptions().entrySet()) {
                 serverBootstrap.childOption(entry.getKey(), entry.getValue());
             }
+            this.serverConfig.getChannelInitializer().addLast(new NettyTransportSession(nettyTransportSession));
             serverBootstrap.group(this.serverConfig.getBossGroup(), this.serverConfig.getWorkerGroup())
                     .channel(NioServerSocketChannel.class)
-                    .childHandler(new ChannelInitializer() {
-                        /**
-                         * This method will be called once the {@link io.netty.channel.Channel} was registered. After the method returns this instance
-                         * will be removed from the {@link io.netty.channel.ChannelPipeline} of the {@link io.netty.channel.Channel}.
-                         *
-                         * @param ch the {@link io.netty.channel.Channel} which was registered.
-                         * @throws Exception is thrown if an error occours. In that case the {@link io.netty.channel.Channel} will be closed.
-                         */
-                        @Override
-                        protected void initChannel(Channel ch) throws Exception {
-                            ChannelPipeline pipeline = ch.pipeline();
-                            for (Map.Entry<String, ChannelHandler> pipelineEntry : serverConfig.getPipeline().entrySet()) {
-                                pipeline.addLast(pipelineEntry.getKey(), pipelineEntry.getValue());
-                            }
-                            pipeline.addLast(new NettyTransportSession(nettyTransportSession));
-                        }
-                    });
-
+                    .childHandler(this.serverConfig.getChannelInitializer());
             // bind server
             serverBootstrap.bind(hostname, port).sync().channel().closeFuture().sync().addListener(new ChannelFutureListener() {
                 @Override
