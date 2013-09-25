@@ -6,7 +6,7 @@ package com.rc.transporter.core;
  * Date  : 9/23/13
  * Time  : 3:55 AM
  */
-public interface ITransportClient<M> {
+public interface ITransportClient<I,O> {
     /**
      * Method to initialize connection with @TransportServer or other server
      *
@@ -14,7 +14,7 @@ public interface ITransportClient<M> {
      * @param port             port
      * @param transportSession @TransportSession to listen to the events associated wtih session
      */
-    public void connect(final String host, final int port, TransportSession<M> transportSession) throws Exception;
+    public void connect(final String host, final int port, TransportSession<I,O> transportSession) throws Exception;
 
     /**
      * Method to close client

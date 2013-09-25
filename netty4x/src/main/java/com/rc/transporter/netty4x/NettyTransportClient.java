@@ -14,7 +14,7 @@ import java.util.Map;
  * Date  : 9/23/13
  * Time  : 4:56 AM
  */
-public class NettyTransportClient<M> implements ITransportClient<M> {
+public class NettyTransportClient<I, O> implements ITransportClient<I, O> {
 
     /**
      * Client config
@@ -40,12 +40,12 @@ public class NettyTransportClient<M> implements ITransportClient<M> {
      * @throws @Exception
      */
     @Override
-    public void connect(final String host, final int port, final TransportSession<M> transportSession) throws Exception {
+    public void connect(final String host, final int port, final TransportSession<I, O> transportSession) throws Exception {
         try {
             this.clientConfig.getChannelInitializer().setRuntimeHandlerProvider(new NettyChannelInitializer.RuntimeHandlerProvider() {
                 @Override
                 public ChannelHandler getChannelHandler() {
-                    return new NettyTransportSession<M>(transportSession);
+                    return new NettyTransportSession<I, O>(transportSession);
                 }
             });
             Bootstrap bootstrap = new Bootstrap()

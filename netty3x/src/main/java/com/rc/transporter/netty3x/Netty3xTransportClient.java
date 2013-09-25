@@ -20,7 +20,7 @@ import java.util.Map;
  * Date  : 9/24/13
  * Time  : 2:06 AM
  */
-public final class Netty3xTransportClient<M> implements ITransportClient<M> {
+public final class Netty3xTransportClient<I, O> implements ITransportClient<I, O> {
     /**
      * Logger
      */
@@ -53,7 +53,7 @@ public final class Netty3xTransportClient<M> implements ITransportClient<M> {
      * @throws @Exception
      */
     @Override
-    public void connect(final String host, final int port, final TransportSession<M> transportSession) throws Exception {
+    public void connect(final String host, final int port, final TransportSession<I, O> transportSession) throws Exception {
         try {
             this.clientBootstrap = new ClientBootstrap(
                     new NioClientSocketChannelFactory(
@@ -66,7 +66,7 @@ public final class Netty3xTransportClient<M> implements ITransportClient<M> {
                     ChannelPipeline pipeline = Channels.pipeline();
                     for (Map.Entry<String, ChannelHandler> handler : clientConfig.getChannelHandlers().entrySet())
                         pipeline.addLast(handler.getKey(), handler.getValue());
-                    pipeline.addLast("handler", new Netty3xTransportSession<M>(transportSession));
+                    pipeline.addLast("handler", new Netty3xTransportSession<I, O>(transportSession));
                     return pipeline;
                 }
             });
