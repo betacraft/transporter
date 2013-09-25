@@ -37,6 +37,7 @@ public final class NettyChannel extends TransportChannel {
      */
     @Override
     public void sendData(Object data) {
+
         this.nettyChannelHandlerContext.writeAndFlush(data);
     }
 
