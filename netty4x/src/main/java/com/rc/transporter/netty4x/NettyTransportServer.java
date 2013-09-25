@@ -50,6 +50,14 @@ public final class NettyTransportServer extends TransportServer {
                       final ITransportSession nettyTransportSession) throws Exception {
         try {
             ServerBootstrap serverBootstrap = new ServerBootstrap();
+            // setting up options
+            for (Map.Entry<ChannelOption, Object> entry : this.serverConfig.getChannelOptions().entrySet()) {
+                serverBootstrap.option(entry.getKey(), entry.getValue());
+            }
+            // setting up child options
+            for (Map.Entry<ChannelOption, Object> entry : this.serverConfig.getChildChannelOptions().entrySet()) {
+                serverBootstrap.childOption(entry.getKey(), entry.getValue());
+            }
             serverBootstrap.group(this.serverConfig.getBossGroup(), this.serverConfig.getWorkerGroup())
                     .channel(NioServerSocketChannel.class)
                     .childHandler(new ChannelInitializer() {
@@ -66,17 +74,10 @@ public final class NettyTransportServer extends TransportServer {
                             for (Map.Entry<String, ChannelHandler> pipelineEntry : serverConfig.getPipeline().entrySet()) {
                                 pipeline.addLast(pipelineEntry.getKey(), pipelineEntry.getValue());
                             }
-                            pipeline.addLast("handler", new NettyTransportSession(nettyTransportSession));
+                            pipeline.addLast(new NettyTransportSession(nettyTransportSession));
                         }
                     });
-            // setting up options
-            for (Map.Entry<ChannelOption, Object> entry : this.serverConfig.getChannelOptions().entrySet()) {
-                serverBootstrap.option(entry.getKey(), entry.getValue());
-            }
-            // setting up child options
-            for (Map.Entry<ChannelOption, Object> entry : this.serverConfig.getChildChannelOptions().entrySet()) {
-                serverBootstrap.childOption(entry.getKey(), entry.getValue());
-            }
+
             // bind server
             serverBootstrap.bind(hostname, port).sync().channel().closeFuture().sync().addListener(new ChannelFutureListener() {
                 @Override

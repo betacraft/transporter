@@ -58,7 +58,7 @@ public class NettyTransportClient<M> implements ITransportClient<M> {
                             for (Map.Entry<String, ChannelHandler> pipelineEntry : clientConfig.getPipeline().entrySet()) {
                                 pipeline.addLast(pipelineEntry.getKey(), pipelineEntry.getValue());
                             }
-                            pipeline.addLast("handler", new NettyTransportSession<M>(transportSession));
+                            pipeline.addLast(new NettyTransportSession<M>(transportSession));
                         }
                     });
             // setting all options
