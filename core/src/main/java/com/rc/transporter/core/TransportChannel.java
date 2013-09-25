@@ -6,7 +6,7 @@ package com.rc.transporter.core;
  * Date  : 9/21/13
  * Time  : 3:56 AM
  */
-public abstract class TransportChannel {
+public abstract class TransportChannel<M> {
     /**
      * Channel state listener which is used internally
      */
@@ -34,7 +34,7 @@ public abstract class TransportChannel {
      *
      * @param data data to be pushed
      */
-    public abstract void sendData(Object data);
+    public abstract void sendData(M data);
 
     protected abstract void closeChannel();
 

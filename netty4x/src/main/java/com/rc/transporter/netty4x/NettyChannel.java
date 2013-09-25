@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Date  : 9/21/13
  * Time  : 3:57 AM
  */
-public final class NettyChannel extends TransportChannel {
+public final class NettyChannel<M> extends TransportChannel<M> {
     /**
      * @ChannelHandlerContext for this channel
      */
@@ -36,8 +36,7 @@ public final class NettyChannel extends TransportChannel {
      * @param data data to be pushed
      */
     @Override
-    public void sendData(Object data) {
-
+    public void sendData(M data) {
         this.nettyChannelHandlerContext.writeAndFlush(data);
     }
 

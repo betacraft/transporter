@@ -8,15 +8,15 @@ import org.jboss.netty.channel.*;
  * Date  : 9/24/13
  * Time  : 1:44 AM
  */
-public final class Netty3xTransportSession<M> extends SimpleChannelUpstreamHandler {
+public final class Netty3xTransportSession<I, O> extends SimpleChannelUpstreamHandler {
     /**
      * @Netty3xChannel associated with this session
      */
-    private Netty3xChannel channel;
+    private Netty3xChannel<O> channel;
     /**
      * Underlying @ITransportSession
      */
-    private ITransportSession<M> transportSession;
+    private ITransportSession<I, O> transportSession;
 
 
     /**
@@ -24,7 +24,7 @@ public final class Netty3xTransportSession<M> extends SimpleChannelUpstreamHandl
      *
      * @param transportSession @ITransportSession that receives events related to this session
      */
-    public Netty3xTransportSession(ITransportSession<M> transportSession) {
+    public Netty3xTransportSession(ITransportSession<I, O> transportSession) {
         this.transportSession = transportSession;
     }
 
@@ -38,7 +38,7 @@ public final class Netty3xTransportSession<M> extends SimpleChannelUpstreamHandl
     @Override
     public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
         super.channelOpen(ctx, e);
-        this.channel = new Netty3xChannel(ctx);
+        this.channel = new Netty3xChannel<O>(ctx);
         this.transportSession.onConnected(this.channel);
     }
 
@@ -65,7 +65,7 @@ public final class Netty3xTransportSession<M> extends SimpleChannelUpstreamHandl
      */
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
-        this.transportSession.onData((M) e.getMessage());
+        this.transportSession.onData((I) e.getMessage());
     }
 
     /**

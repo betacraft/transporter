@@ -10,15 +10,15 @@ import io.netty.channel.SimpleChannelInboundHandler;
  * Date  : 9/21/13
  * Time  : 3:44 AM
  */
-public class NettyTransportSession<M> extends SimpleChannelInboundHandler<Object> {
+public class NettyTransportSession<I, O> extends SimpleChannelInboundHandler<Object> {
     /**
      * @NettyChannel associated with this session
      */
-    private NettyChannel nettyChannel;
+    private NettyChannel<O> nettyChannel;
     /**
      * Underlying @ITransportSession
      */
-    private ITransportSession<M> transportSession;
+    private ITransportSession<I, O> transportSession;
 
 
     /**
@@ -26,7 +26,7 @@ public class NettyTransportSession<M> extends SimpleChannelInboundHandler<Object
      *
      * @param transportSession @ITransportSession which receives event
      */
-    public NettyTransportSession(ITransportSession<M> transportSession) {
+    public NettyTransportSession(ITransportSession<I, O> transportSession) {
         this.transportSession = transportSession;
     }
 
@@ -39,7 +39,7 @@ public class NettyTransportSession<M> extends SimpleChannelInboundHandler<Object
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
-        this.nettyChannel = new NettyChannel(ctx);
+        this.nettyChannel = new NettyChannel<O>(ctx);
         transportSession.onConnected(this.nettyChannel);
     }
 
@@ -51,7 +51,7 @@ public class NettyTransportSession<M> extends SimpleChannelInboundHandler<Object
      */
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-        transportSession.onData((M) msg);
+        transportSession.onData((I) msg);
     }
 
     /**

@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Date  : 9/24/13
  * Time  : 1:56 AM
  */
-public final class Netty3xChannel extends TransportChannel {
+public final class Netty3xChannel<M> extends TransportChannel<M> {
     /**
      * Channel associated with this transport
      */
@@ -36,7 +36,7 @@ public final class Netty3xChannel extends TransportChannel {
      * @param data data to be pushed
      */
     @Override
-    public void sendData(Object data) {
+    public void sendData(M data) {
         this.channel.write(data);
 
     }
