@@ -3,6 +3,7 @@ package com.rc.transporter.netty4x;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
 
 /**
  * Author: akshay
@@ -23,9 +24,10 @@ public abstract class NettyChannelInitializer extends ChannelInitializer {
     @Override
     protected void initChannel(Channel channel) throws Exception {
         this.channel = channel;
+        initializeChannel(this.channel.pipeline());
     }
 
-    protected abstract void initializeChannel(Channel channel);
+    protected abstract void initializeChannel(ChannelPipeline channelPipeline);
 
 
     void addLast(final ChannelHandler channelHandler) {
