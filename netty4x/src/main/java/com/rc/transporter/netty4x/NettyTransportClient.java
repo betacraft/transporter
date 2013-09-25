@@ -3,6 +3,7 @@ package com.rc.transporter.netty4x;
 import com.rc.transporter.core.ITransportClient;
 import com.rc.transporter.core.TransportSession;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
@@ -41,7 +42,12 @@ public class NettyTransportClient<M> implements ITransportClient<M> {
     @Override
     public void connect(final String host, final int port, final TransportSession<M> transportSession) throws Exception {
         try {
-            this.clientConfig.getChannelInitializer().addLast(new NettyTransportSession<M>(transportSession));
+            this.clientConfig.getChannelInitializer().setRuntimeHandlerProvider(new NettyChannelInitializer.RuntimeHandlerProvider() {
+                @Override
+                public ChannelHandler getChannelHandler() {
+                    return new NettyTransportSession<M>(transportSession);
+                }
+            });
             Bootstrap bootstrap = new Bootstrap()
                     .group(this.clientConfig.getWorkerGroup())
                     .channel(NioSocketChannel.class)

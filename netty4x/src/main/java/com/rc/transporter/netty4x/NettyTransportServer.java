@@ -3,10 +3,7 @@ package com.rc.transporter.netty4x;
 import com.rc.transporter.core.ITransportSession;
 import com.rc.transporter.core.TransportServer;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelException;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelOption;
+import io.netty.channel.*;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +58,12 @@ public final class NettyTransportServer extends TransportServer {
             for (Map.Entry<ChannelOption, Object> entry : this.serverConfig.getChildChannelOptions().entrySet()) {
                 serverBootstrap.childOption(entry.getKey(), entry.getValue());
             }
-            this.serverConfig.getChannelInitializer().addLast(new NettyTransportSession(nettyTransportSession));
+            this.serverConfig.getChannelInitializer().setRuntimeHandlerProvider(new NettyChannelInitializer.RuntimeHandlerProvider() {
+                @Override
+                public ChannelHandler getChannelHandler() {
+                    return new NettyTransportSession(nettyTransportSession);
+                }
+            });
             serverBootstrap.group(this.serverConfig.getBossGroup(), this.serverConfig.getWorkerGroup())
                     .channel(NioServerSocketChannel.class)
                     .childHandler(this.serverConfig.getChannelInitializer());
