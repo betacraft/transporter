@@ -13,6 +13,7 @@ import java.util.concurrent.Executors;
  * Time  : 10:47 PM
  */
 public class Netty3xTransportClientConfig {
+
     /**
      * Boss executors
      */
@@ -25,13 +26,34 @@ public class Netty3xTransportClientConfig {
      * Channel handlers
      */
     protected HashMap<String, ChannelHandler> sharableChannelHandlers;
-
+    /**
+     * Channel pipeline factory
+     */
+    protected Netty3xChannelPipelineFactory channelPipelineFactory;
 
     /**
      * Channel options
      */
     protected HashMap<String, Object> channelOptions;
 
+
+    /**
+     * Getter for @channelPipelineFactory
+     *
+     * @return
+     */
+    public Netty3xChannelPipelineFactory getChannelPipelineFactory() {
+        return channelPipelineFactory;
+    }
+
+    /**
+     * Setter for @channelPipelineFactory
+     *
+     * @param channelPipelineFactory
+     */
+    public void setChannelPipelineFactory(final Netty3xChannelPipelineFactory channelPipelineFactory) {
+        this.channelPipelineFactory = channelPipelineFactory;
+    }
 
     /**
      * Getter for @bossExecutors
@@ -140,10 +162,12 @@ public class Netty3xTransportClientConfig {
     /**
      * Getter to get default client configuration
      *
+     * @param channelPipelineFactory @Netty3xChannelPipelineFactory for the client
      * @return @Netty3xTransportClientConfig instance with some pre-configuration
      */
-    public static Netty3xTransportClientConfig getDefault() {
+    public static Netty3xTransportClientConfig getDefault(final Netty3xChannelPipelineFactory channelPipelineFactory) {
         Netty3xTransportClientConfig clientConfig = new Netty3xTransportClientConfig();
+        clientConfig.channelPipelineFactory = channelPipelineFactory;
         clientConfig.bossExecutors = Executors.newCachedThreadPool();
         clientConfig.workerExecutors = Executors.newCachedThreadPool();
         clientConfig.channelOptions.put("tcpNoDelay", true);

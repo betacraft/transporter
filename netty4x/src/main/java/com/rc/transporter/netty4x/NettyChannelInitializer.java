@@ -46,8 +46,18 @@ public abstract class NettyChannelInitializer extends ChannelInitializer {
         this.channel.pipeline().addLast(this.runtimeHandlerProvider.getChannelHandler());
     }
 
+    /**
+     * Method to initialize current channel pipeline
+     *
+     * @param channelPipeline @ChannelPipeline
+     */
     protected abstract void initializeChannel(ChannelPipeline channelPipeline);
 
+    /**
+     * Setter for @runtimeHandlerProvider
+     *
+     * @param runtimeHandlerProvider
+     */
     void setRuntimeHandlerProvider(final RuntimeHandlerProvider runtimeHandlerProvider) {
         this.runtimeHandlerProvider = runtimeHandlerProvider;
     }

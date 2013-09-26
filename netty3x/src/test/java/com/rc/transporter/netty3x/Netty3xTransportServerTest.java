@@ -4,6 +4,7 @@ import com.rc.transporter.core.ITransportSession;
 import com.rc.transporter.core.TransportChannel;
 import com.rc.transporter.core.TransportServer;
 import junit.framework.TestCase;
+import org.jboss.netty.channel.ChannelPipeline;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +24,12 @@ public class Netty3xTransportServerTest extends TestCase {
 
     @Before
     public void setUp() throws Exception {
-        this.serverConfig = Netty3xTransportServerConfig.getDefault();
+        this.serverConfig = Netty3xTransportServerConfig.getDefault(new Netty3xChannelPipelineFactory() {
+            @Override
+            public void initializeChannel(ChannelPipeline pipeline) {
+                //To change body of implemented methods use File | Settings | File Templates.
+            }
+        });
         this.hostname = "0.0.0.0";
         this.port = 8000;
         this.netty3xTransportServer = new Netty3xTransportServer(this.serverConfig);

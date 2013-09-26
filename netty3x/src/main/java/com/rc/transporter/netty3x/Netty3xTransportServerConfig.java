@@ -20,15 +20,17 @@ public class Netty3xTransportServerConfig extends Netty3xTransportClientConfig {
     /**
      * Getter to get default client configuration
      *
+     * @param channelPipelineFactory @Netty3xChannelPipelineFactory for the connection
      * @return @Netty3xTransportClientConfig instance with some pre-configuration
      */
-    public static Netty3xTransportServerConfig getDefault() {
-        Netty3xTransportServerConfig clientConfig = new Netty3xTransportServerConfig();
-        clientConfig.bossExecutors = Executors.newCachedThreadPool();
-        clientConfig.workerExecutors = Executors.newCachedThreadPool();
-        clientConfig.channelOptions.put("tcpNoDelay", true);
-        clientConfig.channelOptions.put("soKeepAlive", true);
-        return clientConfig;
+    public static Netty3xTransportServerConfig getDefault(final Netty3xChannelPipelineFactory channelPipelineFactory) {
+        Netty3xTransportServerConfig serverConfig = new Netty3xTransportServerConfig();
+        serverConfig.bossExecutors = Executors.newCachedThreadPool();
+        serverConfig.workerExecutors = Executors.newCachedThreadPool();
+        serverConfig.channelPipelineFactory = channelPipelineFactory;
+        serverConfig.channelOptions.put("tcpNoDelay", true);
+        serverConfig.channelOptions.put("soKeepAlive", true);
+        return serverConfig;
     }
 
     /**

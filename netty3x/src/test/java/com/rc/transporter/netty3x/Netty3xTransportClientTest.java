@@ -5,6 +5,7 @@ import com.rc.transporter.core.TransportChannel;
 import com.rc.transporter.core.TransportServer;
 import com.rc.transporter.core.TransportSession;
 import junit.framework.TestCase;
+import org.jboss.netty.channel.ChannelPipeline;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,7 +22,12 @@ public class Netty3xTransportClientTest extends TestCase {
 
     @Before
     public void setUp() throws Exception {
-        this.server = new Netty3xTransportServer(Netty3xTransportServerConfig.getDefault());
+        this.server = new Netty3xTransportServer(Netty3xTransportServerConfig.getDefault(new Netty3xChannelPipelineFactory() {
+            @Override
+            public void initializeChannel(ChannelPipeline pipeline) {
+
+            }
+        }));
         this.server.start("0.0.0.0", 8000, new TransportServer.ITransportServerListener() {
                     @Override
                     public void onClosed() {
@@ -49,7 +55,12 @@ public class Netty3xTransportClientTest extends TestCase {
                 }
         );
 
-        this.client = new Netty3xTransportClient(Netty3xTransportClientConfig.getDefault());
+        this.client = new Netty3xTransportClient(Netty3xTransportClientConfig.getDefault(new Netty3xChannelPipelineFactory() {
+            @Override
+            public void initializeChannel(ChannelPipeline pipeline) {
+                //To change body of implemented methods use File | Settings | File Templates.
+            }
+        }));
 
     }
 

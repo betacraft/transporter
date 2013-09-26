@@ -3,11 +3,12 @@ package com.rc.transporter.netty3x;
 import com.rc.transporter.core.ITransportSession;
 import com.rc.transporter.core.TransportServer;
 import org.jboss.netty.bootstrap.ServerBootstrap;
-import org.jboss.netty.channel.*;
+import org.jboss.netty.channel.ChannelFuture;
+import org.jboss.netty.channel.ChannelFutureListener;
+import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 
 import java.net.InetSocketAddress;
-import java.util.Map;
 
 /**
  * Author: akshay
@@ -52,17 +53,14 @@ public class Netty3xTransportServer extends TransportServer {
                         serverConfig.getBossExecutors(),
                         serverConfig.getWorkerExecutors()));
         this.bootstrap.setOptions(this.serverConfig.getChannelOptions());
-        // Set up the pipeline factory.
-        this.bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
-            public ChannelPipeline getPipeline() throws Exception {
-                ChannelPipeline pipeline = Channels.pipeline();
-                for (Map.Entry<String, ChannelHandler> handler : serverConfig.getSharableChannelHandlers().entrySet())
-                    pipeline.addLast(handler.getKey(), handler.getValue());
-                pipeline.addLast("handler", new Netty3xTransportSession(transportSession));
-                return pipeline;
+        this.serverConfig.getChannelPipelineFactory().setRuntimeChannelHandlerProvider(new Netty3xChannelPipelineFactory.RuntimeChannelHandlerProvider() {
+            @Override
+            public ChannelHandler get() {
+                return new Netty3xTransportSession(transportSession);
             }
         });
-
+        // Set up the pipeline factory.
+        this.bootstrap.setPipelineFactory(this.serverConfig.getChannelPipelineFactory());
         // Bind and start to accept incoming connections.
         this.bootstrap.bind(new InetSocketAddress(port)).getCloseFuture().addListener(new ChannelFutureListener() {
             @Override
@@ -90,16 +88,14 @@ public class Netty3xTransportServer extends TransportServer {
                         serverConfig.getBossExecutors(),
                         serverConfig.getWorkerExecutors()));
         this.bootstrap.setOptions(this.serverConfig.getChannelOptions());
-        // Set up the pipeline factory.
-        this.bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
-            public ChannelPipeline getPipeline() throws Exception {
-                ChannelPipeline pipeline = Channels.pipeline();
-                for (Map.Entry<String, ChannelHandler> handler : serverConfig.getSharableChannelHandlers().entrySet())
-                    pipeline.addLast(handler.getKey(), handler.getValue());
-                pipeline.addLast("handler", new Netty3xTransportSession(transportSession));
-                return pipeline;
+        this.serverConfig.getChannelPipelineFactory().setRuntimeChannelHandlerProvider(new Netty3xChannelPipelineFactory.RuntimeChannelHandlerProvider() {
+            @Override
+            public ChannelHandler get() {
+                return new Netty3xTransportSession(transportSession);
             }
         });
+        // Set up the pipeline factory.
+        this.bootstrap.setPipelineFactory(this.serverConfig.getChannelPipelineFactory());
 
         // Bind and start to accept incoming connections.
         this.bootstrap.bind(new InetSocketAddress(port)).getCloseFuture().addListener(new ChannelFutureListener() {
@@ -127,17 +123,14 @@ public class Netty3xTransportServer extends TransportServer {
                         serverConfig.getBossExecutors(),
                         serverConfig.getWorkerExecutors()));
         this.bootstrap.setOptions(this.serverConfig.getChannelOptions());
-        // Set up the pipeline factory.
-        this.bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
-            public ChannelPipeline getPipeline() throws Exception {
-                ChannelPipeline pipeline = Channels.pipeline();
-                for (Map.Entry<String, ChannelHandler> handler : serverConfig.getSharableChannelHandlers().entrySet())
-                    pipeline.addLast(handler.getKey(), handler.getValue());
-                pipeline.addLast("handler", new Netty3xTransportSession(transportSessionFactory.get()));
-                return pipeline;
+        this.serverConfig.getChannelPipelineFactory().setRuntimeChannelHandlerProvider(new Netty3xChannelPipelineFactory.RuntimeChannelHandlerProvider() {
+            @Override
+            public ChannelHandler get() {
+                return new Netty3xTransportSession(transportSessionFactory.get());
             }
         });
-
+        // Set up the pipeline factory.
+        this.bootstrap.setPipelineFactory(this.serverConfig.getChannelPipelineFactory());
         // Bind and start to accept incoming connections.
         this.bootstrap.bind(new InetSocketAddress(port)).getCloseFuture().addListener(new ChannelFutureListener() {
             @Override
@@ -165,17 +158,14 @@ public class Netty3xTransportServer extends TransportServer {
                         serverConfig.getBossExecutors(),
                         serverConfig.getWorkerExecutors()));
         this.bootstrap.setOptions(this.serverConfig.getChannelOptions());
-        // Set up the pipeline factory.
-        this.bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
-            public ChannelPipeline getPipeline() throws Exception {
-                ChannelPipeline pipeline = Channels.pipeline();
-                for (Map.Entry<String, ChannelHandler> handler : serverConfig.getSharableChannelHandlers().entrySet())
-                    pipeline.addLast(handler.getKey(), handler.getValue());
-                pipeline.addLast("handler", new Netty3xTransportSession(transportSessionFactory.get()));
-                return pipeline;
+        this.serverConfig.getChannelPipelineFactory().setRuntimeChannelHandlerProvider(new Netty3xChannelPipelineFactory.RuntimeChannelHandlerProvider() {
+            @Override
+            public ChannelHandler get() {
+                return new Netty3xTransportSession(transportSessionFactory.get());
             }
         });
-
+        // Set up the pipeline factory.
+        this.bootstrap.setPipelineFactory(this.serverConfig.getChannelPipelineFactory());
         // Bind and start to accept incoming connections.
         this.bootstrap.bind(new InetSocketAddress(hostname, port)).getCloseFuture().addListener(new ChannelFutureListener() {
             @Override
