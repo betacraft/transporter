@@ -1,5 +1,8 @@
 package com.rc.transporter.core;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Interface for transport channel
  * Author: akshay
@@ -7,6 +10,10 @@ package com.rc.transporter.core;
  * Time  : 3:56 AM
  */
 public abstract class TransportChannel<M> {
+    /**
+     * Logger
+     */
+    protected final static Logger logger = LoggerFactory.getLogger(TransportChannel.class);
     /**
      * Channel state listener which is used internally
      */

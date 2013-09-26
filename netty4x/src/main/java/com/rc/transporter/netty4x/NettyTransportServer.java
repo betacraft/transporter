@@ -17,6 +17,8 @@ import java.util.Map;
  * Time  : 3:54 AM
  */
 public final class NettyTransportServer extends TransportServer {
+
+
     /**
      * Logger
      */
@@ -35,7 +37,6 @@ public final class NettyTransportServer extends TransportServer {
         super();
         this.serverConfig = config;
     }
-
 
     /**
      * Method to start server
@@ -115,6 +116,110 @@ public final class NettyTransportServer extends TransportServer {
                 @Override
                 public ChannelHandler getChannelHandler() {
                     return new NettyTransportSession(nettyTransportSession);
+                }
+            });
+            serverBootstrap.group(this.serverConfig.getBossGroup(), this.serverConfig.getWorkerGroup())
+                    .channel(NioServerSocketChannel.class)
+                    .childHandler(this.serverConfig.getChannelInitializer());
+            // bind server
+            serverBootstrap.bind(hostname, port).sync().channel().closeFuture().sync().addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture future) throws Exception {
+                    transportServerListener.onClosed();
+                }
+            });
+        } catch (ChannelException exception) {
+            exception.printStackTrace();
+            throw exception;
+        } catch (InterruptedException exception) {
+            exception.printStackTrace();
+            throw exception;
+        } catch (Exception exception) {
+            throw exception;
+        } finally {
+            this.serverConfig.getBossGroup().shutdownGracefully();
+            this.serverConfig.getWorkerGroup().shutdownGracefully();
+        }
+    }
+
+    /**
+     * Method to start server
+     *
+     * @param port                    port on which server needs to be started
+     * @param transportServerListener @ITransportServerListener listener to listen the state of the server
+     * @param transportSessionFactory @ITransportSessionFactory session routine that will be associated with each connection received
+     *                                on this server
+     * @throws Exception throws exception if any during starting the server
+     */
+    @Override
+    public void start(final int port, final ITransportServerListener transportServerListener,
+                      final ITransportSessionFactory transportSessionFactory) throws Exception {
+        try {
+            ServerBootstrap serverBootstrap = new ServerBootstrap();
+            // setting up options
+            for (Map.Entry<ChannelOption, Object> entry : this.serverConfig.getChannelOptions().entrySet()) {
+                serverBootstrap.option(entry.getKey(), entry.getValue());
+            }
+            // setting up child options
+            for (Map.Entry<ChannelOption, Object> entry : this.serverConfig.getChildChannelOptions().entrySet()) {
+                serverBootstrap.childOption(entry.getKey(), entry.getValue());
+            }
+            this.serverConfig.getChannelInitializer().setRuntimeHandlerProvider(new NettyChannelInitializer.RuntimeHandlerProvider() {
+                @Override
+                public ChannelHandler getChannelHandler() {
+                    return new NettyTransportSession(transportSessionFactory.get());
+                }
+            });
+            serverBootstrap.group(this.serverConfig.getBossGroup(), this.serverConfig.getWorkerGroup())
+                    .channel(NioServerSocketChannel.class)
+                    .childHandler(this.serverConfig.getChannelInitializer());
+            // bind server
+            serverBootstrap.bind(port).sync().channel().closeFuture().sync().addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture future) throws Exception {
+                    transportServerListener.onClosed();
+                }
+            });
+        } catch (ChannelException exception) {
+            exception.printStackTrace();
+            throw exception;
+        } catch (InterruptedException exception) {
+            exception.printStackTrace();
+            throw exception;
+        } catch (Exception exception) {
+            throw exception;
+        } finally {
+            this.serverConfig.getBossGroup().shutdownGracefully();
+            this.serverConfig.getWorkerGroup().shutdownGracefully();
+        }
+    }
+
+    /**
+     * Method to start server
+     *
+     * @param hostname                hostname
+     * @param port                    port on which server needs to be started
+     * @param transportServerListener @ITransportServerListener listener to listen the state of the server
+     * @param transportSessionFactory @ITransportSessionFactory factory for session associated with server connections
+     * @throws Exception throws exception if any during starting the server
+     */
+    @Override
+    public void start(final String hostname, final int port, final ITransportServerListener transportServerListener,
+                      final ITransportSessionFactory transportSessionFactory) throws Exception {
+        try {
+            ServerBootstrap serverBootstrap = new ServerBootstrap();
+            // setting up options
+            for (Map.Entry<ChannelOption, Object> entry : this.serverConfig.getChannelOptions().entrySet()) {
+                serverBootstrap.option(entry.getKey(), entry.getValue());
+            }
+            // setting up child options
+            for (Map.Entry<ChannelOption, Object> entry : this.serverConfig.getChildChannelOptions().entrySet()) {
+                serverBootstrap.childOption(entry.getKey(), entry.getValue());
+            }
+            this.serverConfig.getChannelInitializer().setRuntimeHandlerProvider(new NettyChannelInitializer.RuntimeHandlerProvider() {
+                @Override
+                public ChannelHandler getChannelHandler() {
+                    return new NettyTransportSession(transportSessionFactory.get());
                 }
             });
             serverBootstrap.group(this.serverConfig.getBossGroup(), this.serverConfig.getWorkerGroup())
