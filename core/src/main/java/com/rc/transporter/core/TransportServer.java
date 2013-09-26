@@ -29,6 +29,21 @@ public abstract class TransportServer {
         }));
     }
 
+
+    /**
+     * Method to start server
+     *
+     * @param port                    port on which server needs to be started
+     * @param transportServerListener @ITransportServerListener listener to listen the state of the server
+     * @param transportSession        @ITransportSession session routine that will be associated with each connection received
+     *                                on this server
+     * @throws Exception throws exception if any during starting the server
+     */
+    public abstract void start(final int port,
+                               final ITransportServerListener transportServerListener, final ITransportSession transportSession)
+            throws Exception;
+
+
     /**
      * Method to start server
      *

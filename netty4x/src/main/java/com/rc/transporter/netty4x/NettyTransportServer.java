@@ -38,6 +38,59 @@ public final class NettyTransportServer extends TransportServer {
 
 
     /**
+     * Method to start server
+     *
+     * @param port                    port on which server needs to be started
+     * @param transportServerListener @ITransportServerListener listener to listen the state of the server
+     * @param nettyTransportSession   @ITransportSession session routine that will be associated with each connection received
+     *                                on this server
+     * @throws Exception throws exception if any during starting the server
+     */
+    @Override
+    public void start(int port, final ITransportServerListener transportServerListener,
+                      final ITransportSession nettyTransportSession)
+            throws Exception {
+        try {
+            ServerBootstrap serverBootstrap = new ServerBootstrap();
+            // setting up options
+            for (Map.Entry<ChannelOption, Object> entry : this.serverConfig.getChannelOptions().entrySet()) {
+                serverBootstrap.option(entry.getKey(), entry.getValue());
+            }
+            // setting up child options
+            for (Map.Entry<ChannelOption, Object> entry : this.serverConfig.getChildChannelOptions().entrySet()) {
+                serverBootstrap.childOption(entry.getKey(), entry.getValue());
+            }
+            this.serverConfig.getChannelInitializer().setRuntimeHandlerProvider(new NettyChannelInitializer.RuntimeHandlerProvider() {
+                @Override
+                public ChannelHandler getChannelHandler() {
+                    return new NettyTransportSession(nettyTransportSession);
+                }
+            });
+            serverBootstrap.group(this.serverConfig.getBossGroup(), this.serverConfig.getWorkerGroup())
+                    .channel(NioServerSocketChannel.class)
+                    .childHandler(this.serverConfig.getChannelInitializer());
+            // bind server
+            serverBootstrap.bind(port).sync().channel().closeFuture().sync().addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture future) throws Exception {
+                    transportServerListener.onClosed();
+                }
+            });
+        } catch (ChannelException exception) {
+            exception.printStackTrace();
+            throw exception;
+        } catch (InterruptedException exception) {
+            exception.printStackTrace();
+            throw exception;
+        } catch (Exception exception) {
+            throw exception;
+        } finally {
+            this.serverConfig.getBossGroup().shutdownGracefully();
+            this.serverConfig.getWorkerGroup().shutdownGracefully();
+        }
+    }
+
+    /**
      * Starting server
      *
      * @param hostname                hostname

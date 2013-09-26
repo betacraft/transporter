@@ -38,6 +38,43 @@ public class Netty3xTransportServer extends TransportServer {
     /**
      * Method to start server
      *
+     * @param port                    port on which server needs to be started
+     * @param transportServerListener @ITransportServerListener listener to listen the state of the server
+     * @param transportSession        @ITransportSession session routine that will be associated with each connection received
+     *                                on this server
+     * @throws Exception throws exception if any during starting the server
+     */
+    @Override
+    public void start(final int port, final ITransportServerListener transportServerListener,
+                      final ITransportSession transportSession) throws Exception {
+        this.bootstrap = new ServerBootstrap(
+                new NioServerSocketChannelFactory(
+                        serverConfig.getBossExecutors(),
+                        serverConfig.getWorkerExecutors()));
+        this.bootstrap.setOptions(this.serverConfig.getChannelOptions());
+        // Set up the pipeline factory.
+        this.bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
+            public ChannelPipeline getPipeline() throws Exception {
+                ChannelPipeline pipeline = Channels.pipeline();
+                for (Map.Entry<String, ChannelHandler> handler : serverConfig.getSharableChannelHandlers().entrySet())
+                    pipeline.addLast(handler.getKey(), handler.getValue());
+                pipeline.addLast("handler", new Netty3xTransportSession(transportSession));
+                return pipeline;
+            }
+        });
+
+        // Bind and start to accept incoming connections.
+        this.bootstrap.bind(new InetSocketAddress(port)).getCloseFuture().addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture future) throws Exception {
+                transportServerListener.onClosed();
+            }
+        });
+    }
+
+    /**
+     * Method to start server
+     *
      * @param hostname                hostname
      * @param port                    port on which server needs to be started
      * @param transportServerListener @ITransportServerListener listener to listen the state of the server
