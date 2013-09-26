@@ -12,6 +12,7 @@
         <module>core</module>
         <module>netty4x</module>
         <module>netty3x</module>
+        <module>socketio</module>
     </modules>
 
 

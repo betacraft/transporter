@@ -24,7 +24,9 @@ public class Netty3xTransportClientConfig {
     /**
      * Channel handlers
      */
-    protected HashMap<String, ChannelHandler> channelHandlers;
+    protected HashMap<String, ChannelHandler> sharableChannelHandlers;
+
+
     /**
      * Channel options
      */
@@ -50,12 +52,12 @@ public class Netty3xTransportClientConfig {
     }
 
     /**
-     * Getter for @channelHandlers
+     * Getter for @sharableChannelHandlers
      *
      * @return
      */
-    public HashMap<String, ChannelHandler> getChannelHandlers() {
-        return channelHandlers;
+    public HashMap<String, ChannelHandler> getSharableChannelHandlers() {
+        return sharableChannelHandlers;
     }
 
     /**
@@ -66,17 +68,17 @@ public class Netty3xTransportClientConfig {
      * @return
      */
     public Netty3xTransportClientConfig addAnChannelHandler(final String name, final ChannelHandler channelHandler) {
-        this.channelHandlers.put(name, channelHandler);
+        this.sharableChannelHandlers.put(name, channelHandler);
         return this;
     }
 
     /**
-     * Setter for @channelHandlers
+     * Setter for @sharableChannelHandlers
      *
-     * @param channelHandlers
+     * @param sharableChannelHandlers
      */
-    public void setChannelHandlers(final HashMap<String, ChannelHandler> channelHandlers) {
-        this.channelHandlers = channelHandlers;
+    public void setSharableChannelHandlers(final HashMap<String, ChannelHandler> sharableChannelHandlers) {
+        this.sharableChannelHandlers = sharableChannelHandlers;
     }
 
     /**
@@ -130,7 +132,7 @@ public class Netty3xTransportClientConfig {
      * Constructor
      */
     protected Netty3xTransportClientConfig() {
-        this.channelHandlers = new HashMap<String, ChannelHandler>();
+        this.sharableChannelHandlers = new HashMap<String, ChannelHandler>();
         this.channelOptions = new HashMap<String, Object>();
     }
 

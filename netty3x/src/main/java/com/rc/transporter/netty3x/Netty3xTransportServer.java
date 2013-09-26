@@ -57,7 +57,7 @@ public class Netty3xTransportServer extends TransportServer {
         this.bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
             public ChannelPipeline getPipeline() throws Exception {
                 ChannelPipeline pipeline = Channels.pipeline();
-                for (Map.Entry<String, ChannelHandler> handler : serverConfig.getChannelHandlers().entrySet())
+                for (Map.Entry<String, ChannelHandler> handler : serverConfig.getSharableChannelHandlers().entrySet())
                     pipeline.addLast(handler.getKey(), handler.getValue());
                 pipeline.addLast("handler", new Netty3xTransportSession(transportSession));
                 return pipeline;

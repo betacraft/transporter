@@ -64,7 +64,7 @@ public final class Netty3xTransportClient<I, O> implements ITransportClient<I, O
             this.clientBootstrap.setPipelineFactory(new ChannelPipelineFactory() {
                 public ChannelPipeline getPipeline() throws Exception {
                     ChannelPipeline pipeline = Channels.pipeline();
-                    for (Map.Entry<String, ChannelHandler> handler : clientConfig.getChannelHandlers().entrySet())
+                    for (Map.Entry<String, ChannelHandler> handler : clientConfig.getSharableChannelHandlers().entrySet())
                         pipeline.addLast(handler.getKey(), handler.getValue());
                     pipeline.addLast("handler", new Netty3xTransportSession<I, O>(transportSession));
                     return pipeline;
