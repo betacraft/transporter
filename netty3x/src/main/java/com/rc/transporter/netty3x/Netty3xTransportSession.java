@@ -28,33 +28,31 @@ public final class Netty3xTransportSession<I, O> extends SimpleChannelUpstreamHa
         this.transportSession = transportSession;
     }
 
+
     /**
-     * Called when channel is opened
-     *
-     * @param ctx
-     * @param e
-     * @throws Exception
+     * Invoked when a {@link org.jboss.netty.channel.Channel} is open, bound to a local address, and
+     * connected to a remote address.
+     * <br/>
+     * <p/>
+     * <strong>Be aware that this event is fired from within the Boss-Thread so you should not
+     * execute any heavy operation in there as it will block the dispatching to other workers!</strong>
      */
     @Override
-    public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-        super.channelOpen(ctx, e);
+    public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
+        super.channelConnected(ctx, e);
         this.channel = new Netty3xChannel<O>(ctx);
         this.transportSession.onConnected(this.channel);
     }
 
     /**
-     * Called when channel is closed
-     *
-     * @param ctx
-     * @param e
-     * @throws Exception
+     * Invoked when a {@link org.jboss.netty.channel.Channel} was disconnected from its remote peer.
      */
     @Override
-    public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
+    public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
         this.transportSession.onDisconnected();
-        super.channelClosed(ctx, e);
-
+        super.channelDisconnected(ctx, e);
     }
+
 
     /**
      * Called when message is received
