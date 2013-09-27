@@ -4,6 +4,7 @@ import com.rc.transporter.core.ITransportSession;
 import com.rc.transporter.core.TransportServer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
+import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,15 @@ public final class NettyTransportServer extends TransportServer {
      * Server config
      */
     private NettyTransportServerConfig serverConfig;
+    /**
+     * Boss group
+     */
+    private NioEventLoopGroup bossGroup;
+    /**
+     * Worker group
+     */
+    private NioEventLoopGroup workerGroup;
+
 
     /**
      * Constructor
@@ -63,13 +73,16 @@ public final class NettyTransportServer extends TransportServer {
 
                 @Override
                 public void appendRuntimeHandler(final ChannelPipeline pipeline) {
-                    if (serverConfig.getSessionEventsExecutor() == null)
+                    if (serverConfig.getSessionEventsExecutorFactory() == null)
                         pipeline.addLast(new NettyTransportSession(nettyTransportSession));
                     else
-                        pipeline.addLast(serverConfig.getSessionEventsExecutor(), new NettyTransportSession(nettyTransportSession));
+                        pipeline.addLast(serverConfig.getSessionEventsExecutorFactory().get(), new NettyTransportSession(nettyTransportSession));
                 }
             });
-            serverBootstrap.group(this.serverConfig.getBossGroup(), this.serverConfig.getWorkerGroup())
+            this.bossGroup = this.serverConfig.getBossGroupFactory().get();
+            this.workerGroup = this.serverConfig.getWorkerGroupFactory().get();
+
+            serverBootstrap.group(this.bossGroup, this.workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .childHandler(this.serverConfig.getChannelInitializer());
             // bind server
@@ -88,8 +101,7 @@ public final class NettyTransportServer extends TransportServer {
         } catch (Exception exception) {
             throw exception;
         } finally {
-            this.serverConfig.getBossGroup().shutdownGracefully();
-            this.serverConfig.getWorkerGroup().shutdownGracefully();
+            close();
         }
     }
 
@@ -118,13 +130,15 @@ public final class NettyTransportServer extends TransportServer {
 
                 @Override
                 public void appendRuntimeHandler(final ChannelPipeline pipeline) {
-                    if (serverConfig.getSessionEventsExecutor() == null)
+                    if (serverConfig.getSessionEventsExecutorFactory() == null)
                         pipeline.addLast(new NettyTransportSession(nettyTransportSession));
                     else
-                        pipeline.addLast(serverConfig.getSessionEventsExecutor(), new NettyTransportSession(nettyTransportSession));
+                        pipeline.addLast(serverConfig.getSessionEventsExecutorFactory().get(), new NettyTransportSession(nettyTransportSession));
                 }
             });
-            serverBootstrap.group(this.serverConfig.getBossGroup(), this.serverConfig.getWorkerGroup())
+            this.bossGroup = this.serverConfig.getBossGroupFactory().get();
+            this.workerGroup = this.serverConfig.getWorkerGroupFactory().get();
+            serverBootstrap.group(this.bossGroup, this.workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .childHandler(this.serverConfig.getChannelInitializer());
             // bind server
@@ -143,8 +157,7 @@ public final class NettyTransportServer extends TransportServer {
         } catch (Exception exception) {
             throw exception;
         } finally {
-            this.serverConfig.getBossGroup().shutdownGracefully();
-            this.serverConfig.getWorkerGroup().shutdownGracefully();
+            close();
         }
     }
 
@@ -174,13 +187,15 @@ public final class NettyTransportServer extends TransportServer {
 
                 @Override
                 public void appendRuntimeHandler(final ChannelPipeline pipeline) {
-                    if (serverConfig.getSessionEventsExecutor() == null)
+                    if (serverConfig.getSessionEventsExecutorFactory() == null)
                         pipeline.addLast(new NettyTransportSession(transportSessionFactory.get()));
                     else
-                        pipeline.addLast(serverConfig.getSessionEventsExecutor(), new NettyTransportSession(transportSessionFactory.get()));
+                        pipeline.addLast(serverConfig.getSessionEventsExecutorFactory().get(), new NettyTransportSession(transportSessionFactory.get()));
                 }
             });
-            serverBootstrap.group(this.serverConfig.getBossGroup(), this.serverConfig.getWorkerGroup())
+            this.bossGroup = this.serverConfig.getBossGroupFactory().get();
+            this.workerGroup = this.serverConfig.getWorkerGroupFactory().get();
+            serverBootstrap.group(this.bossGroup, this.workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .childHandler(this.serverConfig.getChannelInitializer());
             // bind server
@@ -199,8 +214,7 @@ public final class NettyTransportServer extends TransportServer {
         } catch (Exception exception) {
             throw exception;
         } finally {
-            this.serverConfig.getBossGroup().shutdownGracefully();
-            this.serverConfig.getWorkerGroup().shutdownGracefully();
+            close();
         }
     }
 
@@ -230,13 +244,15 @@ public final class NettyTransportServer extends TransportServer {
             this.serverConfig.getChannelInitializer().setRuntimeHandlerProvider(new NettyChannelInitializer.RuntimeHandlerProvider() {
                 @Override
                 public void appendRuntimeHandler(ChannelPipeline pipeline) {
-                    if (serverConfig.getSessionEventsExecutor() == null)
+                    if (serverConfig.getSessionEventsExecutorFactory() == null)
                         pipeline.addLast(new NettyTransportSession(transportSessionFactory.get()));
                     else
-                        pipeline.addLast(serverConfig.getSessionEventsExecutor(), new NettyTransportSession(transportSessionFactory.get()));
+                        pipeline.addLast(serverConfig.getSessionEventsExecutorFactory().get(), new NettyTransportSession(transportSessionFactory.get()));
                 }
             });
-            serverBootstrap.group(this.serverConfig.getBossGroup(), this.serverConfig.getWorkerGroup())
+            this.bossGroup = this.serverConfig.getBossGroupFactory().get();
+            this.workerGroup = this.serverConfig.getWorkerGroupFactory().get();
+            serverBootstrap.group(this.bossGroup, this.workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .childHandler(this.serverConfig.getChannelInitializer());
             // bind server
@@ -255,8 +271,7 @@ public final class NettyTransportServer extends TransportServer {
         } catch (Exception exception) {
             throw exception;
         } finally {
-            this.serverConfig.getBossGroup().shutdownGracefully();
-            this.serverConfig.getWorkerGroup().shutdownGracefully();
+            close();
         }
     }
 
@@ -265,7 +280,7 @@ public final class NettyTransportServer extends TransportServer {
      */
     @Override
     protected void close() {
-        this.serverConfig.getBossGroup().shutdownGracefully();
-        this.serverConfig.getWorkerGroup().shutdownGracefully();
+        this.bossGroup.shutdownGracefully();
+        this.workerGroup.shutdownGracefully();
     }
 }

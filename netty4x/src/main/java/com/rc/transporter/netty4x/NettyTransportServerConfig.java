@@ -5,6 +5,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Author: akshay
@@ -15,28 +16,50 @@ public final class NettyTransportServerConfig extends NettyTransportClientConfig
     /**
      * Boss group
      */
-    private NioEventLoopGroup bossGroup;
+    private NioEventLoopGroupFactory bossGroupFactory;
     /**
      * Child options
      */
     private Map<ChannelOption, Object> childChannelOptions;
+    /**
+     * keep nio event loop group alive
+     */
+    private AtomicBoolean keepBossGroupAlive = new AtomicBoolean(false);
 
     /**
-     * Getter for @bossGroup
+     * Getter for @keepBossGroupAlive
      *
      * @return
      */
-    public NioEventLoopGroup getBossGroup() {
-        return bossGroup;
+    public boolean getKeepBossGroupAlive() {
+        return keepBossGroupAlive.get();
+    }
+
+    /**
+     * Setter for @keepBossGroupAlive
+     *
+     * @param keepBossGroupAlive
+     */
+    public void setKeepBossGroupAlive(final boolean keepBossGroupAlive) {
+        this.keepBossGroupAlive.set(keepBossGroupAlive);
+    }
+
+    /**
+     * Getter for @bossGroupFactory
+     *
+     * @return
+     */
+    public NioEventLoopGroupFactory getBossGroupFactory() {
+        return bossGroupFactory;
     }
 
     /**
      * Setter for @bossGroup
      *
-     * @param bossGroup
+     * @param bossGroupFactory
      */
-    public void setBossGroup(NioEventLoopGroup bossGroup) {
-        this.bossGroup = bossGroup;
+    public void setBossGroupFactory(NioEventLoopGroupFactory bossGroupFactory) {
+        this.bossGroupFactory = bossGroupFactory;
     }
 
 
@@ -97,7 +120,12 @@ public final class NettyTransportServerConfig extends NettyTransportClientConfig
      */
     private NettyTransportServerConfig(final NettyChannelInitializer channelInitializer) {
         super(channelInitializer);
-        this.bossGroup = new NioEventLoopGroup(0);
+        this.bossGroupFactory = new NioEventLoopGroupFactory() {
+            @Override
+            public NioEventLoopGroup get() {
+                return new NioEventLoopGroup(0);
+            }
+        };
         // Add so backlogs for servers
         addChannelOption(ChannelOption.SO_BACKLOG, 100);
         this.childChannelOptions = new HashMap<ChannelOption, Object>();

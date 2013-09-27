@@ -5,7 +5,9 @@ import com.rc.transporter.core.TransportSession;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
+import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.util.concurrent.EventExecutorGroup;
 
 import java.util.Map;
 
@@ -20,6 +22,14 @@ public class NettyTransportClient<I, O> implements ITransportClient<I, O> {
      * Client config
      */
     private NettyTransportClientConfig clientConfig;
+    /**
+     * Current executor loop group
+     */
+    private EventExecutorGroup executorGroup;
+    /**
+     * Current loop group
+     */
+    private NioEventLoopGroup nioEventLoopGroup;
 
 
     /**
@@ -42,15 +52,16 @@ public class NettyTransportClient<I, O> implements ITransportClient<I, O> {
     @Override
     public void connect(final String host, final int port, final TransportSession<I, O> transportSession) throws Exception {
         try {
+            this.nioEventLoopGroup = this.clientConfig.getWorkerGroupFactory().get();
+            this.executorGroup = this.clientConfig.getWorkerGroupFactory().get();
             this.clientConfig.getChannelInitializer().setRuntimeHandlerProvider(new NettyChannelInitializer.RuntimeHandlerProvider() {
-
                 @Override
                 public void appendRuntimeHandler(final ChannelPipeline pipeline) {
-                    pipeline.addLast(new NettyTransportSession<I, O>(transportSession));
+                    pipeline.addLast(executorGroup, new NettyTransportSession<I, O>(transportSession));
                 }
             });
             Bootstrap bootstrap = new Bootstrap()
-                    .group(this.clientConfig.getWorkerGroup())
+                    .group(this.nioEventLoopGroup)
                     .channel(NioSocketChannel.class)
                     .handler(this.clientConfig.getChannelInitializer());
             // setting all options
@@ -69,6 +80,10 @@ public class NettyTransportClient<I, O> implements ITransportClient<I, O> {
      */
     @Override
     public void close() {
-        this.clientConfig.getWorkerGroup().shutdownGracefully();
+        if (!this.clientConfig.getKeepWorkerGroupAlive())
+            this.executorGroup.shutdownGracefully();
+        if (!this.clientConfig.getKeepExecutorGroupAlive())
+            this.nioEventLoopGroup.shutdownGracefully();
+
     }
 }
