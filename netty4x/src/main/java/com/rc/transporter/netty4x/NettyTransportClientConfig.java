@@ -212,6 +212,9 @@ public class NettyTransportClientConfig {
         this.channelInitializer = channelInitializer;
         // initializing default channel options
         this.channelOptions = new HashMap<ChannelOption, Object>();
+        this.channelOptions.put(ChannelOption.SO_SNDBUF, 1048576);
+        this.channelOptions.put(ChannelOption.SO_RCVBUF,1048576);
+
         this.channelOptions.put(ChannelOption.TCP_NODELAY, true);
         this.channelOptions.put(ChannelOption.SO_KEEPALIVE, true);
     }
@@ -223,12 +226,14 @@ public class NettyTransportClientConfig {
      * @param workerGroupFactory @NioEventLoopGroupFactory for worker
      * @param channelInitializer @ChannelInitializer associated with channel
      */
-    public NettyTransportClientConfig(final NioEventLoopGroupFactory workerGroupFactory,
+    protected NettyTransportClientConfig(final NioEventLoopGroupFactory workerGroupFactory,
                                       final NettyChannelInitializer channelInitializer) {
         this.workerGroupFactory = workerGroupFactory;
         this.channelInitializer = channelInitializer;
         // initializing default channel options
         this.channelOptions = new HashMap<ChannelOption, Object>();
+        this.channelOptions.put(ChannelOption.SO_SNDBUF, 1048576);
+        this.channelOptions.put(ChannelOption.SO_RCVBUF,1048576);
         this.channelOptions.put(ChannelOption.TCP_NODELAY, true);
         this.channelOptions.put(ChannelOption.SO_KEEPALIVE, true);
     }

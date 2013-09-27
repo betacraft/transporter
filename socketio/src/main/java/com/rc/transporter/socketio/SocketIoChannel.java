@@ -54,4 +54,15 @@ public final class SocketIoChannel extends TransportChannel<String> {
         this.isClosed.set(true);
         this.socketIOClient.disconnect();
     }
+
+    /**
+     * Method to set properties associated with channel
+     *
+     * @param name  name of the property
+     * @param value value of the property
+     */
+    @Override
+    public void setProperty(String name, Object value) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
 }

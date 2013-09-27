@@ -127,8 +127,14 @@ public final class NettyTransportServerConfig extends NettyTransportClientConfig
             }
         };
         // Add so backlogs for servers
+
         addChannelOption(ChannelOption.SO_BACKLOG, 100);
+        addChannelOption(ChannelOption.SO_KEEPALIVE, true);
+        addChannelOption(ChannelOption.TCP_NODELAY, true);
+
         this.childChannelOptions = new HashMap<ChannelOption, Object>();
+        this.childChannelOptions.put(ChannelOption.SO_SNDBUF, 1048576);
+        this.childChannelOptions.put(ChannelOption.SO_RCVBUF, 1048576);
         this.childChannelOptions.put(ChannelOption.TCP_NODELAY, true);
         this.childChannelOptions.put(ChannelOption.SO_KEEPALIVE, true);
 

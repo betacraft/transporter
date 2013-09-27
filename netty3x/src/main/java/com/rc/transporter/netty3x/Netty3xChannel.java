@@ -52,4 +52,15 @@ public final class Netty3xChannel<M> extends TransportChannel<M> {
         this.channel.disconnect();
         this.channel.close();
     }
+
+    /**
+     * Method to set properties associated with channel
+     *
+     * @param name  name of the property
+     * @param value value of the property
+     */
+    @Override
+    public void setProperty(String name, Object value) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
 }

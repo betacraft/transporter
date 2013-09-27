@@ -14,6 +14,7 @@ public abstract class TransportChannel<M> {
      * Logger
      */
     protected final static Logger logger = LoggerFactory.getLogger(TransportChannel.class);
+
     /**
      * Channel state listener which is used internally
      */
@@ -43,7 +44,18 @@ public abstract class TransportChannel<M> {
      */
     public abstract void sendData(M data);
 
+    /**
+     * Method to close a channel
+     */
     protected abstract void closeChannel();
+
+    /**
+     * Method to set properties associated with channel
+     *
+     * @param name  name of the property
+     * @param value value of the property
+     */
+    public abstract void setProperty(final String name, Object value);
 
     /**
      * Method to close channel
