@@ -75,7 +75,8 @@ public final class Netty3xTransportSession<I, O> extends SimpleChannelUpstreamHa
      */
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
-        this.channel.closeChannel();
+        if (this.channel != null)
+            this.channel.closeChannel();
         this.transportSession.onError(e.getCause());
     }
 }

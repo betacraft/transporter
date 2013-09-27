@@ -17,8 +17,6 @@ import java.util.Map;
  * Time  : 3:54 AM
  */
 public final class NettyTransportServer extends TransportServer {
-
-
     /**
      * Logger
      */
@@ -62,9 +60,13 @@ public final class NettyTransportServer extends TransportServer {
                 serverBootstrap.childOption(entry.getKey(), entry.getValue());
             }
             this.serverConfig.getChannelInitializer().setRuntimeHandlerProvider(new NettyChannelInitializer.RuntimeHandlerProvider() {
+
                 @Override
-                public ChannelHandler getChannelHandler() {
-                    return new NettyTransportSession(nettyTransportSession);
+                public void appendRuntimeHandler(final ChannelPipeline pipeline) {
+                    if (serverConfig.getSessionEventsExecutor() == null)
+                        pipeline.addLast(new NettyTransportSession(nettyTransportSession));
+                    else
+                        pipeline.addLast(serverConfig.getSessionEventsExecutor(), new NettyTransportSession(nettyTransportSession));
                 }
             });
             serverBootstrap.group(this.serverConfig.getBossGroup(), this.serverConfig.getWorkerGroup())
@@ -113,9 +115,13 @@ public final class NettyTransportServer extends TransportServer {
                 serverBootstrap.childOption(entry.getKey(), entry.getValue());
             }
             this.serverConfig.getChannelInitializer().setRuntimeHandlerProvider(new NettyChannelInitializer.RuntimeHandlerProvider() {
+
                 @Override
-                public ChannelHandler getChannelHandler() {
-                    return new NettyTransportSession(nettyTransportSession);
+                public void appendRuntimeHandler(final ChannelPipeline pipeline) {
+                    if (serverConfig.getSessionEventsExecutor() == null)
+                        pipeline.addLast(new NettyTransportSession(nettyTransportSession));
+                    else
+                        pipeline.addLast(serverConfig.getSessionEventsExecutor(), new NettyTransportSession(nettyTransportSession));
                 }
             });
             serverBootstrap.group(this.serverConfig.getBossGroup(), this.serverConfig.getWorkerGroup())
@@ -165,9 +171,13 @@ public final class NettyTransportServer extends TransportServer {
                 serverBootstrap.childOption(entry.getKey(), entry.getValue());
             }
             this.serverConfig.getChannelInitializer().setRuntimeHandlerProvider(new NettyChannelInitializer.RuntimeHandlerProvider() {
+
                 @Override
-                public ChannelHandler getChannelHandler() {
-                    return new NettyTransportSession(transportSessionFactory.get());
+                public void appendRuntimeHandler(final ChannelPipeline pipeline) {
+                    if (serverConfig.getSessionEventsExecutor() == null)
+                        pipeline.addLast(new NettyTransportSession(transportSessionFactory.get()));
+                    else
+                        pipeline.addLast(serverConfig.getSessionEventsExecutor(), new NettyTransportSession(transportSessionFactory.get()));
                 }
             });
             serverBootstrap.group(this.serverConfig.getBossGroup(), this.serverConfig.getWorkerGroup())
@@ -194,6 +204,7 @@ public final class NettyTransportServer extends TransportServer {
         }
     }
 
+
     /**
      * Method to start server
      *
@@ -218,8 +229,11 @@ public final class NettyTransportServer extends TransportServer {
             }
             this.serverConfig.getChannelInitializer().setRuntimeHandlerProvider(new NettyChannelInitializer.RuntimeHandlerProvider() {
                 @Override
-                public ChannelHandler getChannelHandler() {
-                    return new NettyTransportSession(transportSessionFactory.get());
+                public void appendRuntimeHandler(ChannelPipeline pipeline) {
+                    if (serverConfig.getSessionEventsExecutor() == null)
+                        pipeline.addLast(new NettyTransportSession(transportSessionFactory.get()));
+                    else
+                        pipeline.addLast(serverConfig.getSessionEventsExecutor(), new NettyTransportSession(transportSessionFactory.get()));
                 }
             });
             serverBootstrap.group(this.serverConfig.getBossGroup(), this.serverConfig.getWorkerGroup())

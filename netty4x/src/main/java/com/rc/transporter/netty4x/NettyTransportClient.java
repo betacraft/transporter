@@ -3,8 +3,8 @@ package com.rc.transporter.netty4x;
 import com.rc.transporter.core.ITransportClient;
 import com.rc.transporter.core.TransportSession;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
 import java.util.Map;
@@ -43,9 +43,10 @@ public class NettyTransportClient<I, O> implements ITransportClient<I, O> {
     public void connect(final String host, final int port, final TransportSession<I, O> transportSession) throws Exception {
         try {
             this.clientConfig.getChannelInitializer().setRuntimeHandlerProvider(new NettyChannelInitializer.RuntimeHandlerProvider() {
+
                 @Override
-                public ChannelHandler getChannelHandler() {
-                    return new NettyTransportSession<I, O>(transportSession);
+                public void appendRuntimeHandler(final ChannelPipeline pipeline) {
+                    pipeline.addLast(new NettyTransportSession<I, O>(transportSession));
                 }
             });
             Bootstrap bootstrap = new Bootstrap()

@@ -1,7 +1,6 @@
 package com.rc.transporter.netty4x;
 
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 
@@ -15,8 +14,7 @@ public abstract class NettyChannelInitializer extends ChannelInitializer {
      * Runtime channel handler provider
      */
     interface RuntimeHandlerProvider {
-
-        ChannelHandler getChannelHandler();
+        void appendRuntimeHandler(final ChannelPipeline pipeline);
     }
 
     /**
@@ -43,7 +41,7 @@ public abstract class NettyChannelInitializer extends ChannelInitializer {
         initializeChannel(this.channel.pipeline());
         if (this.runtimeHandlerProvider == null)
             return;
-        this.channel.pipeline().addLast(this.runtimeHandlerProvider.getChannelHandler());
+        this.runtimeHandlerProvider.appendRuntimeHandler(this.channel.pipeline());
     }
 
     /**

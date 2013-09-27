@@ -2,6 +2,7 @@ package com.rc.transporter.netty4x;
 
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.util.concurrent.EventExecutorGroup;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +26,29 @@ public class NettyTransportClientConfig {
      * Channel initializer
      */
     private NettyChannelInitializer channelInitializer;
+    /**
+     * Session Event executors
+     */
+    private EventExecutorGroup sessionEventsExecutor;
 
+
+    /**
+     * Getter for @sessionEventsExecutor
+     *
+     * @return
+     */
+    public EventExecutorGroup getSessionEventsExecutor() {
+        return sessionEventsExecutor;
+    }
+
+    /**
+     * Setter for @sessionEventsExecutor
+     *
+     * @param sessionEventsExecutor
+     */
+    public void setSessionEventsExecutor(EventExecutorGroup sessionEventsExecutor) {
+        this.sessionEventsExecutor = sessionEventsExecutor;
+    }
 
     /**
      * Getter for @channelInitializer

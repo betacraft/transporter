@@ -1,7 +1,6 @@
 package com.rc.transporter.netty4x;
 
 import com.rc.transporter.core.TransportChannel;
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -39,9 +38,6 @@ public final class NettyChannel<M> extends TransportChannel<M> {
     @Override
     public void sendData(M data) {
         //logger.debug("Sending data over netty channel " + data);
-        if (data instanceof ByteBuf) {
-            this.nettyChannelHandlerContext.writeAndFlush(((ByteBuf) data).retain());
-        }
         this.nettyChannelHandlerContext.writeAndFlush(data);
     }
 
