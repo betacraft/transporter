@@ -11,6 +11,7 @@ import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import java.net.InetSocketAddress;
 
 /**
+ * Netty 3.x based transport sever
  * Author: akshay
  * Date  : 9/25/13
  * Time  : 12:30 AM

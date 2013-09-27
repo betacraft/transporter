@@ -4,15 +4,11 @@ import com.rc.transporter.core.ITransportClient;
 import com.rc.transporter.core.TransportSession;
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.ChannelHandler;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ChannelPipelineFactory;
-import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
-import java.util.Map;
 
 /**
  * Netty 3x transport client
@@ -60,16 +56,13 @@ public final class Netty3xTransportClient<I, O> implements ITransportClient<I, O
                             this.clientConfig.getBossExecutors(),
                             this.clientConfig.getWorkerExecutors()));
             this.clientBootstrap.setOptions(clientConfig.getChannelOptions());
-            // Set up the pipeline factory.
-            this.clientBootstrap.setPipelineFactory(new ChannelPipelineFactory() {
-                public ChannelPipeline getPipeline() throws Exception {
-                    ChannelPipeline pipeline = Channels.pipeline();
-                    for (Map.Entry<String, ChannelHandler> handler : clientConfig.getSharableChannelHandlers().entrySet())
-                        pipeline.addLast(handler.getKey(), handler.getValue());
-                    pipeline.addLast("handler", new Netty3xTransportSession<I, O>(transportSession));
-                    return pipeline;
+            this.clientConfig.getChannelPipelineFactory().setRuntimeChannelHandlerProvider(new Netty3xChannelPipelineFactory.RuntimeChannelHandlerProvider() {
+                @Override
+                public ChannelHandler get() {
+                    return new Netty3xTransportSession<I, O>(transportSession);
                 }
             });
+            this.clientBootstrap.setPipelineFactory(this.clientConfig.getChannelPipelineFactory());
             // Start the connection attempt.
             this.clientBootstrap.connect(new InetSocketAddress(host, port));
         } catch (Exception exception) {
