@@ -73,10 +73,12 @@ public final class NettyTransportServer extends TransportServer {
 
                 @Override
                 public void appendRuntimeHandler(final ChannelPipeline pipeline) {
-                    if (serverConfig.getSessionEventsExecutorFactory() == null)
+                    if (serverConfig.getSessionEventsExecutorFactory() == null) {
+                        logger.warn("No session events executor factory assigned\nMake sure you are not stealing time from worker group for better performance");
                         pipeline.addLast(new NettyTransportSession(nettyTransportSession));
-                    else
+                    } else {
                         pipeline.addLast(serverConfig.getSessionEventsExecutorFactory().get(), new NettyTransportSession(nettyTransportSession));
+                    }
                 }
             });
             this.bossGroup = this.serverConfig.getBossGroupFactory().get();

@@ -8,6 +8,8 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.EventExecutorGroup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -18,6 +20,10 @@ import java.util.Map;
  */
 public class NettyTransportClient<I, O> implements ITransportClient<I, O> {
 
+    /**
+     * Logger
+     */
+    private static final Logger logger = LoggerFactory.getLogger(NettyTransportClient.class);
     /**
      * Client config
      */
@@ -53,11 +59,17 @@ public class NettyTransportClient<I, O> implements ITransportClient<I, O> {
     public void connect(final String host, final int port, final TransportSession<I, O> transportSession) throws Exception {
         try {
             this.nioEventLoopGroup = this.clientConfig.getWorkerGroupFactory().get();
-            this.executorGroup = this.clientConfig.getWorkerGroupFactory().get();
+
             this.clientConfig.getChannelInitializer().setRuntimeHandlerProvider(new NettyChannelInitializer.RuntimeHandlerProvider() {
                 @Override
                 public void appendRuntimeHandler(final ChannelPipeline pipeline) {
-                    pipeline.addLast(executorGroup, new NettyTransportSession<I, O>(transportSession));
+                    if (clientConfig.getSessionEventsExecutorFactory() == null) {
+                        logger.warn("No session events executor factory assigned\nMake sure you are not stealing time from worker group for better performance");
+                        pipeline.addLast(new NettyTransportSession<I, O>(transportSession));
+                    } else {
+                        executorGroup = clientConfig.getSessionEventsExecutorFactory().get();
+                        pipeline.addLast(executorGroup, new NettyTransportSession<I, O>(transportSession));
+                    }
                 }
             });
             Bootstrap bootstrap = new Bootstrap()
@@ -80,9 +92,9 @@ public class NettyTransportClient<I, O> implements ITransportClient<I, O> {
      */
     @Override
     public void close() {
-        if (!this.clientConfig.getKeepWorkerGroupAlive())
+        if (!this.clientConfig.getKeepExecutorGroupAlive() && this.executorGroup != null)
             this.executorGroup.shutdownGracefully();
-        if (!this.clientConfig.getKeepExecutorGroupAlive())
+        if (!this.clientConfig.getKeepWorkerGroupAlive())
             this.nioEventLoopGroup.shutdownGracefully();
 
     }
