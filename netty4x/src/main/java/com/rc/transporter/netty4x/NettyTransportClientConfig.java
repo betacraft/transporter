@@ -223,12 +223,12 @@ public class NettyTransportClientConfig {
     /**
      * Constructor
      *
-     * @param workerGroupFactory @NioEventLoopGroupFactory for worker
+     * @param nioGroupFactory @NioEventLoopGroupFactory for worker
      * @param channelInitializer @ChannelInitializer associated with channel
      */
-    protected NettyTransportClientConfig(final NioEventLoopGroupFactory workerGroupFactory,
+    protected NettyTransportClientConfig(final NioEventLoopGroupFactory nioGroupFactory,
                                       final NettyChannelInitializer channelInitializer) {
-        this.nioGroupFactory = workerGroupFactory;
+        this.nioGroupFactory = nioGroupFactory;
         this.channelInitializer = channelInitializer;
         // initializing default channel options
         this.channelOptions = new HashMap<ChannelOption, Object>();
@@ -243,13 +243,13 @@ public class NettyTransportClientConfig {
     /**
      * Factory
      *
-     * @param workerGroupFactory @NioEventLoopGroupFactory for worker
+     * @param nioGroupFactory @NioEventLoopGroupFactory for worker
      * @param channelInitializer @ChannelInitializer associated with channel
      * @return
      */
-    public static NettyTransportClientConfig getDefault(final NioEventLoopGroupFactory workerGroupFactory,
+    public static NettyTransportClientConfig getDefault(final NioEventLoopGroupFactory nioGroupFactory,
                                                         final NettyChannelInitializer channelInitializer) {
-        return new NettyTransportClientConfig(workerGroupFactory, channelInitializer);
+        return new NettyTransportClientConfig(nioGroupFactory, channelInitializer);
     }
 
 

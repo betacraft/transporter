@@ -3,6 +3,8 @@ package com.rc.transporter.netty4x;
 import com.rc.transporter.core.ITransportClient;
 import com.rc.transporter.core.TransportSession;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -59,7 +61,6 @@ public class NettyTransportClient<I, O> implements ITransportClient<I, O> {
     public void connect(final String host, final int port, final TransportSession<I, O> transportSession) throws Exception {
         try {
             this.nioEventLoopGroup = this.clientConfig.getNioGroupFactory().get();
-
             this.clientConfig.getChannelInitializer().setRuntimeHandlerProvider(new NettyChannelInitializer.RuntimeHandlerProvider() {
                 @Override
                 public void appendRuntimeHandler(final ChannelPipeline pipeline) {
@@ -81,7 +82,14 @@ public class NettyTransportClient<I, O> implements ITransportClient<I, O> {
                 bootstrap.option(channelOption.getKey(), channelOption.getValue());
             }
             // staring the client
-            bootstrap.connect(host, port);
+            bootstrap.connect(host, port).channel().closeFuture().addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture future) throws Exception {
+                    close();
+                }
+            });
+
+
         } catch (Exception exception) {
             throw exception;
         }
@@ -101,6 +109,5 @@ public class NettyTransportClient<I, O> implements ITransportClient<I, O> {
             logger.debug("Shutting down nio group");
             this.nioEventLoopGroup.shutdownGracefully();
         }
-
     }
 }
