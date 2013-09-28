@@ -11,15 +11,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Time  : 3:57 AM
  */
 public final class NettyChannel<M> extends TransportChannel<M> {
-
     /**
      * Enum associated with property
      */
-    public enum NettyChannelProperty {
-        CLOSE_READ,
-        CLOSE_WRITE,
-
-
+    public static class NettyChannelProperty {
+        public static final String AUTO_READ = "AUTO_READ";
     }
 
     /**
@@ -72,7 +68,11 @@ public final class NettyChannel<M> extends TransportChannel<M> {
      */
     @Override
     public void setProperty(String name, Object value) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        // property to set auto-read enabled or disabled
+        if (name.equals(NettyChannelProperty.AUTO_READ)) {
+            logger.debug("Setting autoread to " + value);
+            this.nettyChannelHandlerContext.channel().config().setAutoRead(((Boolean) value));
+        }
     }
 
 

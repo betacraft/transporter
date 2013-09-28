@@ -58,7 +58,7 @@ public class NettyTransportClient<I, O> implements ITransportClient<I, O> {
     @Override
     public void connect(final String host, final int port, final TransportSession<I, O> transportSession) throws Exception {
         try {
-            this.nioEventLoopGroup = this.clientConfig.getWorkerGroupFactory().get();
+            this.nioEventLoopGroup = this.clientConfig.getNioGroupFactory().get();
 
             this.clientConfig.getChannelInitializer().setRuntimeHandlerProvider(new NettyChannelInitializer.RuntimeHandlerProvider() {
                 @Override
@@ -92,10 +92,15 @@ public class NettyTransportClient<I, O> implements ITransportClient<I, O> {
      */
     @Override
     public void close() {
-        if (!this.clientConfig.getKeepExecutorGroupAlive() && this.executorGroup != null)
+        logger.debug("Transport client is closed");
+        if (!this.clientConfig.getKeepExecutorGroupAlive() && this.executorGroup != null) {
+            logger.debug("Shutting down executor group");
             this.executorGroup.shutdownGracefully();
-        if (!this.clientConfig.getKeepWorkerGroupAlive())
+        }
+        if (!this.clientConfig.getKeepNioGroupAlive()) {
+            logger.debug("Shutting down nio group");
             this.nioEventLoopGroup.shutdownGracefully();
+        }
 
     }
 }

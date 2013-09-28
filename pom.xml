@@ -14,6 +14,7 @@
         <module>netty3x</module>
         <module>socketio</module>
         <module>rawsocket</module>
+        <module>javanio</module>
     </modules>
 
 

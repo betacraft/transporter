@@ -133,6 +133,7 @@ public final class NettyTransportServerConfig extends NettyTransportClientConfig
         addChannelOption(ChannelOption.TCP_NODELAY, true);
 
         this.childChannelOptions = new HashMap<ChannelOption, Object>();
+        this.childChannelOptions.put(ChannelOption.ALLOW_HALF_CLOSURE, true);
         this.childChannelOptions.put(ChannelOption.SO_SNDBUF, 1048576);
         this.childChannelOptions.put(ChannelOption.SO_RCVBUF, 1048576);
         this.childChannelOptions.put(ChannelOption.TCP_NODELAY, true);
