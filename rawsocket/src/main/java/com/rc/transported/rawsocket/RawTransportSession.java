@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -47,6 +48,13 @@ public final class RawTransportSession {
      */
     public RawTransportSession(final Socket socket, final ITransportSession transportSession) {
         logger.debug("Starting raw transport session");
+        try {
+            socket.setTcpNoDelay(true);
+            socket.setKeepAlive(true);
+        } catch (SocketException e) {
+            e.printStackTrace();
+            transportSession.onError(e.getCause());
+        }
         this.channel = new RawChannel(socket);
         this.transportSession = transportSession;
         transportSession.onConnected(this.channel);

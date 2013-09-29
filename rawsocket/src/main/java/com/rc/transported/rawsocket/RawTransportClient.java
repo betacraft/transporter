@@ -33,7 +33,11 @@ public final class RawTransportClient implements ITransportClient<byte[], byte[]
     @Override
     public void connect(final String host, final int port,
                         final TransportSession<byte[], byte[]> transportSession) throws Exception {
-        this.rawTransportSession = new RawTransportSession(new Socket(host, port), transportSession);
+        Socket socket = new Socket(host, port);
+        socket.setKeepAlive(true);
+        socket.setTcpNoDelay(true);
+        socket.setSoTimeout(120000); // 2 minutes
+        this.rawTransportSession = new RawTransportSession(socket, transportSession);
     }
 
     /**
