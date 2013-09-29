@@ -2,6 +2,7 @@ package com.rc.transported.rawsocket;
 
 import com.rc.transporter.core.TransportChannel;
 
+import java.io.IOException;
 import java.net.Socket;
 
 /**
@@ -10,7 +11,7 @@ import java.net.Socket;
  * Date  : 9/27/13
  * Time  : 4:56 PM
  */
-public class RawChannel<M> extends TransportChannel<M> {
+public class RawChannel extends TransportChannel<byte[]> {
 
     /**
      * Underlying socket associated with this channel
@@ -33,13 +34,24 @@ public class RawChannel<M> extends TransportChannel<M> {
      * @param data data to be pushed
      */
     @Override
-    public void sendData(M data) {
-
+    public void sendData(byte[] data) {
+        try {
+            this.socket.getOutputStream().write(data);
+        } catch (IOException e) {
+            e.printStackTrace();
+            close();
+        }
     }
 
     @Override
     protected void closeChannel() {
-        //To change body of implemented methods use File | Settings | File Templates.
+        if (this.socket == null)
+            return;
+        try {
+            this.socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -50,6 +62,6 @@ public class RawChannel<M> extends TransportChannel<M> {
      */
     @Override
     public void setProperty(String name, Object value) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        throw new IllegalStateException("This method is not supported");
     }
 }
