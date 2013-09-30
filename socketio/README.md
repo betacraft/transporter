@@ -1,6 +1,6 @@
 ## Socket IO based transporter server
 
-This is the transporter server based on socket io implementation which internally uses netty.
+This is the transporter server based on [socket io implementation](https://github.com/mrniko/netty-socketio) which internally uses netty.
 
 ## Complexity
 

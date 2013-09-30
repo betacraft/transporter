@@ -43,6 +43,12 @@ public final class SocketIoChannel extends TransportChannel<String> {
     }
 
 
+    /**
+     * Method to send an event over socketio
+     *
+     * @param eventName name of the event
+     * @param data      data associated with the event
+     */
     public void sendEvent(String eventName, Object data) {
         this.socketIOClient.sendEvent(eventName, data);
     }

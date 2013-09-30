@@ -1,8 +1,10 @@
 package com.rc.transporter.socketio;
 
-import com.rc.transporter.core.ITransportSession;
+import com.corundumstudio.socketio.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 
 /**
  * Socketio server configuration
@@ -12,15 +14,67 @@ import java.util.HashMap;
  */
 public final class SocketIoServerConfig {
     /**
-     * Socket io server session factory
+     * Logger
      */
-    public interface SocketIoServerSessionFactory {
-        public ITransportSession get();
-    }
+    private static final Logger logger = LoggerFactory.getLogger(SocketIoServerConfig.class);
 
     /**
-     * Namespaces associated with this server
+     * Namespaces associated with server
      */
-    private HashMap<String, SocketIoServerSessionFactory> namespaces;
+    private ArrayList<SocketIoServerNamespace> namespaces;
+    /**
+     * Socketio related configuration
+     */
+    private Configuration configuration;
+
+    /**
+     * Initialization block
+     */ {
+        this.namespaces = new ArrayList<SocketIoServerNamespace>();
+        this.configuration = new Configuration();
+    }
+
+
+    /**
+     * Getter for @configuration
+     *
+     * @return
+     */
+    public Configuration getConfiguration() {
+        return configuration;
+    }
+
+
+    /**
+     * Getter for @namespaces
+     *
+     * @return
+     */
+    public ArrayList<SocketIoServerNamespace> getNamespaces() {
+        return namespaces;
+    }
+
+
+    /**
+     * Method to add @SocketIoServerNamespace to the configuration
+     *
+     * @param namespace
+     * @return
+     */
+    public SocketIoServerConfig addNamespace(final SocketIoServerNamespace namespace) {
+        this.namespaces.add(namespace);
+        return this;
+
+    }
+
+
+    /**
+     * Factory
+     *
+     * @return instance of @SocketIoServerConfig
+     */
+    public static SocketIoServerConfig get() {
+        return new SocketIoServerConfig();
+    }
 
 }
