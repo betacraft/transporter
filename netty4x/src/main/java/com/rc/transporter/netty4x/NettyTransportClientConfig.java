@@ -175,7 +175,7 @@ public class NettyTransportClientConfig {
      *
      * @return
      */
-    public NioEventLoopGroupFactory getNioGroupFactory() {
+    public NioEventLoopGroupFactory getWorkerGroupFactory() {
         return nioGroupFactory;
     }
 
@@ -184,7 +184,7 @@ public class NettyTransportClientConfig {
      *
      * @param workerGroup
      */
-    public void setNioGroupFactory(NioEventLoopGroupFactory workerGroup) {
+    public void setWorkerGroupFactory(NioEventLoopGroupFactory workerGroup) {
         this.nioGroupFactory = workerGroup;
     }
 

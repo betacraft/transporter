@@ -60,7 +60,7 @@ public class NettyTransportClient<I, O> implements ITransportClient<I, O> {
     @Override
     public void connect(final String host, final int port, final TransportSession<I, O> transportSession) throws Exception {
         try {
-            this.nioEventLoopGroup = this.clientConfig.getNioGroupFactory().get();
+            this.nioEventLoopGroup = this.clientConfig.getWorkerGroupFactory().get();
             this.clientConfig.getChannelInitializer().setRuntimeHandlerProvider(new NettyChannelInitializer.RuntimeHandlerProvider() {
                 @Override
                 public void appendRuntimeHandler(final ChannelPipeline pipeline) {

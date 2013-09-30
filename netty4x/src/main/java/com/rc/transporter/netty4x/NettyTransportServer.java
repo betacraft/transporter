@@ -82,7 +82,7 @@ public final class NettyTransportServer extends TransportServer {
                 }
             });
             this.bossGroup = this.serverConfig.getBossGroupFactory().get();
-            this.workerGroup = this.serverConfig.getNioGroupFactory().get();
+            this.workerGroup = this.serverConfig.getWorkerGroupFactory().get();
 
             serverBootstrap.group(this.bossGroup, this.workerGroup)
                     .channel(NioServerSocketChannel.class)
@@ -139,7 +139,7 @@ public final class NettyTransportServer extends TransportServer {
                 }
             });
             this.bossGroup = this.serverConfig.getBossGroupFactory().get();
-            this.workerGroup = this.serverConfig.getNioGroupFactory().get();
+            this.workerGroup = this.serverConfig.getWorkerGroupFactory().get();
             serverBootstrap.group(this.bossGroup, this.workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .childHandler(this.serverConfig.getChannelInitializer());
@@ -196,7 +196,7 @@ public final class NettyTransportServer extends TransportServer {
                 }
             });
             this.bossGroup = this.serverConfig.getBossGroupFactory().get();
-            this.workerGroup = this.serverConfig.getNioGroupFactory().get();
+            this.workerGroup = this.serverConfig.getWorkerGroupFactory().get();
             serverBootstrap.group(this.bossGroup, this.workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .childHandler(this.serverConfig.getChannelInitializer());
@@ -253,7 +253,7 @@ public final class NettyTransportServer extends TransportServer {
                 }
             });
             this.bossGroup = this.serverConfig.getBossGroupFactory().get();
-            this.workerGroup = this.serverConfig.getNioGroupFactory().get();
+            this.workerGroup = this.serverConfig.getWorkerGroupFactory().get();
             serverBootstrap.group(this.bossGroup, this.workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .childHandler(this.serverConfig.getChannelInitializer());
