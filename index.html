@@ -7,6 +7,7 @@
 
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -15,17 +16,18 @@
   <body>
     <div class="wrapper">
       <header>
-        <h1>Transporter</h1>
-        <p>An abstraction library for transport frameworks</p>
-
-        <p class="view"><a href="https://github.com/RainingClouds/transporter">View the Project on GitHub <small>RainingClouds/transporter</small></a></p>
-
+        <h1 class="header">Transporter</h1>
+        <p class="header">An abstraction library for transport frameworks</p>
 
         <ul>
-          <li><a href="https://github.com/RainingClouds/transporter/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/RainingClouds/transporter/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/RainingClouds/transporter">View On <strong>GitHub</strong></a></li>
+          <li class="download"><a class="buttons" href="https://github.com/RainingClouds/transporter/zipball/master">Download ZIP</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/RainingClouds/transporter/tarball/master">Download TAR</a></li>
+          <li><a class="buttons github" href="https://github.com/RainingClouds/transporter">View On GitHub</a></li>
         </ul>
+
+        <p class="header">This project is maintained by <a class="header name" href="https://github.com/RainingClouds">RainingClouds</a></p>
+
+
       </header>
       <section>
         <h2>
@@ -157,11 +159,11 @@ implementation is available and soon netty3x will be pushed.</p>
                          */
                         @Override
                         protected void initChannel(Channel ch) throws Exception {
-                            ChannelPipeline pipeline = ch.pipeline();
+                            ChannelPipeline sharablePipeline = ch.sharablePipeline();
                             for (Map.Entry&lt;String, ChannelHandler&gt; pipelineEntry : serverConfig.getPipeline().entrySet()) {
-                                pipeline.addLast(pipelineEntry.getKey(), pipelineEntry.getValue());
+                                sharablePipeline.addLast(pipelineEntry.getKey(), pipelineEntry.getValue());
                             }
-                            pipeline.addLast("handler", new NettyTransportSession(nettyTransportSession));
+                            sharablePipeline.addLast("handler", new NettyTransportSession(nettyTransportSession));
                         }
                     });
             // setting up options
@@ -263,11 +265,10 @@ implementation is available and soon netty3x will be pushed.</p>
 <p>For any other help or info, you can mail us at <a href="mailto:akshay@rainingclouds.com">akshay@rainingclouds.com</a>.</p>
       </section>
       <footer>
-        <p>This project is maintained by <a href="https://github.com/RainingClouds">RainingClouds</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+        <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
       </footer>
     </div>
-    <script src="javascripts/scale.fix.js"></script>
-    
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+		
   </body>
 </html>
