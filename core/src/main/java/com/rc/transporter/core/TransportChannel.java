@@ -50,6 +50,11 @@ public abstract class TransportChannel<M> {
     protected abstract void closeChannel();
 
     /**
+     * Method to check if channel is open
+     */
+    public abstract boolean isOpen();
+
+    /**
      * Method to set properties associated with channel
      *
      * @param name  name of the property

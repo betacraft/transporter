@@ -53,11 +53,20 @@ public final class NettyChannel<M> extends TransportChannel<M> {
      */
     @Override
     protected void closeChannel() {
-        if (this.channelClosed.get())
+        logger.trace("Close channel request");
+        if (this.channelClosed.getAndSet(true))
             return;
-        this.channelClosed.set(true);
+        logger.trace("Closing channel");
         this.nettyChannelHandlerContext.disconnect();
         this.nettyChannelHandlerContext.close();
+    }
+
+    /**
+     * Method to check if channel is open
+     */
+    @Override
+    public boolean isOpen() {
+        return !this.channelClosed.get();
     }
 
     /**

@@ -46,11 +46,18 @@ public final class Netty3xChannel<M> extends TransportChannel<M> {
      */
     @Override
     protected void closeChannel() {
-        if (this.isChannelClosed.get())
+        if (this.isChannelClosed.getAndSet(true))
             return;
-        this.isChannelClosed.set(true);
         this.channel.disconnect();
         this.channel.close();
+    }
+
+    /**
+     * Method to check if channel is open
+     */
+    @Override
+    public boolean isOpen() {
+        return !this.isChannelClosed.get();
     }
 
     /**

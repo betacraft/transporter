@@ -3,6 +3,8 @@ package com.rc.transporter.netty4x;
 import com.rc.transporter.core.ITransportSession;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Netty transport system
@@ -11,6 +13,10 @@ import io.netty.channel.SimpleChannelInboundHandler;
  * Time  : 3:44 AM
  */
 public class NettyTransportSession<I, O> extends SimpleChannelInboundHandler<Object> {
+    /**
+     * Logger
+     */
+    private static final Logger logger = LoggerFactory.getLogger(NettyTransportSession.class);
     /**
      * @NettyChannel associated with this session
      */
@@ -62,9 +68,10 @@ public class NettyTransportSession<I, O> extends SimpleChannelInboundHandler<Obj
      */
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        transportSession.onDisconnected();
-        this.nettyChannel.close();
         super.channelInactive(ctx);
+        transportSession.onDisconnected();
+        logger.info("Channel inactive " + ctx.name());
+        this.nettyChannel.close();
     }
 
     /**
@@ -75,6 +82,7 @@ public class NettyTransportSession<I, O> extends SimpleChannelInboundHandler<Obj
      */
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        logger.info("Exception caught ", cause + ctx.name());
         transportSession.onError(cause);
         this.nettyChannel.closeChannel();
     }

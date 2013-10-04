@@ -55,10 +55,17 @@ public final class SocketIoChannel extends TransportChannel<String> {
 
     @Override
     protected void closeChannel() {
-        if (this.isClosed.get())
+        if (this.isClosed.getAndSet(true))
             return;
-        this.isClosed.set(true);
         this.socketIOClient.disconnect();
+    }
+
+    /**
+     * Method to check if channel is open
+     */
+    @Override
+    public boolean isOpen() {
+        return !this.isClosed.get();
     }
 
     /**

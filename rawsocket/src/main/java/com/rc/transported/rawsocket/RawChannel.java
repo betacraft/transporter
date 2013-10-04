@@ -55,6 +55,14 @@ public class RawChannel extends TransportChannel<byte[]> {
     }
 
     /**
+     * Method to check if channel is open
+     */
+    @Override
+    public boolean isOpen() {
+        return !socket.isClosed();
+    }
+
+    /**
      * Method to set properties associated with channel
      *
      * @param name  name of the property
