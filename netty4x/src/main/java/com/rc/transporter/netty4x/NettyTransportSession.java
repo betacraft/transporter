@@ -61,6 +61,17 @@ public class NettyTransportSession<I, O> extends SimpleChannelInboundHandler<Obj
     }
 
     /**
+     * Calls {@link io.netty.channel.ChannelHandlerContext#fireUserEventTriggered(Object)} to forward
+     * to the next {@link io.netty.channel.ChannelInboundHandler} in the {@link io.netty.channel.ChannelPipeline}.
+     * <p/>
+     * Sub-classes may override this method to change behavior.
+     */
+    @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        super.userEventTriggered(ctx, evt);
+    }
+
+    /**
      * Calls {@link io.netty.channel.ChannelHandlerContext#fireChannelInactive()} to forward
      * to the next {@link io.netty.channel.ChannelInboundHandler} in the {@link io.netty.channel.ChannelPipeline}.
      * <p/>

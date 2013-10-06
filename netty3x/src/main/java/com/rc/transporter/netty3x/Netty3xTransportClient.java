@@ -1,7 +1,7 @@
 package com.rc.transporter.netty3x;
 
 import com.rc.transporter.core.ITransportClient;
-import com.rc.transporter.core.TransportSession;
+import com.rc.transporter.core.ITransportSession;
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
@@ -49,7 +49,7 @@ public final class Netty3xTransportClient<I, O> implements ITransportClient<I, O
      * @throws @Exception
      */
     @Override
-    public void connect(final String host, final int port, final TransportSession<I, O> transportSession) throws Exception {
+    public void connect(final String host, final int port, final ITransportSession<I, O> transportSession) throws Exception {
         try {
             this.clientBootstrap = new ClientBootstrap(
                     new NioClientSocketChannelFactory(

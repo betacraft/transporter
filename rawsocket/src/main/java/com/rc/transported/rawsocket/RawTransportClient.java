@@ -1,7 +1,7 @@
 package com.rc.transported.rawsocket;
 
 import com.rc.transporter.core.ITransportClient;
-import com.rc.transporter.core.TransportSession;
+import com.rc.transporter.core.ITransportSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +32,7 @@ public final class RawTransportClient implements ITransportClient<byte[], byte[]
      */
     @Override
     public void connect(final String host, final int port,
-                        final TransportSession<byte[], byte[]> transportSession) throws Exception {
+                        final ITransportSession<byte[], byte[]> transportSession) throws Exception {
         Socket socket = new Socket(host, port);
         socket.setKeepAlive(true);
         socket.setTcpNoDelay(true);

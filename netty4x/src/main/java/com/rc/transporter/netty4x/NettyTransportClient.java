@@ -1,7 +1,7 @@
 package com.rc.transporter.netty4x;
 
 import com.rc.transporter.core.ITransportClient;
-import com.rc.transporter.core.TransportSession;
+import com.rc.transporter.core.ITransportSession;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -58,7 +58,7 @@ public class NettyTransportClient<I, O> implements ITransportClient<I, O> {
      * @throws @Exception
      */
     @Override
-    public void connect(final String host, final int port, final TransportSession<I, O> transportSession) throws Exception {
+    public void connect(final String host, final int port, final ITransportSession<I, O> transportSession) throws Exception {
         try {
             this.nioEventLoopGroup = this.clientConfig.getWorkerGroupFactory().get();
             this.clientConfig.getChannelInitializer().setRuntimeHandlerProvider(new NettyChannelInitializer.RuntimeHandlerProvider() {
@@ -85,11 +85,10 @@ public class NettyTransportClient<I, O> implements ITransportClient<I, O> {
             bootstrap.connect(host, port).channel().closeFuture().addListener(new ChannelFutureListener() {
                 @Override
                 public void operationComplete(ChannelFuture future) throws Exception {
+                    logger.info("Client bootstrap closed");
                     close();
                 }
             });
-
-
         } catch (Exception exception) {
             throw exception;
         }

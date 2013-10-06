@@ -45,7 +45,8 @@ public final class NettyChannel<M> extends TransportChannel<M> {
     @Override
     public void sendData(M data) {
         //logger.debug("Sending data over netty channel " + data);
-        this.nettyChannelHandlerContext.writeAndFlush(data);
+        if (isOpen())
+            this.nettyChannelHandlerContext.writeAndFlush(data);
     }
 
     /**
