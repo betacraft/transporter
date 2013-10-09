@@ -92,6 +92,41 @@ public final class SocketIoTransportServer extends TransportServer {
     /**
      * Method to start server
      *
+     * @param port                    port on which server needs to be started
+     * @param transportServerListener @ITransportServerListener listener to listen the state of the server
+     *                                on this server
+     * @throws Exception throws exception if any during starting the server
+     */
+    public void start(final int port, final ITransportServerListener transportServerListener) throws Exception {
+        this.socketIoServerWorker.submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    logger.debug("Starting socketio server on port " + port);
+                    transportServerConfig.getConfiguration().setPort(port);
+                    socketIOServer = new SocketIOServer(transportServerConfig.getConfiguration());
+                    // setting all specified namespaces
+                    for (SocketIoServerNamespace socketIoServerNamespace : transportServerConfig.getNamespaces())
+                        socketIoServerNamespace.setOn(socketIOServer);
+
+
+                    socketIOServer.start(new ChannelFutureListener() {
+                        @Override
+                        public void operationComplete(ChannelFuture future) throws Exception {
+                            transportServerListener.onClosed();
+                        }
+                    });
+                } catch (Exception e) {
+                    logger.error("Error ", e);
+                    transportServerListener.onClosed();
+                }
+            }
+        });
+    }
+
+    /**
+     * Method to start server
+     *
      * @param hostname                hostname
      * @param port                    port on which server needs to be started
      * @param transportServerListener @ITransportServerListener listener to listen the state of the server
