@@ -49,6 +49,7 @@ final class SocketIoTransportSession implements ConnectListener, DisconnectListe
         this.clientSessionFactory = clientSessionFactory;
     }
 
+
     /**
      * Constructor
      *
@@ -116,6 +117,7 @@ final class SocketIoTransportSession implements ConnectListener, DisconnectListe
     @OnEvent("reg")
     public void onEvent(SocketIOClient client, String data, AckRequest ackSender) {
         try {
+            logger.trace("On reg event " + data);
             this.connectionCatalog.get(client.getSessionId()).onData(data);
         } catch (Exception e) {
             e.printStackTrace();

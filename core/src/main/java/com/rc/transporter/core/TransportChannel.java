@@ -15,6 +15,7 @@ public abstract class TransportChannel<M> {
      */
     protected final static Logger logger = LoggerFactory.getLogger(TransportChannel.class);
 
+
     /**
      * Channel state listener which is used internally
      */
@@ -43,6 +44,7 @@ public abstract class TransportChannel<M> {
      * @param data data to be pushed
      */
     public abstract void sendData(M data);
+
 
     /**
      * Method to close a channel

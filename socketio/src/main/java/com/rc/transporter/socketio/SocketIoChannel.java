@@ -2,7 +2,9 @@ package com.rc.transporter.socketio;
 
 import com.corundumstudio.socketio.SocketIOClient;
 import com.rc.transporter.core.TransportChannel;
+import io.netty.buffer.ByteBuf;
 
+import java.nio.charset.Charset;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -11,7 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Date  : 9/26/13
  * Time  : 6:31 PM
  */
-public final class SocketIoChannel extends TransportChannel<String> {
+public final class SocketIoChannel extends TransportChannel<Object> {
 
 
     /**
@@ -22,6 +24,7 @@ public final class SocketIoChannel extends TransportChannel<String> {
      * Flag for close
      */
     private AtomicBoolean isClosed = new AtomicBoolean(false);
+
 
     /**
      * Constructor
@@ -38,8 +41,16 @@ public final class SocketIoChannel extends TransportChannel<String> {
      * @param data data to be pushed
      */
     @Override
-    public void sendData(String data) {
-        this.socketIOClient.sendMessage(data);
+    public void sendData(Object data) {
+        if (data instanceof String) {
+            this.socketIOClient.sendMessage((String) data);
+            return;
+        }
+        if (data instanceof ByteBuf) {
+            this.socketIOClient.sendMessage(((ByteBuf) data).toString(Charset.defaultCharset()));
+            return;
+        }
+        throw new IllegalStateException("Unsupported data " + data.getClass().getName());
     }
 
 
