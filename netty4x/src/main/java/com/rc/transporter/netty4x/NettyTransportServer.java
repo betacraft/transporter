@@ -282,7 +282,9 @@ public final class NettyTransportServer extends TransportServer {
      */
     @Override
     protected void close() {
-        this.bossGroup.shutdownGracefully();
-        this.workerGroup.shutdownGracefully();
+        if (this.bossGroup != null)
+            this.bossGroup.shutdownGracefully();
+        if (this.workerGroup != null)
+            this.workerGroup.shutdownGracefully();
     }
 }
