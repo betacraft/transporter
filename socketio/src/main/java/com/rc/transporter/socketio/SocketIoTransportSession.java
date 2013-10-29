@@ -86,7 +86,7 @@ final class SocketIoTransportSession implements ConnectListener, DisconnectListe
             this.connectionCatalog.put(client.getSessionId(), session);
             session.onConnected(new SocketIoChannel(client));
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("While processing onConnect", e);
         }
     }
 
@@ -107,10 +107,12 @@ final class SocketIoTransportSession implements ConnectListener, DisconnectListe
 
     @Override
     public void onDisconnect(SocketIOClient client) {
+        if (!this.connectionCatalog.containsKey(client.getSessionId()))
+            return;
         try {
             this.connectionCatalog.remove(client.getSessionId()).onDisconnected();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("While processing onDisconnect", e);
         }
     }
 
@@ -120,7 +122,7 @@ final class SocketIoTransportSession implements ConnectListener, DisconnectListe
             logger.trace("On reg event " + data);
             this.connectionCatalog.get(client.getSessionId()).onData(data);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("While processing onEvent", e);
         }
     }
 
