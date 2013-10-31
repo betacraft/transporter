@@ -15,11 +15,11 @@
     <orderEntry type="library" name="Maven: ch.qos.logback:logback-classic:1.0.13" level="project" />
     <orderEntry type="library" name="Maven: ch.qos.logback:logback-core:1.0.13" level="project" />
     <orderEntry type="library" name="Maven: org.javassist:javassist:3.18.0-GA" level="project" />
-    <orderEntry type="library" name="Maven: com.corundumstudio.socketio:netty-socketio:1.5.1-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: io.netty:netty-all:4.0.2.Final-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.2.2" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.2.2" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.2.2" level="project" />
+    <orderEntry type="library" name="Maven: com.corundumstudio.socketio:netty-socketio:1.5.3-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-all:4.0.11.Final" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.2.3" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.2.3" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.2.3" level="project" />
     <orderEntry type="module" module-name="core" />
   </component>
 </module>

@@ -29,7 +29,7 @@
         <dependency>
             <groupId>com.corundumstudio.socketio</groupId>
             <artifactId>netty-socketio</artifactId>
-            <version>1.5.1-SNAPSHOT</version>
+            <version>1.5.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.rainingclouds</groupId>
