@@ -81,6 +81,7 @@ final class SocketIoTransportSession implements ConnectListener, DisconnectListe
 
     @Override
     public void onConnect(final SocketIOClient client) {
+        logger.trace("SocketIO server got a new connection");
         try {
             ITransportSession session = this.clientSessionFactory.get();
             this.connectionCatalog.put(client.getSessionId(), session);
@@ -107,6 +108,7 @@ final class SocketIoTransportSession implements ConnectListener, DisconnectListe
 
     @Override
     public void onDisconnect(SocketIOClient client) {
+        logger.debug("SocketIO disconnected");
         if (!this.connectionCatalog.containsKey(client.getSessionId()))
             return;
         try {
