@@ -10,7 +10,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>socketio</artifactId>
+    <version>1.1-BETA</version>
     <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+        </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -29,7 +35,12 @@
         <dependency>
             <groupId>com.corundumstudio.socketio</groupId>
             <artifactId>netty-socketio</artifactId>
-            <version>1.5.3-SNAPSHOT</version>
+            <version>1.5.4-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.rainingclouds</groupId>
+            <artifactId>netty4x</artifactId>
+            <version>1.0-ALPHA-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.rainingclouds</groupId>

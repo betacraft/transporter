@@ -8,6 +8,7 @@ import io.netty.channel.ChannelFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -40,8 +41,28 @@ public final class SocketIoTransportServer extends TransportServer {
      *
      * @param transportServerConfig @SocketIoServerConfig
      */
-    public SocketIoTransportServer(final SocketIoServerConfig transportServerConfig) {
+    public SocketIoTransportServer (final SocketIoServerConfig transportServerConfig) {
         this.transportServerConfig = transportServerConfig;
+    }
+
+    /**
+     * Common initialization associated with socketio
+     */
+    private void init () throws Exception {
+        this.socketIOServer = new SocketIOServer(this.transportServerConfig.getConfiguration());
+        if (this.transportServerConfig.getConfiguration().isAllowCustomRequests()) {
+            ArrayList<ITransportSession> customHandlers = this.transportServerConfig
+                    .getCustomRequestHandlers();
+            if (customHandlers == null)
+                throw new IllegalStateException("No custom request handlers are provided");
+            SocketIOPipelineFactory socketIOChannelInitializer = SocketIOPipelineFactory.get();
+            socketIOChannelInitializer.setHandlers(customHandlers);
+            socketIOServer.setPipelineFactory(socketIOChannelInitializer);
+        }
+        // setting all specified namespaces
+        for (SocketIoServerNamespace socketIoServerNamespace : transportServerConfig
+                .getNamespaces())
+            socketIoServerNamespace.setOn(socketIOServer);
     }
 
     /**
@@ -49,27 +70,26 @@ public final class SocketIoTransportServer extends TransportServer {
      *
      * @param port                    port on which server needs to be started
      * @param transportServerListener @ITransportServerListener listener to listen the state of the server
-     * @param transportSession        @ITransportSession session routine that will be associated with each connection received
+     * @param transportSession        @ITransportSession session routine that will be associated with each
+     *                                connection received
      *                                on this server
      * @throws Exception throws exception if any during starting the server
      */
     @Override
-    public void start(final int port, final ITransportServerListener transportServerListener,
-                      final ITransportSession transportSession) throws Exception {
+    public void start (final int port, final ITransportServerListener transportServerListener,
+            final ITransportSession transportSession) throws Exception {
         this.socketIoServerWorker.submit(new Runnable() {
             @Override
-            public void run() {
+            public void run () {
                 try {
                     logger.debug("Starting socketio server on port " + port);
                     transportServerConfig.getConfiguration().setPort(port);
-                    socketIOServer = new SocketIOServer(transportServerConfig.getConfiguration());
-                    // setting all specified namespaces
-                    for (SocketIoServerNamespace socketIoServerNamespace : transportServerConfig.getNamespaces())
-                        socketIoServerNamespace.setOn(socketIOServer);
+                    init();
                     // if on default namespace user wants a listener
                     if (transportSession != null) {
                         logger.debug("Setting default namespace listener");
-                        SocketIoTransportSession defaultNamespaceSession = new SocketIoTransportSession(transportSession);
+                        SocketIoTransportSession defaultNamespaceSession = new SocketIoTransportSession
+                                (transportSession);
                         socketIOServer.addConnectListener(defaultNamespaceSession);
                         socketIOServer.addMessageListener(defaultNamespaceSession);
                         socketIOServer.addDisconnectListener(defaultNamespaceSession);
@@ -77,7 +97,7 @@ public final class SocketIoTransportServer extends TransportServer {
                     }
                     socketIOServer.start(new ChannelFutureListener() {
                         @Override
-                        public void operationComplete(ChannelFuture future) throws Exception {
+                        public void operationComplete (ChannelFuture future) throws Exception {
                             transportServerListener.onClosed();
                         }
                     });
@@ -89,6 +109,7 @@ public final class SocketIoTransportServer extends TransportServer {
         });
     }
 
+
     /**
      * Method to start server
      *
@@ -97,22 +118,18 @@ public final class SocketIoTransportServer extends TransportServer {
      *                                on this server
      * @throws Exception throws exception if any during starting the server
      */
-    public void start(final int port, final ITransportServerListener transportServerListener) throws Exception {
+    public void start (final int port, final ITransportServerListener transportServerListener) throws
+            Exception {
         this.socketIoServerWorker.submit(new Runnable() {
             @Override
-            public void run() {
+            public void run () {
                 try {
                     logger.debug("Starting socketio server on port " + port);
                     transportServerConfig.getConfiguration().setPort(port);
-                    socketIOServer = new SocketIOServer(transportServerConfig.getConfiguration());
-                    // setting all specified namespaces
-                    for (SocketIoServerNamespace socketIoServerNamespace : transportServerConfig.getNamespaces())
-                        socketIoServerNamespace.setOn(socketIOServer);
-
-
+                    init();
                     socketIOServer.start(new ChannelFutureListener() {
                         @Override
-                        public void operationComplete(ChannelFuture future) throws Exception {
+                        public void operationComplete (ChannelFuture future) throws Exception {
                             transportServerListener.onClosed();
                         }
                     });
@@ -133,23 +150,19 @@ public final class SocketIoTransportServer extends TransportServer {
      *                                on this server
      * @throws Exception throws exception if any during starting the server
      */
-    public void start(final String hostname, final int port, final ITransportServerListener transportServerListener) throws Exception {
+    public void start (final String hostname, final int port, final ITransportServerListener
+            transportServerListener) throws Exception {
         this.socketIoServerWorker.submit(new Runnable() {
             @Override
-            public void run() {
+            public void run () {
                 try {
                     logger.debug("Starting socketio server on port " + port);
                     transportServerConfig.getConfiguration().setPort(port);
                     transportServerConfig.getConfiguration().setHostname(hostname);
-                    socketIOServer = new SocketIOServer(transportServerConfig.getConfiguration());
-                    // setting all specified namespaces
-                    for (SocketIoServerNamespace socketIoServerNamespace : transportServerConfig.getNamespaces())
-                        socketIoServerNamespace.setOn(socketIOServer);
-
-
+                    init();
                     socketIOServer.start(new ChannelFutureListener() {
                         @Override
-                        public void operationComplete(ChannelFuture future) throws Exception {
+                        public void operationComplete (ChannelFuture future) throws Exception {
                             transportServerListener.onClosed();
                         }
                     });
@@ -167,28 +180,28 @@ public final class SocketIoTransportServer extends TransportServer {
      * @param hostname                hostname
      * @param port                    port on which server needs to be started
      * @param transportServerListener @ITransportServerListener listener to listen the state of the server
-     * @param transportSession        @ITransportSession session routine that will be associated with each connection received
+     * @param transportSession        @ITransportSession session routine that will be associated with each
+     *                                connection received
      *                                on this server
      * @throws Exception throws exception if any during starting the server
      */
     @Override
-    public void start(final String hostname, final int port, final ITransportServerListener transportServerListener,
-                      final ITransportSession transportSession) throws Exception {
+    public void start (final String hostname, final int port, final ITransportServerListener
+            transportServerListener,
+            final ITransportSession transportSession) throws Exception {
         this.socketIoServerWorker.submit(new Runnable() {
             @Override
-            public void run() {
+            public void run () {
                 try {
                     logger.debug("Starting socketio server on port " + port);
                     transportServerConfig.getConfiguration().setHostname(hostname);
                     transportServerConfig.getConfiguration().setPort(port);
-                    socketIOServer = new SocketIOServer(transportServerConfig.getConfiguration());
-                    // setting all specified namespaces
-                    for (SocketIoServerNamespace socketIoServerNamespace : transportServerConfig.getNamespaces())
-                        socketIoServerNamespace.setOn(socketIOServer);
+                    init();
                     // if on default namespace user wants a listener
                     if (transportSession != null) {
                         logger.debug("Setting default namespace listener");
-                        SocketIoTransportSession defaultNamespaceSession = new SocketIoTransportSession(transportSession);
+                        SocketIoTransportSession defaultNamespaceSession = new SocketIoTransportSession
+                                (transportSession);
                         socketIOServer.addConnectListener(defaultNamespaceSession);
                         socketIOServer.addMessageListener(defaultNamespaceSession);
                         socketIOServer.addDisconnectListener(defaultNamespaceSession);
@@ -196,7 +209,7 @@ public final class SocketIoTransportServer extends TransportServer {
                     }
                     socketIOServer.start(new ChannelFutureListener() {
                         @Override
-                        public void operationComplete(ChannelFuture future) throws Exception {
+                        public void operationComplete (ChannelFuture future) throws Exception {
                             transportServerListener.onClosed();
                         }
                     });
@@ -213,27 +226,26 @@ public final class SocketIoTransportServer extends TransportServer {
      *
      * @param port                    port on which server needs to be started
      * @param transportServerListener @ITransportServerListener listener to listen the state of the server
-     * @param transportSessionFactory @ITransportSessionFactory session routine that will be associated with each connection received
+     * @param transportSessionFactory @ITransportSessionFactory session routine that will be associated
+     *                                with each connection received
      *                                on this server
      * @throws Exception throws exception if any during starting the server
      */
     @Override
-    public void start(final int port, final ITransportServerListener transportServerListener,
-                      final ITransportSessionFactory transportSessionFactory) throws Exception {
+    public void start (final int port, final ITransportServerListener transportServerListener,
+            final ITransportSessionFactory transportSessionFactory) throws Exception {
         this.socketIoServerWorker.submit(new Runnable() {
             @Override
-            public void run() {
+            public void run () {
                 try {
                     logger.debug("Starting socketio server on port " + port);
                     transportServerConfig.getConfiguration().setPort(port);
-                    socketIOServer = new SocketIOServer(transportServerConfig.getConfiguration());
-                    // setting all specified namespaces
-                    for (SocketIoServerNamespace socketIoServerNamespace : transportServerConfig.getNamespaces())
-                        socketIoServerNamespace.setOn(socketIOServer);
+                    init();
                     // if on default namespace user wants a listener
                     if (transportSessionFactory != null) {
                         logger.debug("Setting default namespace listener");
-                        SocketIoTransportSession defaultNamespaceSession = new SocketIoTransportSession(transportSessionFactory);
+                        SocketIoTransportSession defaultNamespaceSession = new SocketIoTransportSession
+                                (transportSessionFactory);
                         socketIOServer.addConnectListener(defaultNamespaceSession);
                         socketIOServer.addMessageListener(defaultNamespaceSession);
                         socketIOServer.addDisconnectListener(defaultNamespaceSession);
@@ -241,7 +253,7 @@ public final class SocketIoTransportServer extends TransportServer {
                     }
                     socketIOServer.start(new ChannelFutureListener() {
                         @Override
-                        public void operationComplete(ChannelFuture future) throws Exception {
+                        public void operationComplete (ChannelFuture future) throws Exception {
                             transportServerListener.onClosed();
                         }
                     });
@@ -259,28 +271,27 @@ public final class SocketIoTransportServer extends TransportServer {
      * @param hostname                hostname
      * @param port                    port on which server needs to be started
      * @param transportServerListener @ITransportServerListener listener to listen the state of the server
-     * @param transportSessionFactory @ITransportSessionFactory factory for session associated with server connections
+     * @param transportSessionFactory @ITransportSessionFactory factory for session associated with server
+     *                                connections
      * @throws Exception throws exception if any during starting the server
      */
     @Override
-    public void start(final String hostname,
-                      final int port, final ITransportServerListener transportServerListener,
-                      final ITransportSessionFactory transportSessionFactory) throws Exception {
+    public void start (final String hostname,
+            final int port, final ITransportServerListener transportServerListener,
+            final ITransportSessionFactory transportSessionFactory) throws Exception {
         this.socketIoServerWorker.submit(new Runnable() {
             @Override
-            public void run() {
+            public void run () {
                 try {
                     logger.debug("Starting socketio server on port " + port);
                     transportServerConfig.getConfiguration().setHostname(hostname);
                     transportServerConfig.getConfiguration().setPort(port);
-                    socketIOServer = new SocketIOServer(transportServerConfig.getConfiguration());
-                    // setting all specified namespaces
-                    for (SocketIoServerNamespace socketIoServerNamespace : transportServerConfig.getNamespaces())
-                        socketIoServerNamespace.setOn(socketIOServer);
+                    init();
                     // if on default namespace user wants a listener
                     if (transportSessionFactory != null) {
                         logger.debug("Setting default namespace listener");
-                        SocketIoTransportSession defaultNamespaceSession = new SocketIoTransportSession(transportSessionFactory);
+                        SocketIoTransportSession defaultNamespaceSession = new SocketIoTransportSession
+                                (transportSessionFactory);
                         socketIOServer.addConnectListener(defaultNamespaceSession);
                         socketIOServer.addMessageListener(defaultNamespaceSession);
                         socketIOServer.addDisconnectListener(defaultNamespaceSession);
@@ -288,7 +299,7 @@ public final class SocketIoTransportServer extends TransportServer {
                     }
                     socketIOServer.start(new ChannelFutureListener() {
                         @Override
-                        public void operationComplete(ChannelFuture future) throws Exception {
+                        public void operationComplete (ChannelFuture future) throws Exception {
                             transportServerListener.onClosed();
                         }
                     });
@@ -304,7 +315,7 @@ public final class SocketIoTransportServer extends TransportServer {
      * Method to close server
      */
     @Override
-    protected void close() {
+    protected void close () {
         if (this.socketIOServer != null)
             this.socketIOServer.stop();
         if (this.socketIoServerWorker != null)
