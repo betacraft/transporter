@@ -25,7 +25,7 @@ public class SocketIoTransportServerTest extends TestCase {
         SocketIoServerConfig socketIoServerConfig = SocketIoServerConfig.get();
         socketIoServerConfig.getConfiguration().setWorkerThreads(100);
         socketIoServerConfig.getConfiguration().setAllowCustomRequests(true);
-        socketIoServerConfig.addCustomRequestHandler(new ITransportSession() {
+        socketIoServerConfig.addSharableCustomRequestHandler(new ITransportSession() {
             @Override
             public void onConnected (TransportChannel channel) {
                 logger.trace("Got connection");
@@ -43,7 +43,7 @@ public class SocketIoTransportServerTest extends TestCase {
 
             @Override
             public void onData (Object data) {
-                logger.trace("Got data" + data.toString());
+                logger.trace("Got data " + data.toString());
             }
         });
         this.socketIoTransportServer = new SocketIoTransportServer(socketIoServerConfig);
@@ -52,7 +52,7 @@ public class SocketIoTransportServerTest extends TestCase {
 
     public void testWithAllowCustomRequests () throws Exception {
         final CountDownLatch countDownLatch = new CountDownLatch(1);
-        this.socketIoTransportServer.start(8000, new TransportServer.ITransportServerListener() {
+        this.socketIoTransportServer.start(8001, new TransportServer.ITransportServerListener() {
                     @Override
                     public void onClosed () {
                         countDownLatch.countDown();

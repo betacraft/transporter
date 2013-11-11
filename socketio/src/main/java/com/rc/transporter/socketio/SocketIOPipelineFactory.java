@@ -1,7 +1,7 @@
 package com.rc.transporter.socketio;
 
 import com.corundumstudio.socketio.SocketIOChannelInitializer;
-import com.rc.transporter.core.ITransportSession;
+import com.rc.transporter.core.TransportServer;
 import com.rc.transporter.netty4x.NettyTransportSession;
 import io.netty.channel.Channel;
 
@@ -17,7 +17,7 @@ final class SocketIOPipelineFactory extends SocketIOChannelInitializer {
     /**
      * Channel handlers
      */
-    private ArrayList<ITransportSession> handlers;
+    private ArrayList<TransportServer.ITransportSessionFactory> handlers;
 
 
     /**
@@ -32,7 +32,7 @@ final class SocketIOPipelineFactory extends SocketIOChannelInitializer {
      *
      * @param handlers
      */
-    public void setHandlers (final ArrayList<ITransportSession> handlers) {
+    public void setHandlers (final ArrayList<TransportServer.ITransportSessionFactory> handlers) {
         this.handlers = handlers;
     }
 
@@ -41,9 +41,9 @@ final class SocketIOPipelineFactory extends SocketIOChannelInitializer {
      *
      * @param handler
      */
-    public void addHandler (final ITransportSession handler) {
+    public void addHandler (final TransportServer.ITransportSessionFactory handler) {
         if (this.handlers == null) {
-            this.handlers = new ArrayList<ITransportSession>();
+            this.handlers = new ArrayList<TransportServer.ITransportSessionFactory>();
         }
         this.handlers.add(handler);
     }
@@ -62,8 +62,8 @@ final class SocketIOPipelineFactory extends SocketIOChannelInitializer {
     @Override
     protected void initChannel (Channel ch) throws Exception {
         super.initChannel(ch);
-        for (ITransportSession transportSession : this.handlers) {
-            ch.pipeline().addLast(new NettyTransportSession(transportSession));
+        for (TransportServer.ITransportSessionFactory transportSessionFactory : this.handlers) {
+            ch.pipeline().addLast(new NettyTransportSession(transportSessionFactory.get()));
         }
     }
 }

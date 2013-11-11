@@ -51,7 +51,7 @@ public final class SocketIoTransportServer extends TransportServer {
     private void init () throws Exception {
         this.socketIOServer = new SocketIOServer(this.transportServerConfig.getConfiguration());
         if (this.transportServerConfig.getConfiguration().isAllowCustomRequests()) {
-            ArrayList<ITransportSession> customHandlers = this.transportServerConfig
+            ArrayList<ITransportSessionFactory> customHandlers = this.transportServerConfig
                     .getCustomRequestHandlers();
             if (customHandlers == null)
                 throw new IllegalStateException("No custom request handlers are provided");

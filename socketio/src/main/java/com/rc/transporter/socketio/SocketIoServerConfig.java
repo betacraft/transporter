@@ -2,6 +2,7 @@ package com.rc.transporter.socketio;
 
 import com.corundumstudio.socketio.Configuration;
 import com.rc.transporter.core.ITransportSession;
+import com.rc.transporter.core.TransportServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +27,7 @@ public final class SocketIoServerConfig {
     /**
      * Custom request handler
      */
-    private ArrayList<ITransportSession> customRequestHandlers;
+    private ArrayList<TransportServer.ITransportSessionFactory> customRequestHandlers;
     /**
      * Socketio related configuration
      */
@@ -61,25 +62,39 @@ public final class SocketIoServerConfig {
 
 
     /**
-     * Add custom request hanlder
+     * Add custom request handler
      *
      * @param customRequestHandler
      */
-    public void addCustomRequestHandler (final ITransportSession customRequestHandler) {
+    public void addSharableCustomRequestHandler (final ITransportSession customRequestHandler) {
         // lazy initialization is used so as to avoid an extra flag
         if (this.customRequestHandlers == null) {
-            this.customRequestHandlers = new ArrayList<ITransportSession>();
+            this.customRequestHandlers = new ArrayList<TransportServer.ITransportSessionFactory>();
         }
-        this.customRequestHandlers.add(customRequestHandler);
-
+        this.customRequestHandlers.add(new TransportServer.ITransportSessionFactory() {
+            @Override
+            public ITransportSession get () {
+                return customRequestHandler;
+            }
+        });
     }
+
+    public void addCustomRequestHandlerFactory (final TransportServer.ITransportSessionFactory
+            customRequestHandlingTransportSessionFactory) {
+        // lazy initialization is used so as to avoid an extra flag
+        if (this.customRequestHandlers == null) {
+            this.customRequestHandlers = new ArrayList<TransportServer.ITransportSessionFactory>();
+        }
+        this.customRequestHandlers.add(customRequestHandlingTransportSessionFactory);
+    }
+
 
     /**
      * Getter for @customRequestHandlers
      *
      * @return
      */
-    public ArrayList<ITransportSession> getCustomRequestHandlers () {
+    public ArrayList<TransportServer.ITransportSessionFactory> getCustomRequestHandlers () {
         return this.customRequestHandlers;
     }
 
