@@ -18,8 +18,6 @@ final class SocketIOPipelineFactory extends SocketIOChannelInitializer {
      * Channel handlers
      */
     private ArrayList<TransportServer.ITransportSessionFactory> handlers;
-
-
     /**
      * Constructors
      */
@@ -65,5 +63,6 @@ final class SocketIOPipelineFactory extends SocketIOChannelInitializer {
         for (TransportServer.ITransportSessionFactory transportSessionFactory : this.handlers) {
             ch.pipeline().addLast(new NettyTransportSession(transportSessionFactory.get()));
         }
+
     }
 }

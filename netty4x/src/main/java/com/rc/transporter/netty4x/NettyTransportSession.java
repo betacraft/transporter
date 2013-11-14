@@ -32,53 +32,57 @@ public class NettyTransportSession<I, O> extends SimpleChannelInboundHandler<Obj
      *
      * @param transportSession @ITransportSession which receives event
      */
-    public NettyTransportSession(ITransportSession<I, O> transportSession) {
+    public NettyTransportSession (ITransportSession<I, O> transportSession) {
         this.transportSession = transportSession;
     }
 
     /**
      * Calls {@link io.netty.channel.ChannelHandlerContext#fireChannelActive()} to forward
-     * to the next {@link io.netty.channel.ChannelInboundHandler} in the {@link io.netty.channel.ChannelPipeline}.
+     * to the next {@link io.netty.channel.ChannelInboundHandler} in the {@link io.netty.channel
+     * .ChannelPipeline}.
      * <p/>
      * Sub-classes may override this method to change behavior.
      */
     @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+    public void channelActive (ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
         this.nettyChannel = new NettyChannel<O>(ctx);
         transportSession.onConnected(this.nettyChannel);
     }
 
     /**
-     * @param ctx the {@link io.netty.channel.ChannelHandlerContext} which this {@link io.netty.channel.SimpleChannelInboundHandler}
+     * @param ctx the {@link io.netty.channel.ChannelHandlerContext} which this {@link io.netty.channel
+     *            .SimpleChannelInboundHandler}
      *            belongs to
      * @param msg the message to handle
      * @throws Exception is thrown if an error accour
      */
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
+    protected void channelRead0 (ChannelHandlerContext ctx, Object msg) throws Exception {
         transportSession.onData((I) msg);
     }
 
     /**
      * Calls {@link io.netty.channel.ChannelHandlerContext#fireUserEventTriggered(Object)} to forward
-     * to the next {@link io.netty.channel.ChannelInboundHandler} in the {@link io.netty.channel.ChannelPipeline}.
+     * to the next {@link io.netty.channel.ChannelInboundHandler} in the {@link io.netty.channel
+     * .ChannelPipeline}.
      * <p/>
      * Sub-classes may override this method to change behavior.
      */
     @Override
-    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+    public void userEventTriggered (ChannelHandlerContext ctx, Object evt) throws Exception {
         super.userEventTriggered(ctx, evt);
     }
 
     /**
      * Calls {@link io.netty.channel.ChannelHandlerContext#fireChannelInactive()} to forward
-     * to the next {@link io.netty.channel.ChannelInboundHandler} in the {@link io.netty.channel.ChannelPipeline}.
+     * to the next {@link io.netty.channel.ChannelInboundHandler} in the {@link io.netty.channel
+     * .ChannelPipeline}.
      * <p/>
      * Sub-classes may override this method to change behavior.
      */
     @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+    public void channelInactive (ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
         transportSession.onDisconnected();
         logger.info("Channel inactive " + ctx.name());
@@ -92,8 +96,8 @@ public class NettyTransportSession<I, O> extends SimpleChannelInboundHandler<Obj
      * Sub-classes may override this method to change behavior.
      */
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        logger.info("Exception caught ", cause + ctx.name());
+    public void exceptionCaught (ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        logger.error("Exception caught ", cause);
         transportSession.onError(cause);
         this.nettyChannel.closeChannel();
     }

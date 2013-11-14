@@ -45,7 +45,8 @@ final class SocketIoTransportSession implements ConnectListener, DisconnectListe
      *
      * @param clientSessionFactory @SocketIoServerSessionFactory
      */
-    SocketIoTransportSession(final SocketIoServerNamespace.SocketIoServerSessionFactory clientSessionFactory) {
+    SocketIoTransportSession (final SocketIoServerNamespace.SocketIoServerSessionFactory
+            clientSessionFactory) {
         this.clientSessionFactory = clientSessionFactory;
     }
 
@@ -55,32 +56,31 @@ final class SocketIoTransportSession implements ConnectListener, DisconnectListe
      *
      * @param transportSession sharable @ITransportSession
      */
-    SocketIoTransportSession(final ITransportSession transportSession) {
+    SocketIoTransportSession (final ITransportSession transportSession) {
         this.clientSessionFactory = new SocketIoServerNamespace.SocketIoServerSessionFactory() {
             @Override
-            public ITransportSession get() {
+            public ITransportSession get () {
                 return transportSession;
             }
         };
     }
-
 
     /**
      * Constructor
      *
      * @param transportSessionFactory @ITransportSessionFactory
      */
-    SocketIoTransportSession(final TransportServer.ITransportSessionFactory transportSessionFactory) {
+    SocketIoTransportSession (final TransportServer.ITransportSessionFactory transportSessionFactory) {
         this.clientSessionFactory = new SocketIoServerNamespace.SocketIoServerSessionFactory() {
             @Override
-            public ITransportSession get() {
+            public ITransportSession get () {
                 return transportSessionFactory.get();
             }
         };
     }
 
     @Override
-    public void onConnect(final SocketIOClient client) {
+    public void onConnect (final SocketIOClient client) {
         logger.trace("SocketIO server got a new connection");
         try {
             ITransportSession session = this.clientSessionFactory.get();
@@ -98,7 +98,7 @@ final class SocketIoTransportSession implements ConnectListener, DisconnectListe
      * @param data   - received object
      */
     @Override
-    public void onData(SocketIOClient client, String data, AckRequest ackSender) {
+    public void onData (SocketIOClient client, String data, AckRequest ackSender) {
         try {
             this.connectionCatalog.get(client.getSessionId()).onData(data);
         } catch (Exception e) {
@@ -107,7 +107,7 @@ final class SocketIoTransportSession implements ConnectListener, DisconnectListe
     }
 
     @Override
-    public void onDisconnect(SocketIOClient client) {
+    public void onDisconnect (SocketIOClient client) {
         logger.debug("SocketIO disconnected");
         if (!this.connectionCatalog.containsKey(client.getSessionId()))
             return;
@@ -119,7 +119,7 @@ final class SocketIoTransportSession implements ConnectListener, DisconnectListe
     }
 
     @OnEvent("reg")
-    public void onEvent(SocketIOClient client, String data, AckRequest ackSender) {
+    public void onEvent (SocketIOClient client, String data, AckRequest ackSender) {
         try {
             logger.trace("On reg event " + data);
             this.connectionCatalog.get(client.getSessionId()).onData(data);
@@ -127,6 +127,5 @@ final class SocketIoTransportSession implements ConnectListener, DisconnectListe
             logger.error("While processing onEvent", e);
         }
     }
-
 
 }

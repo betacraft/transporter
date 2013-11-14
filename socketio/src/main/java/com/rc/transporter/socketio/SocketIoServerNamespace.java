@@ -22,7 +22,7 @@ public final class SocketIoServerNamespace {
      * Socket io server session factory
      */
     public interface SocketIoServerSessionFactory {
-        public ITransportSession get();
+        public ITransportSession get ();
     }
 
     /**
@@ -34,14 +34,14 @@ public final class SocketIoServerNamespace {
      */
     private final SocketIoServerSessionFactory clientSessionFactory;
 
-
     /**
      * Constructor
      *
      * @param path                 path of the namespace
      * @param clientSessionFactory @SocketIoServerSessionFactory for this namespace
      */
-    private SocketIoServerNamespace(final String path, final SocketIoServerSessionFactory clientSessionFactory) {
+    private SocketIoServerNamespace (final String path, final SocketIoServerSessionFactory
+            clientSessionFactory) {
         this.path = path;
         this.clientSessionFactory = clientSessionFactory;
     }
@@ -51,7 +51,7 @@ public final class SocketIoServerNamespace {
      *
      * @param socketIOServer
      */
-    void setOn(final SocketIOServer socketIOServer) {
+    void setOn (final SocketIOServer socketIOServer) {
         SocketIONamespace namespace = socketIOServer.addNamespace(this.path);
         SocketIoTransportSession session = new SocketIoTransportSession(this.clientSessionFactory);
         namespace.addConnectListener(session);
@@ -67,7 +67,8 @@ public final class SocketIoServerNamespace {
      * @param clientSessionFactory @SocketIoServerSessionFactory for this namespace
      * @return
      */
-    public static SocketIoServerNamespace get(final String path, final SocketIoServerSessionFactory clientSessionFactory) {
+    public static SocketIoServerNamespace get (final String path, final SocketIoServerSessionFactory
+            clientSessionFactory) {
         return new SocketIoServerNamespace(path, clientSessionFactory);
     }
 
