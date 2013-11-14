@@ -6,31 +6,31 @@ package com.rc.transporter.core;
  * Date  : 9/21/13
  * Time  : 3:41 AM
  */
-public interface ITransportSession<I,O> {
+public interface ITransportSession<I, O> {
 
     /**
      * Callback called when connection is received in session
      *
      * @param channel @TransportChannel associated with this session
      */
-    public void onConnected(TransportChannel<O> channel);
+    public void onConnected (TransportChannel<O> channel);
 
     /**
      * Callback called when connection is disconnected
      */
-    public void onDisconnected();
+    public void onDisconnected ();
 
     /**
      * Callback called when error is caused in session
      *
      * @param cause Error cause
      */
-    public void onError(Throwable cause);
+    public void onError (Throwable cause);
 
     /**
      * Callback called when data is available
      *
      * @param data data
      */
-    public void onData(I data);
+    public void onData (I data);
 }

@@ -13,10 +13,10 @@ public abstract class TransportSession<I, O> implements ITransportSession<I, O> 
      *
      * @param channel @TransportChannel associated with this session
      */
-    public void onConnected(TransportChannel<O> channel) {
+    public void onConnected (TransportChannel<O> channel) {
         channel.setChannelStateListener(new TransportChannel.IChannelStateListener() {
             @Override
-            public void onClose() {
+            public void onClose () {
                 onDisconnected();
             }
         });

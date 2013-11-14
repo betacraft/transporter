@@ -20,7 +20,7 @@ public abstract class TransportChannel<M> {
      * Channel state listener which is used internally
      */
     interface IChannelStateListener {
-        void onClose();
+        void onClose ();
     }
 
     /**
@@ -33,7 +33,7 @@ public abstract class TransportChannel<M> {
      *
      * @param channelStateListener instance of @IChannelStateListener
      */
-    void setChannelStateListener(final IChannelStateListener channelStateListener) {
+    void setChannelStateListener (final IChannelStateListener channelStateListener) {
         this.channelStateListener = channelStateListener;
     }
 
@@ -43,18 +43,18 @@ public abstract class TransportChannel<M> {
      *
      * @param data data to be pushed
      */
-    public abstract void sendData(M data);
+    public abstract void sendData (M data);
 
 
     /**
      * Method to close a channel
      */
-    protected abstract void closeChannel();
+    protected abstract void closeChannel ();
 
     /**
      * Method to check if channel is open
      */
-    public abstract boolean isOpen();
+    public abstract boolean isOpen ();
 
     /**
      * Method to set properties associated with channel
@@ -62,12 +62,12 @@ public abstract class TransportChannel<M> {
      * @param name  name of the property
      * @param value value of the property
      */
-    public abstract void setProperty(final String name, Object value);
+    public abstract void setProperty (final String name, Object value);
 
     /**
      * Method to close channel
      */
-    public void close() {
+    public void close () {
         closeChannel();
         if (this.channelStateListener == null)
             return;

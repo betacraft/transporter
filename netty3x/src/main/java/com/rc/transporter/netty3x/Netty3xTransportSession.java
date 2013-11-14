@@ -24,7 +24,7 @@ public final class Netty3xTransportSession<I, O> extends SimpleChannelUpstreamHa
      *
      * @param transportSession @ITransportSession that receives events related to this session
      */
-    public Netty3xTransportSession(ITransportSession<I, O> transportSession) {
+    public Netty3xTransportSession (ITransportSession<I, O> transportSession) {
         this.transportSession = transportSession;
     }
 
@@ -38,7 +38,7 @@ public final class Netty3xTransportSession<I, O> extends SimpleChannelUpstreamHa
      * execute any heavy operation in there as it will block the dispatching to other workers!</strong>
      */
     @Override
-    public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
+    public void channelConnected (ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
         super.channelConnected(ctx, e);
         this.channel = new Netty3xChannel<O>(ctx);
         this.transportSession.onConnected(this.channel);
@@ -48,7 +48,7 @@ public final class Netty3xTransportSession<I, O> extends SimpleChannelUpstreamHa
      * Invoked when a {@link org.jboss.netty.channel.Channel} was disconnected from its remote peer.
      */
     @Override
-    public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
+    public void channelDisconnected (ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
         this.transportSession.onDisconnected();
         super.channelDisconnected(ctx, e);
     }
@@ -62,7 +62,7 @@ public final class Netty3xTransportSession<I, O> extends SimpleChannelUpstreamHa
      * @throws Exception
      */
     @Override
-    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
+    public void messageReceived (ChannelHandlerContext ctx, MessageEvent e) throws Exception {
         this.transportSession.onData((I) e.getMessage());
     }
 
@@ -74,7 +74,7 @@ public final class Netty3xTransportSession<I, O> extends SimpleChannelUpstreamHa
      * @throws Exception
      */
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
+    public void exceptionCaught (ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
         if (this.channel != null)
             this.channel.closeChannel();
         this.transportSession.onError(e.getCause());
