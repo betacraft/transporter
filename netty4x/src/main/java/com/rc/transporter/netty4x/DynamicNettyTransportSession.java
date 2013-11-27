@@ -69,7 +69,7 @@ public class DynamicNettyTransportSession<I, O> extends SimpleChannelInboundHand
     @Override
     protected void channelRead0 (ChannelHandlerContext ctx, Object msg) throws Exception {
         if (!isValidated.get()) {
-            if (transportSession.validate((I)msg)) {
+            if (transportSession.validate((I) msg)) {
                 isValidated.set(true);
             } else {
                 if (nettyChannel != null) {
@@ -80,8 +80,8 @@ public class DynamicNettyTransportSession<I, O> extends SimpleChannelInboundHand
                             .remove(DynamicNettyTransportSession.this);
                 }
                 ctx.fireChannelRead(((UnpooledUnsafeDirectByteBuf) msg).retain());
-                return;
             }
+            return;
         }
         transportSession.onData((I) msg);
     }

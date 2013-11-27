@@ -94,7 +94,7 @@ public class SocketIoTransportServerTest extends TestCase {
                 }
         );
         logger.trace("Got connection");
-        countDownLatch.await();
+        countDownLatch.countDown();
         assertTrue(true);
     }
 

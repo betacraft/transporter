@@ -65,6 +65,5 @@ final class SocketIOPipelineFactory extends SocketIOChannelInitializer {
             ch.pipeline().addLast(new DynamicNettyTransportSession(transportSessionFactory.get()));
         }
         super.initChannel(ch);
-
     }
 }
