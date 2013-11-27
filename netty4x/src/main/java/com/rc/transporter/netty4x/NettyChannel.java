@@ -86,4 +86,8 @@ public final class NettyChannel<M> extends TransportChannel<M> {
     }
 
 
+    ChannelHandlerContext getNettyChannelHandlerContext(){
+        return this.nettyChannelHandlerContext;
+    }
+
 }

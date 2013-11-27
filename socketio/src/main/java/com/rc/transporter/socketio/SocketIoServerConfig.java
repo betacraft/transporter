@@ -1,8 +1,8 @@
 package com.rc.transporter.socketio;
 
 import com.corundumstudio.socketio.Configuration;
-import com.rc.transporter.core.ITransportSession;
-import com.rc.transporter.core.TransportServer;
+import com.rc.transporter.netty4x.IDynamicNettyTransportSessionFactory;
+import com.rc.transporter.netty4x.IDynamicTransportSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +27,7 @@ public final class SocketIoServerConfig {
     /**
      * Custom request handler
      */
-    private ArrayList<TransportServer.ITransportSessionFactory> customRequestHandlers;
+    private ArrayList<IDynamicNettyTransportSessionFactory> customRequestHandlers;
     /**
      * Socketio related configuration
      */
@@ -66,24 +66,24 @@ public final class SocketIoServerConfig {
      *
      * @param customRequestHandler
      */
-    public void addSharableCustomRequestHandler (final ITransportSession customRequestHandler) {
+    public void addSharableCustomRequestHandler (final IDynamicTransportSession customRequestHandler) {
         // lazy initialization is used so as to avoid an extra flag
         if (this.customRequestHandlers == null) {
-            this.customRequestHandlers = new ArrayList<TransportServer.ITransportSessionFactory>();
+            this.customRequestHandlers = new ArrayList<IDynamicNettyTransportSessionFactory>();
         }
-        this.customRequestHandlers.add(new TransportServer.ITransportSessionFactory() {
+        this.customRequestHandlers.add(new IDynamicNettyTransportSessionFactory() {
             @Override
-            public ITransportSession get () {
+            public IDynamicTransportSession get () {
                 return customRequestHandler;
             }
         });
     }
 
-    public void addCustomRequestHandlerFactory (final TransportServer.ITransportSessionFactory
+    public void addCustomRequestHandlerFactory (final IDynamicNettyTransportSessionFactory
             customRequestHandlingTransportSessionFactory) {
         // lazy initialization is used so as to avoid an extra flag
         if (this.customRequestHandlers == null) {
-            this.customRequestHandlers = new ArrayList<TransportServer.ITransportSessionFactory>();
+            this.customRequestHandlers = new ArrayList<IDynamicNettyTransportSessionFactory>();
         }
         this.customRequestHandlers.add(customRequestHandlingTransportSessionFactory);
     }
@@ -94,7 +94,7 @@ public final class SocketIoServerConfig {
      *
      * @return
      */
-    public ArrayList<TransportServer.ITransportSessionFactory> getCustomRequestHandlers () {
+    public ArrayList<IDynamicNettyTransportSessionFactory> getCustomRequestHandlers () {
         return this.customRequestHandlers;
     }
 

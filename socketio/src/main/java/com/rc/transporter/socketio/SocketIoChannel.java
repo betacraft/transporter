@@ -14,8 +14,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Time  : 6:31 PM
  */
 public final class SocketIoChannel extends TransportChannel<Object> {
-
-
     /**
      * Socket client
      */
@@ -25,13 +23,12 @@ public final class SocketIoChannel extends TransportChannel<Object> {
      */
     private AtomicBoolean isClosed = new AtomicBoolean(false);
 
-
     /**
      * Constructor
      *
      * @param socketIOClient @SocketIOClient socket io client
      */
-    public SocketIoChannel(final SocketIOClient socketIOClient) {
+    public SocketIoChannel (final SocketIOClient socketIOClient) {
         this.socketIOClient = socketIOClient;
     }
 
@@ -41,7 +38,7 @@ public final class SocketIoChannel extends TransportChannel<Object> {
      * @param data data to be pushed
      */
     @Override
-    public void sendData(Object data) {
+    public void sendData (Object data) {
         if (data instanceof String) {
             this.socketIOClient.sendMessage((String) data);
             return;
@@ -60,12 +57,12 @@ public final class SocketIoChannel extends TransportChannel<Object> {
      * @param eventName name of the event
      * @param data      data associated with the event
      */
-    public void sendEvent(String eventName, Object data) {
+    public void sendEvent (String eventName, Object data) {
         this.socketIOClient.sendEvent(eventName, data);
     }
 
     @Override
-    protected void closeChannel() {
+    protected void closeChannel () {
         if (this.isClosed.getAndSet(true))
             return;
         this.socketIOClient.disconnect();
@@ -75,7 +72,7 @@ public final class SocketIoChannel extends TransportChannel<Object> {
      * Method to check if channel is open
      */
     @Override
-    public boolean isOpen() {
+    public boolean isOpen () {
         return !this.isClosed.get();
     }
 
@@ -86,7 +83,7 @@ public final class SocketIoChannel extends TransportChannel<Object> {
      * @param value value of the property
      */
     @Override
-    public void setProperty(String name, Object value) {
+    public void setProperty (String name, Object value) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 }

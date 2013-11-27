@@ -3,6 +3,7 @@ package com.rc.transporter.socketio;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.rc.transporter.core.ITransportSession;
 import com.rc.transporter.core.TransportServer;
+import com.rc.transporter.netty4x.IDynamicNettyTransportSessionFactory;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import org.slf4j.Logger;
@@ -51,7 +52,7 @@ public final class SocketIoTransportServer extends TransportServer {
     private void init () throws Exception {
         this.socketIOServer = new SocketIOServer(this.transportServerConfig.getConfiguration());
         if (this.transportServerConfig.getConfiguration().isAllowCustomRequests()) {
-            ArrayList<ITransportSessionFactory> customHandlers = this.transportServerConfig
+            ArrayList<IDynamicNettyTransportSessionFactory> customHandlers = this.transportServerConfig
                     .getCustomRequestHandlers();
             if (customHandlers == null)
                 throw new IllegalStateException("No custom request handlers are provided");

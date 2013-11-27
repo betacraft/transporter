@@ -1,8 +1,8 @@
 package com.rc.transporter.socketio;
 
 import com.corundumstudio.socketio.SocketIOChannelInitializer;
-import com.rc.transporter.core.TransportServer;
-import com.rc.transporter.netty4x.NettyTransportSession;
+import com.rc.transporter.netty4x.DynamicNettyTransportSession;
+import com.rc.transporter.netty4x.IDynamicNettyTransportSessionFactory;
 import io.netty.channel.Channel;
 
 import java.util.ArrayList;
@@ -17,7 +17,8 @@ final class SocketIOPipelineFactory extends SocketIOChannelInitializer {
     /**
      * Channel handlers
      */
-    private ArrayList<TransportServer.ITransportSessionFactory> handlers;
+    private ArrayList<IDynamicNettyTransportSessionFactory> handlers;
+
     /**
      * Constructors
      */
@@ -30,7 +31,7 @@ final class SocketIOPipelineFactory extends SocketIOChannelInitializer {
      *
      * @param handlers
      */
-    public void setHandlers (final ArrayList<TransportServer.ITransportSessionFactory> handlers) {
+    public void setHandlers (final ArrayList<IDynamicNettyTransportSessionFactory> handlers) {
         this.handlers = handlers;
     }
 
@@ -39,9 +40,10 @@ final class SocketIOPipelineFactory extends SocketIOChannelInitializer {
      *
      * @param handler
      */
-    public void addHandler (final TransportServer.ITransportSessionFactory handler) {
+    public void addHandler (final IDynamicNettyTransportSessionFactory handler) {
+
         if (this.handlers == null) {
-            this.handlers = new ArrayList<TransportServer.ITransportSessionFactory>();
+            this.handlers = new ArrayList<IDynamicNettyTransportSessionFactory>();
         }
         this.handlers.add(handler);
     }
@@ -59,10 +61,10 @@ final class SocketIOPipelineFactory extends SocketIOChannelInitializer {
 
     @Override
     protected void initChannel (Channel ch) throws Exception {
-        super.initChannel(ch);
-        for (TransportServer.ITransportSessionFactory transportSessionFactory : this.handlers) {
-            ch.pipeline().addLast(new NettyTransportSession(transportSessionFactory.get()));
+        for (IDynamicNettyTransportSessionFactory transportSessionFactory : this.handlers) {
+            ch.pipeline().addLast(new DynamicNettyTransportSession(transportSessionFactory.get()));
         }
+        super.initChannel(ch);
 
     }
 }

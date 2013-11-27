@@ -1,10 +1,12 @@
 package com.rc.transporter.netty4x;
 
-import com.rc.transporter.core.ITransportSession;
+import io.netty.buffer.UnpooledUnsafeDirectByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Netty transport system
@@ -12,11 +14,11 @@ import org.slf4j.LoggerFactory;
  * Date  : 9/21/13
  * Time  : 3:44 AM
  */
-public class NettyTransportSession<I, O> extends SimpleChannelInboundHandler<Object> {
+public class DynamicNettyTransportSession<I, O> extends SimpleChannelInboundHandler<Object> {
     /**
      * Logger
      */
-    private static final Logger logger = LoggerFactory.getLogger(NettyTransportSession.class);
+    private static final Logger logger = LoggerFactory.getLogger(DynamicNettyTransportSession.class);
     /**
      * @NettyChannel associated with this session
      */
@@ -24,7 +26,14 @@ public class NettyTransportSession<I, O> extends SimpleChannelInboundHandler<Obj
     /**
      * Underlying @ITransportSession
      */
-    private ITransportSession<I, O> transportSession;
+    private IDynamicTransportSession<I, O> transportSession;
+    /**
+     * is removed
+     */
+    private AtomicBoolean isClosed = new AtomicBoolean(false);
+
+
+    private AtomicBoolean isValidated = new AtomicBoolean(false);
 
 
     /**
@@ -46,7 +55,7 @@ public class NettyTransportSession<I, O> extends SimpleChannelInboundHandler<Obj
      *
      * @param transportSession @ITransportSession which receives event
      */
-    public NettyTransportSession (ITransportSession<I, O> transportSession) {
+    public DynamicNettyTransportSession (IDynamicTransportSession<I, O> transportSession) {
         this.transportSession = transportSession;
     }
 
@@ -59,6 +68,21 @@ public class NettyTransportSession<I, O> extends SimpleChannelInboundHandler<Obj
      */
     @Override
     protected void channelRead0 (ChannelHandlerContext ctx, Object msg) throws Exception {
+        if (!isValidated.get()) {
+            if (transportSession.validate((I)msg)) {
+                isValidated.set(true);
+            } else {
+                if (nettyChannel != null) {
+                    isClosed.set(true);
+                    logger.trace("Removing dynamic transport session");
+                    nettyChannel.getNettyChannelHandlerContext()
+                            .pipeline()
+                            .remove(DynamicNettyTransportSession.this);
+                }
+                ctx.fireChannelRead(((UnpooledUnsafeDirectByteBuf) msg).retain());
+                return;
+            }
+        }
         transportSession.onData((I) msg);
     }
 
@@ -84,6 +108,8 @@ public class NettyTransportSession<I, O> extends SimpleChannelInboundHandler<Obj
     @Override
     public void channelInactive (ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
+        if (isClosed.get())
+            return;
         transportSession.onDisconnected();
         logger.info("Channel inactive " + ctx.name());
         this.nettyChannel.close();
@@ -97,7 +123,10 @@ public class NettyTransportSession<I, O> extends SimpleChannelInboundHandler<Obj
      */
     @Override
     public void exceptionCaught (ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        super.exceptionCaught(ctx, cause);
         logger.error("Exception caught ", cause);
+        if (isClosed.get())
+            return;
         transportSession.onError(cause);
         this.nettyChannel.closeChannel();
     }

@@ -3,10 +3,13 @@ package com.rc.transporter.socketio;
 import com.rc.transporter.core.ITransportSession;
 import com.rc.transporter.core.TransportChannel;
 import com.rc.transporter.core.TransportServer;
+import com.rc.transporter.netty4x.DynamicTransportSession;
+import io.netty.buffer.UnpooledUnsafeDirectByteBuf;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.Charset;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -25,26 +28,37 @@ public class SocketIoTransportServerTest extends TestCase {
         SocketIoServerConfig socketIoServerConfig = SocketIoServerConfig.get();
         socketIoServerConfig.getConfiguration().setWorkerThreads(100);
         socketIoServerConfig.getConfiguration().setAllowCustomRequests(true);
-        socketIoServerConfig.addSharableCustomRequestHandler(new ITransportSession() {
+        socketIoServerConfig.addSharableCustomRequestHandler(new DynamicTransportSession() {
+
+
             @Override
             public void onConnected (TransportChannel channel) {
-                logger.trace("Got connection");
+                logger.trace("commet Got connection");
             }
 
             @Override
             public void onDisconnected () {
-                logger.trace("disconnected");
+                logger.trace("commet disconnected");
             }
 
             @Override
             public void onError (Throwable cause) {
-                logger.trace("on error", cause);
+                logger.trace("commet on error", cause);
             }
 
             @Override
             public void onData (Object data) {
-                logger.trace("Got data " + data.toString());
+                logger.trace("Got data " + ((UnpooledUnsafeDirectByteBuf) data).toString(Charset
+                        .defaultCharset()));
             }
+
+            @Override
+            public boolean validate (Object data) {
+                return !((UnpooledUnsafeDirectByteBuf) data)
+                        .toString(Charset.defaultCharset())
+                        .contains("socket.io");
+            }
+
         });
         this.socketIoTransportServer = new SocketIoTransportServer(socketIoServerConfig);
 
@@ -60,17 +74,17 @@ public class SocketIoTransportServerTest extends TestCase {
                 }, new ITransportSession() {
                     @Override
                     public void onConnected (TransportChannel channel) {
-                        logger.trace("connected");
+                        logger.trace("socketioconnected");
                     }
 
                     @Override
                     public void onDisconnected () {
-                        logger.trace("on disconnected");
+                        logger.trace("socketioon disconnected");
                     }
 
                     @Override
                     public void onError (Throwable cause) {
-                        logger.trace("on error");
+                        logger.trace("socketioon error");
                     }
 
                     @Override
@@ -80,7 +94,7 @@ public class SocketIoTransportServerTest extends TestCase {
                 }
         );
         logger.trace("Got connection");
-        countDownLatch.countDown();
+        countDownLatch.await();
         assertTrue(true);
     }
 
