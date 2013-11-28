@@ -4,6 +4,8 @@ import com.corundumstudio.socketio.SocketIOChannelInitializer;
 import com.rc.transporter.netty4x.DynamicNettyTransportSession;
 import com.rc.transporter.netty4x.IDynamicNettyTransportSessionFactory;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 
@@ -15,9 +17,14 @@ import java.util.ArrayList;
  */
 final class SocketIOPipelineFactory extends SocketIOChannelInitializer {
     /**
+     * logger
+     */
+    private static final Logger logger= LoggerFactory.getLogger(SocketIOPipelineFactory.class);
+    /**
      * Channel handlers
      */
     private ArrayList<IDynamicNettyTransportSessionFactory> handlers;
+
 
     /**
      * Constructors
@@ -55,15 +62,17 @@ final class SocketIOPipelineFactory extends SocketIOChannelInitializer {
      * @return instance of @SocketIOChannelInitializers
      */
     static SocketIOPipelineFactory get () {
+        logger.trace("creating new pipeline factory");
         return new SocketIOPipelineFactory();
     }
 
 
     @Override
     protected void initChannel (Channel ch) throws Exception {
-        for (IDynamicNettyTransportSessionFactory transportSessionFactory : this.handlers) {
-            ch.pipeline().addLast(new DynamicNettyTransportSession(transportSessionFactory.get()));
-        }
         super.initChannel(ch);
+        for (IDynamicNettyTransportSessionFactory transportSessionFactory : this.handlers) {
+            ch.pipeline().addLast(transportSessionFactory.getName(),
+                    new DynamicNettyTransportSession(transportSessionFactory.get()));
+        }
     }
 }

@@ -9,6 +9,7 @@ import com.rc.transporter.core.ITransportSession;
  */
 public interface IDynamicTransportSession<I, O> extends ITransportSession<I, O> {
 
+    public String getName ();
 
     public boolean validate (I data);
 

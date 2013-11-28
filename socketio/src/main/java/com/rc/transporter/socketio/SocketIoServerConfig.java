@@ -76,6 +76,11 @@ public final class SocketIoServerConfig {
             public IDynamicTransportSession get () {
                 return customRequestHandler;
             }
+
+            @Override
+            public String getName () {
+                return customRequestHandler.getName();
+            }
         });
     }
 
@@ -85,6 +90,7 @@ public final class SocketIoServerConfig {
         if (this.customRequestHandlers == null) {
             this.customRequestHandlers = new ArrayList<IDynamicNettyTransportSessionFactory>();
         }
+        logger.trace("adding custom request handler factory");
         this.customRequestHandlers.add(customRequestHandlingTransportSessionFactory);
     }
 

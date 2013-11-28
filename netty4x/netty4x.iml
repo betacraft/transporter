@@ -15,7 +15,7 @@
     <orderEntry type="library" name="Maven: ch.qos.logback:logback-classic:1.0.13" level="project" />
     <orderEntry type="library" name="Maven: ch.qos.logback:logback-core:1.0.13" level="project" />
     <orderEntry type="library" name="Maven: org.javassist:javassist:3.18.0-GA" level="project" />
-    <orderEntry type="library" name="Maven: io.netty:netty-all:4.0.12.Final-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-all:4.0.14.Final-SNAPSHOT" level="project" />
     <orderEntry type="module" module-name="core" />
   </component>
 </module>

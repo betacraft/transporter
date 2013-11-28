@@ -1,11 +1,12 @@
 package com.rc.transporter.netty4x;
 
-import io.netty.buffer.UnpooledUnsafeDirectByteBuf;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -48,6 +49,7 @@ public class DynamicNettyTransportSession<I, O> extends SimpleChannelInboundHand
         super.channelActive(ctx);
         this.nettyChannel = new NettyChannel<O>(ctx);
         transportSession.onConnected(this.nettyChannel);
+        logger.trace("Got channel connection");
     }
 
     /**
@@ -69,17 +71,17 @@ public class DynamicNettyTransportSession<I, O> extends SimpleChannelInboundHand
     @Override
     protected void channelRead0 (ChannelHandlerContext ctx, Object msg) throws Exception {
         if (!isValidated.get()) {
+            logger.trace("Got data " + msg.toString());
             if (transportSession.validate((I) msg)) {
+                logger.trace("session validated");
                 isValidated.set(true);
             } else {
-                if (nettyChannel != null) {
-                    isClosed.set(true);
-                    logger.trace("Removing dynamic transport session");
-                    nettyChannel.getNettyChannelHandlerContext()
-                            .pipeline()
-                            .remove(DynamicNettyTransportSession.this);
-                }
-                ctx.fireChannelRead(((UnpooledUnsafeDirectByteBuf) msg).retain());
+                isClosed.set(true);
+                logger.trace("Removing dynamic transport session");
+                ctx.pipeline().remove(transportSession.getName());
+                for (Map.Entry<String, ChannelHandler> entry : ctx.pipeline().toMap().entrySet())
+                    logger.trace(entry.getKey());
+                ctx.close();
             }
             return;
         }
@@ -108,7 +110,7 @@ public class DynamicNettyTransportSession<I, O> extends SimpleChannelInboundHand
     @Override
     public void channelInactive (ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
-        if (isClosed.get())
+        if (isClosed.get() || !isValidated.get())
             return;
         transportSession.onDisconnected();
         logger.info("Channel inactive " + ctx.name());
@@ -125,7 +127,7 @@ public class DynamicNettyTransportSession<I, O> extends SimpleChannelInboundHand
     public void exceptionCaught (ChannelHandlerContext ctx, Throwable cause) throws Exception {
         super.exceptionCaught(ctx, cause);
         logger.error("Exception caught ", cause);
-        if (isClosed.get())
+        if (isClosed.get() || !isValidated.get())
             return;
         transportSession.onError(cause);
         this.nettyChannel.closeChannel();

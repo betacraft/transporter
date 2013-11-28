@@ -50,6 +50,7 @@ public final class SocketIoTransportServer extends TransportServer {
      * Common initialization associated with socketio
      */
     private void init () throws Exception {
+        logger.trace("Initializing socketio server");
         this.socketIOServer = new SocketIOServer(this.transportServerConfig.getConfiguration());
         if (this.transportServerConfig.getConfiguration().isAllowCustomRequests()) {
             ArrayList<IDynamicNettyTransportSessionFactory> customHandlers = this.transportServerConfig

@@ -6,5 +6,6 @@ package com.rc.transporter.netty4x;
  * Time  : 1:12 AM
  */
 public interface IDynamicNettyTransportSessionFactory {
-                public IDynamicTransportSession get();
+    public IDynamicTransportSession get ();
+    public String getName();
 }
