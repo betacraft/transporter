@@ -1,12 +1,10 @@
 package com.rc.transporter.netty4x;
 
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -79,9 +77,6 @@ public class DynamicNettyTransportSession<I, O> extends SimpleChannelInboundHand
                 isClosed.set(true);
                 logger.trace("Removing dynamic transport session");
                 ctx.pipeline().remove(transportSession.getName());
-                for (Map.Entry<String, ChannelHandler> entry : ctx.pipeline().toMap().entrySet())
-                    logger.trace(entry.getKey());
-                ctx.close();
             }
             return;
         }
