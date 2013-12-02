@@ -1,6 +1,7 @@
 package com.rc.transporter.netty4x;
 
 import com.rc.transporter.core.TransportChannel;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -33,7 +34,7 @@ public final class NettyChannel<M> extends TransportChannel<M> {
      *
      * @param nettyChannelHandlerContext @ChannelHandlerContext associated with this instance
      */
-    public NettyChannel(ChannelHandlerContext nettyChannelHandlerContext) {
+    public NettyChannel (ChannelHandlerContext nettyChannelHandlerContext) {
         this.nettyChannelHandlerContext = nettyChannelHandlerContext;
     }
 
@@ -43,8 +44,7 @@ public final class NettyChannel<M> extends TransportChannel<M> {
      * @param data data to be pushed
      */
     @Override
-    public void sendData(M data) {
-        logger.trace("Sending data over netty channel " + data);
+    public void sendData (M data) {
         if (isOpen())
             this.nettyChannelHandlerContext.writeAndFlush(data);
     }
@@ -53,7 +53,7 @@ public final class NettyChannel<M> extends TransportChannel<M> {
      * Method to close this channel
      */
     @Override
-    protected void closeChannel() {
+    protected void closeChannel () {
         logger.trace("Close channel request");
         if (this.channelClosed.getAndSet(true))
             return;
@@ -66,7 +66,7 @@ public final class NettyChannel<M> extends TransportChannel<M> {
      * Method to check if channel is open
      */
     @Override
-    public boolean isOpen() {
+    public boolean isOpen () {
         return !this.channelClosed.get();
     }
 
@@ -77,7 +77,7 @@ public final class NettyChannel<M> extends TransportChannel<M> {
      * @param value value of the property
      */
     @Override
-    public void setProperty(String name, Object value) {
+    public void setProperty (String name, Object value) {
         // property to set auto-read enabled or disabled
         if (name.equals(NettyChannelProperty.AUTO_READ)) {
             logger.debug("Setting autoread to " + value);
@@ -85,8 +85,13 @@ public final class NettyChannel<M> extends TransportChannel<M> {
         }
     }
 
+    public void sendDataWithPromise (M data,ChannelFutureListener channelFutureListener) {
+        if (isOpen())
+            this.nettyChannelHandlerContext.writeAndFlush(data).addListeners(channelFutureListener);
+    }
 
-    ChannelHandlerContext getNettyChannelHandlerContext(){
+
+    ChannelHandlerContext getNettyChannelHandlerContext () {
         return this.nettyChannelHandlerContext;
     }
 

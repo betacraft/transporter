@@ -8,6 +8,7 @@ import com.corundumstudio.socketio.listener.DataListener;
 import com.corundumstudio.socketio.listener.DisconnectListener;
 import com.rc.transporter.core.ITransportSession;
 import com.rc.transporter.core.TransportServer;
+import com.sun.corba.se.impl.orbutil.concurrent.Mutex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,10 +35,15 @@ final class SocketIoTransportSession implements ConnectListener, DisconnectListe
      */
     private SocketIoServerNamespace.SocketIoServerSessionFactory clientSessionFactory;
 
+    private ConcurrentHashMap<UUID, Mutex> connectionCatalogEntryLock;
+
+    private static final int MAX_HASH_MAP_CHECKS = 3;
+
     /**
      * Initialization block
      */ {
         this.connectionCatalog = new ConcurrentHashMap<UUID, ITransportSession>();
+        this.connectionCatalogEntryLock = new ConcurrentHashMap<UUID, Mutex>();
     }
 
     /**
@@ -83,8 +89,12 @@ final class SocketIoTransportSession implements ConnectListener, DisconnectListe
     public void onConnect (final SocketIOClient client) {
         logger.trace("SocketIO server got a new connection");
         try {
+            Mutex mutex = new Mutex();
+            mutex.acquire();
+            this.connectionCatalogEntryLock.put(client.getSessionId(), mutex);
             ITransportSession session = this.clientSessionFactory.get();
             this.connectionCatalog.put(client.getSessionId(), session);
+            mutex.release();
             session.onConnected(new SocketIoChannel(client));
         } catch (Exception e) {
             logger.error("While processing onConnect", e);
@@ -100,6 +110,7 @@ final class SocketIoTransportSession implements ConnectListener, DisconnectListe
     @Override
     public void onData (SocketIOClient client, String data, AckRequest ackSender) {
         try {
+            logger.trace("inside on data " + data);
             this.connectionCatalog.get(client.getSessionId()).onData(data);
         } catch (Exception e) {
             e.printStackTrace();
@@ -121,8 +132,26 @@ final class SocketIoTransportSession implements ConnectListener, DisconnectListe
     @OnEvent("reg")
     public void onEvent (SocketIOClient client, String data, AckRequest ackSender) {
         try {
+            int retries = 0;
+            Mutex mutex = null;
+            while (retries < MAX_HASH_MAP_CHECKS) {
+                mutex = this.connectionCatalogEntryLock.get(client.getSessionId());
+                if (mutex == null) {
+                    Thread.sleep(200);
+                } else {
+                    break;
+                }
+                ++retries;
+            }
+            if (mutex == null) {
+                logger.error("Socketio channel onEvent called before onConnected with data", data);
+                client.disconnect();
+                return;
+            }
+            mutex.acquire();
             logger.trace("On reg event " + data);
             this.connectionCatalog.get(client.getSessionId()).onData(data);
+            mutex.release();
         } catch (Exception e) {
             logger.error("While processing onEvent", e);
         }

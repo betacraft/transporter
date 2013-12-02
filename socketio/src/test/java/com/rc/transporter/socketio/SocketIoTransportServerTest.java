@@ -52,16 +52,7 @@ public class SocketIoTransportServerTest extends TestCase {
                     public void onConnected (final TransportChannel channel) {
                         logger.trace("commet Got connection");
                         this.channel = channel;
-                        ScheduledExecutorService
-                                sender = Executors.newSingleThreadScheduledExecutor();
-                        writeHeader();
-                        sender.scheduleAtFixedRate(new Runnable() {
-                            @Override
-                            public void run () {
-                                channel.sendData(new DefaultLastHttpContent(Unpooled.copiedBuffer
-                                        ("test", CharsetUtil.UTF_8)));
-                            }
-                        }, 0,2, TimeUnit.SECONDS);
+
                     }
 
                     @Override
@@ -86,7 +77,19 @@ public class SocketIoTransportServerTest extends TestCase {
 
                     @Override
                     public boolean validate (Object data) {
-                        return data.toString().contains("stream");
+                        if(!data.toString().contains("stream"))
+                            return false;
+                        ScheduledExecutorService
+                                sender = Executors.newSingleThreadScheduledExecutor();
+                        writeHeader();
+                        sender.scheduleAtFixedRate(new Runnable() {
+                            @Override
+                            public void run () {
+                                channel.sendData(new DefaultLastHttpContent(Unpooled.copiedBuffer
+                                        ("test", CharsetUtil.UTF_8)));
+                            }
+                        }, 0,2, TimeUnit.SECONDS);
+                        return true;
                     }
 
 
