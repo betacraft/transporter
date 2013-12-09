@@ -2,10 +2,6 @@ package com.rc.transporter.socketio;
 
 import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.SocketIOClient;
-import com.corundumstudio.socketio.annotation.OnEvent;
-import com.corundumstudio.socketio.listener.ConnectListener;
-import com.corundumstudio.socketio.listener.DataListener;
-import com.corundumstudio.socketio.listener.DisconnectListener;
 import com.rc.transporter.core.ITransportSession;
 import com.rc.transporter.core.TransportServer;
 import com.sun.corba.se.impl.orbutil.concurrent.Mutex;
@@ -21,23 +17,25 @@ import java.util.concurrent.ConcurrentHashMap;
  * Date  : 9/30/13
  * Time  : 5:54 PM
  */
-final class SocketIoTransportSession implements ConnectListener, DisconnectListener, DataListener<String> {
+public class SocketIoTransportSession implements ISocketIOTransportSession {
     /**
      * Logger
      */
-    private static final Logger logger = LoggerFactory.getLogger(SocketIoTransportSession.class);
+    protected static final Logger logger = LoggerFactory.getLogger(SocketIoTransportSession.class);
     /**
      * Connection catalog
      */
-    private ConcurrentHashMap<UUID, ITransportSession> connectionCatalog;
+    protected ConcurrentHashMap<UUID, ITransportSession> connectionCatalog;
     /**
      * Client session factory for incoming connections
      */
-    private SocketIoServerNamespace.SocketIoServerSessionFactory clientSessionFactory;
+    protected TransportServer.ITransportSessionFactory clientSessionFactory;
+    /**
+     * Catalog locks for each entry
+     */
+    protected ConcurrentHashMap<UUID, Mutex> connectionCatalogEntryLock;
 
-    private ConcurrentHashMap<UUID, Mutex> connectionCatalogEntryLock;
-
-    private static final int MAX_HASH_MAP_CHECKS = 3;
+    protected static final int MAX_HASH_MAP_CHECKS = 3;
 
     /**
      * Initialization block
@@ -46,44 +44,28 @@ final class SocketIoTransportSession implements ConnectListener, DisconnectListe
         this.connectionCatalogEntryLock = new ConcurrentHashMap<UUID, Mutex>();
     }
 
-    /**
-     * Constructor
-     *
-     * @param clientSessionFactory @SocketIoServerSessionFactory
-     */
-    SocketIoTransportSession (final SocketIoServerNamespace.SocketIoServerSessionFactory
-            clientSessionFactory) {
-        this.clientSessionFactory = clientSessionFactory;
-    }
 
-
-    /**
-     * Constructor
-     *
-     * @param transportSession sharable @ITransportSession
-     */
-    SocketIoTransportSession (final ITransportSession transportSession) {
-        this.clientSessionFactory = new SocketIoServerNamespace.SocketIoServerSessionFactory() {
+    public ISocketIOTransportSession setSharableTransportSession (final ITransportSession transportSession) {
+        this.clientSessionFactory = new TransportServer.ITransportSessionFactory() {
             @Override
             public ITransportSession get () {
                 return transportSession;
             }
         };
+        return this;
     }
 
-    /**
-     * Constructor
-     *
-     * @param transportSessionFactory @ITransportSessionFactory
-     */
-    SocketIoTransportSession (final TransportServer.ITransportSessionFactory transportSessionFactory) {
-        this.clientSessionFactory = new SocketIoServerNamespace.SocketIoServerSessionFactory() {
+    public ISocketIOTransportSession setClientSessionFactory (final TransportServer.ITransportSessionFactory
+            transportSessionFactory) {
+        this.clientSessionFactory = new TransportServer.ITransportSessionFactory() {
             @Override
             public ITransportSession get () {
                 return transportSessionFactory.get();
             }
         };
+        return this;
     }
+
 
     @Override
     public void onConnect (final SocketIOClient client) {
@@ -110,10 +92,28 @@ final class SocketIoTransportSession implements ConnectListener, DisconnectListe
     @Override
     public void onData (SocketIOClient client, String data, AckRequest ackSender) {
         try {
+            int retries = 0;
+            Mutex mutex = null;
+            while (retries < MAX_HASH_MAP_CHECKS) {
+                mutex = this.connectionCatalogEntryLock.get(client.getSessionId());
+                if (mutex == null) {
+                    Thread.sleep(200);
+                } else {
+                    break;
+                }
+                ++retries;
+            }
+            if (mutex == null) {
+                logger.error("Socketio channel onData called before onConnected with data", data);
+                client.disconnect();
+                return;
+            }
+            mutex.acquire();
             logger.trace("inside on data " + data);
             this.connectionCatalog.get(client.getSessionId()).onData(data);
+            mutex.release();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error while sending data", e);
         }
     }
 
@@ -129,32 +129,6 @@ final class SocketIoTransportSession implements ConnectListener, DisconnectListe
         }
     }
 
-    @OnEvent("reg")
-    public void onEvent (SocketIOClient client, String data, AckRequest ackSender) {
-        try {
-            int retries = 0;
-            Mutex mutex = null;
-            while (retries < MAX_HASH_MAP_CHECKS) {
-                mutex = this.connectionCatalogEntryLock.get(client.getSessionId());
-                if (mutex == null) {
-                    Thread.sleep(200);
-                } else {
-                    break;
-                }
-                ++retries;
-            }
-            if (mutex == null) {
-                logger.error("Socketio channel onEvent called before onConnected with data", data);
-                client.disconnect();
-                return;
-            }
-            mutex.acquire();
-            logger.trace("On reg event " + data);
-            this.connectionCatalog.get(client.getSessionId()).onData(data);
-            mutex.release();
-        } catch (Exception e) {
-            logger.error("While processing onEvent", e);
-        }
-    }
+
 
 }

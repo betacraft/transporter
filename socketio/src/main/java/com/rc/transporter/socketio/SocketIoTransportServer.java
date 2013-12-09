@@ -90,8 +90,8 @@ public final class SocketIoTransportServer extends TransportServer {
                     // if on default namespace user wants a listener
                     if (transportSession != null) {
                         logger.debug("Setting default namespace listener");
-                        SocketIoTransportSession defaultNamespaceSession = new SocketIoTransportSession
-                                (transportSession);
+                        ISocketIOTransportSession defaultNamespaceSession = new SocketIoTransportSession
+                                ().setSharableTransportSession(transportSession);
                         socketIOServer.addConnectListener(defaultNamespaceSession);
                         socketIOServer.addMessageListener(defaultNamespaceSession);
                         socketIOServer.addDisconnectListener(defaultNamespaceSession);
@@ -202,8 +202,8 @@ public final class SocketIoTransportServer extends TransportServer {
                     // if on default namespace user wants a listener
                     if (transportSession != null) {
                         logger.debug("Setting default namespace listener");
-                        SocketIoTransportSession defaultNamespaceSession = new SocketIoTransportSession
-                                (transportSession);
+                        ISocketIOTransportSession defaultNamespaceSession = new SocketIoTransportSession
+                                ().setSharableTransportSession(transportSession);
                         socketIOServer.addConnectListener(defaultNamespaceSession);
                         socketIOServer.addMessageListener(defaultNamespaceSession);
                         socketIOServer.addDisconnectListener(defaultNamespaceSession);
@@ -246,8 +246,9 @@ public final class SocketIoTransportServer extends TransportServer {
                     // if on default namespace user wants a listener
                     if (transportSessionFactory != null) {
                         logger.debug("Setting default namespace listener");
-                        SocketIoTransportSession defaultNamespaceSession = new SocketIoTransportSession
-                                (transportSessionFactory);
+                        ISocketIOTransportSession defaultNamespaceSession =
+                                new SocketIoTransportSession().setClientSessionFactory
+                                        (transportSessionFactory);
                         socketIOServer.addConnectListener(defaultNamespaceSession);
                         socketIOServer.addMessageListener(defaultNamespaceSession);
                         socketIOServer.addDisconnectListener(defaultNamespaceSession);
@@ -292,8 +293,8 @@ public final class SocketIoTransportServer extends TransportServer {
                     // if on default namespace user wants a listener
                     if (transportSessionFactory != null) {
                         logger.debug("Setting default namespace listener");
-                        SocketIoTransportSession defaultNamespaceSession = new SocketIoTransportSession
-                                (transportSessionFactory);
+                        ISocketIOTransportSession defaultNamespaceSession = new SocketIoTransportSession
+                                ().setClientSessionFactory(transportSessionFactory);
                         socketIOServer.addConnectListener(defaultNamespaceSession);
                         socketIOServer.addMessageListener(defaultNamespaceSession);
                         socketIOServer.addDisconnectListener(defaultNamespaceSession);

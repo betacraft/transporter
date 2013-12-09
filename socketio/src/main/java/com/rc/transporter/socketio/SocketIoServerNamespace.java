@@ -2,7 +2,7 @@ package com.rc.transporter.socketio;
 
 import com.corundumstudio.socketio.SocketIONamespace;
 import com.corundumstudio.socketio.SocketIOServer;
-import com.rc.transporter.core.ITransportSession;
+import com.rc.transporter.core.TransportServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,20 +19,18 @@ public final class SocketIoServerNamespace {
     private static final Logger logger = LoggerFactory.getLogger(SocketIoServerNamespace.class);
 
     /**
-     * Socket io server session factory
-     */
-    public interface SocketIoServerSessionFactory {
-        public ITransportSession get ();
-    }
-
-    /**
      * Namespace path
      */
     private final String path;
     /**
      * Session factory for clients on this namespace
      */
-    private final SocketIoServerSessionFactory clientSessionFactory;
+    private final TransportServer.ITransportSessionFactory clientSessionFactory;
+    /**
+     * SocketIO transport session factory
+     */
+    private final SocketIOTransportSessionFactory socketIOTransportSessionFactory;
+
 
     /**
      * Constructor
@@ -40,10 +38,32 @@ public final class SocketIoServerNamespace {
      * @param path                 path of the namespace
      * @param clientSessionFactory @SocketIoServerSessionFactory for this namespace
      */
-    private SocketIoServerNamespace (final String path, final SocketIoServerSessionFactory
+    private SocketIoServerNamespace (final String path, final TransportServer.ITransportSessionFactory
             clientSessionFactory) {
         this.path = path;
         this.clientSessionFactory = clientSessionFactory;
+        this.socketIOTransportSessionFactory = new SocketIOTransportSessionFactory() {
+            @Override
+            public ISocketIOTransportSession get () {
+                return new SocketIoTransportSession().setClientSessionFactory(clientSessionFactory);
+            }
+        };
+    }
+
+    /**
+     * Constructor
+     *
+     * @param path
+     * @param clientSessionFactory
+     * @param socketIOTransportSessionFactory
+     *
+     */
+    private SocketIoServerNamespace (final String path,
+            final TransportServer.ITransportSessionFactory clientSessionFactory,
+            final SocketIOTransportSessionFactory socketIOTransportSessionFactory) {
+        this.path = path;
+        this.clientSessionFactory = clientSessionFactory;
+        this.socketIOTransportSessionFactory = socketIOTransportSessionFactory;
     }
 
     /**
@@ -51,9 +71,9 @@ public final class SocketIoServerNamespace {
      *
      * @param socketIOServer
      */
-    void setOn (final SocketIOServer socketIOServer) {
+    protected void setOn (final SocketIOServer socketIOServer) {
         SocketIONamespace namespace = socketIOServer.addNamespace(this.path);
-        SocketIoTransportSession session = new SocketIoTransportSession(this.clientSessionFactory);
+        ISocketIOTransportSession session = this.socketIOTransportSessionFactory.get();
         namespace.addConnectListener(session);
         namespace.addMessageListener(session);
         namespace.addDisconnectListener(session);
@@ -67,9 +87,22 @@ public final class SocketIoServerNamespace {
      * @param clientSessionFactory @SocketIoServerSessionFactory for this namespace
      * @return
      */
-    public static SocketIoServerNamespace get (final String path, final SocketIoServerSessionFactory
-            clientSessionFactory) {
+    public static SocketIoServerNamespace get (final String path,
+            final TransportServer.ITransportSessionFactory clientSessionFactory) {
         return new SocketIoServerNamespace(path, clientSessionFactory);
+    }
+
+    /**
+     * Factory
+     *
+     * @param path                 path of the namespace
+     * @param clientSessionFactory @SocketIoServerSessionFactory for this namespace
+     * @return
+     */
+    public static SocketIoServerNamespace get (final String path,
+            final TransportServer.ITransportSessionFactory clientSessionFactory,
+            final SocketIOTransportSessionFactory socketIOTransportSessionFactory) {
+        return new SocketIoServerNamespace(path, clientSessionFactory, socketIOTransportSessionFactory);
     }
 
 }
