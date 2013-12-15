@@ -69,6 +69,11 @@ public class Netty3xTransportServerTest extends TestCase {
                         public void onData(Object data) {
                             //To change body of implemented methods use File | Settings | File Templates.
                         }
+
+                        @Override
+                        public void setProperty (String key, Object value) {
+                            //To change body of implemented methods use File | Settings | File Templates.
+                        }
                     }
             );
             assertTrue(true);
@@ -104,6 +109,11 @@ public class Netty3xTransportServerTest extends TestCase {
 
                         @Override
                         public void onData(Object data) {
+                            //To change body of implemented methods use File | Settings | File Templates.
+                        }
+
+                        @Override
+                        public void setProperty (String key, Object value) {
                             //To change body of implemented methods use File | Settings | File Templates.
                         }
                     }

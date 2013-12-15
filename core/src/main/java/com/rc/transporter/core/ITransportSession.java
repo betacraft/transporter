@@ -33,5 +33,9 @@ public interface ITransportSession<I, O> {
      * @param data data
      */
     public void onData (I data);
+    /**
+     * Generic method for setting properties related with session
+     */
+    public void setProperty(final String key, final Object value);
 
 }

@@ -71,6 +71,11 @@ public class SocketIoTransportServerTest extends TestCase {
                     }
 
                     @Override
+                    public void setProperty (String key, Object value) {
+                        //To change body of implemented methods use File | Settings | File Templates.
+                    }
+
+                    @Override
                     public String getName () {
                         return "test";
                     }
@@ -152,6 +157,11 @@ public class SocketIoTransportServerTest extends TestCase {
                     public void onData (Object data) {
                         logger.trace("On data " + data.toString());
                         this.channel.sendData("server_test");
+                    }
+
+                    @Override
+                    public void setProperty (String key, Object value) {
+                        //To change body of implemented methods use File | Settings | File Templates.
                     }
                 }
         );

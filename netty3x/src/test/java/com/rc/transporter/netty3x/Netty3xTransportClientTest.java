@@ -52,6 +52,11 @@ public class Netty3xTransportClientTest extends TestCase {
                     public void onData(Object data) {
                         //To change body of implemented methods use File | Settings | File Templates.
                     }
+
+                    @Override
+                    public void setProperty (String key, Object value) {
+                        //To change body of implemented methods use File | Settings | File Templates.
+                    }
                 }
         );
 
@@ -88,6 +93,11 @@ public class Netty3xTransportClientTest extends TestCase {
                 public void onData(Object data) {
                     //To change body of implemented methods use File | Settings | File Templates.
                 }
+
+                @Override
+                public void setProperty (String key, Object value) {
+                    //To change body of implemented methods use File | Settings | File Templates.
+                }
             });
             assertTrue(true);
         } catch (Exception exception) {
@@ -112,6 +122,11 @@ public class Netty3xTransportClientTest extends TestCase {
 
                 @Override
                 public void onData(Object data) {
+                    //To change body of implemented methods use File | Settings | File Templates.
+                }
+
+                @Override
+                public void setProperty (String key, Object value) {
                     //To change body of implemented methods use File | Settings | File Templates.
                 }
             });
