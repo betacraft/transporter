@@ -86,7 +86,8 @@ public class NettyTransportSession<I, O> extends SimpleChannelInboundHandler<Obj
         super.channelInactive(ctx);
         transportSession.onDisconnected();
         logger.info("Channel inactive " + ctx.name());
-        this.nettyChannel.close();
+        if (this.nettyChannel != null)
+            this.nettyChannel.close();
     }
 
     /**
@@ -99,6 +100,7 @@ public class NettyTransportSession<I, O> extends SimpleChannelInboundHandler<Obj
     public void exceptionCaught (ChannelHandlerContext ctx, Throwable cause) throws Exception {
         logger.error("Exception caught ", cause);
         transportSession.onError(cause);
-        this.nettyChannel.closeChannel();
+        if (this.nettyChannel != null)
+            this.nettyChannel.closeChannel();
     }
 }
