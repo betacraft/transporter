@@ -9,17 +9,15 @@ This library is in it's nascent phases and being actively developed in RainingCl
 
 
 ## Architecture
-
-
-                                              +------------+
-                               |              | raw socket |
-                               |              +------------+
-    +------------+             |              | netty 3.x  |
-    | Your       |      +------+------+       +------------+
-    | Business   |  <-> | Transporter |  <->  | netty 4.x  |
-    | Logic      |      +------+------+       +------------+
-    +------------+             |              |  socketio  |
-                               |              +------------+
+                                          +------------+
+                           |              | raw socket |
+                           |              +------------+
++------------+             |              | netty 3.x  |
+| Your       |      +------+------+       +------------+
+| Business   |  <-> | Transporter |  <->  | netty 4.x  |
+| Logic      |      +------+------+       +------------+
++------------+             |              |  socketio  |
+                           |              +------------+
 
 
 So ideally this library acts as an interface between your business logic and transport layer.
