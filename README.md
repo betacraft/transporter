@@ -10,7 +10,7 @@ This library is in it's nascent phases and being actively developed in RainingCl
 
 ## Architecture
 
-<pre>
+
                                               +------------+
                                |              | raw socket |
                                |              +------------+
@@ -20,8 +20,7 @@ This library is in it's nascent phases and being actively developed in RainingCl
     | Logic      |      +------+------+       +------------+
     +------------+             |              |  socketio  |
                                |              +------------+
-                               |              |    ...     |
-</pre>
+
 
 So ideally this library acts as an interface between your business logic and transport layer.
 
@@ -32,7 +31,7 @@ So ideally this library acts as an interface between your business logic and tra
 + [x] Netty 3.x
 + [x] Raw Sockets
 + [x] SocketIO
-+ []  Java NIO
++ [ ] Java NIO (need help to complete)
 
 
 ## Components
