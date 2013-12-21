@@ -318,7 +318,7 @@ public final class SocketIoTransportServer extends TransportServer {
      * Method to close server
      */
     @Override
-    protected void close () {
+    public void close () {
         if (this.socketIOServer != null)
             this.socketIOServer.stop();
         if (this.socketIoServerWorker != null)

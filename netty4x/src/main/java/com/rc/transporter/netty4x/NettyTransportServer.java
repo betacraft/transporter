@@ -310,7 +310,7 @@ public final class NettyTransportServer extends TransportServer {
      * Method to close server
      */
     @Override
-    protected void close () {
+    public void close () {
         if (this.bossGroup != null)
             this.bossGroup.shutdownGracefully();
         if (this.workerGroup != null)
