@@ -20,6 +20,7 @@ This library is in it's nascent phases and being actively developed in RainingCl
    | Logic      |      +------+------+       +------------+
    +------------+             |              |  socketio  |
                               |              +------------+
+
 ```
 
 So ideally this library acts as an interface between your business logic and transport layer.
