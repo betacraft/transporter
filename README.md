@@ -28,11 +28,11 @@ So ideally this library acts as an interface between your business logic and tra
 
 ## Supported frameworks
 
-[x] Netty 4.x
-[x] Netty 3.x
-[x] Raw Sockets
-[x] SocketIO
-[]  Java NIO
++ [x] Netty 4.x
++ [x] Netty 3.x
++ [x] Raw Sockets
++ [x] SocketIO
++ []  Java NIO
 
 
 ## Components
