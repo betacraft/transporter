@@ -35,13 +35,12 @@ public final class NettyTransportServer extends TransportServer {
      */
     private NioEventLoopGroup workerGroup;
 
-
     /**
      * Constructor
      *
      * @param config netty server config
      */
-    public NettyTransportServer(final NettyTransportServerConfig config) {
+    public NettyTransportServer (final NettyTransportServerConfig config) {
         super();
         this.serverConfig = config;
     }
@@ -51,13 +50,14 @@ public final class NettyTransportServer extends TransportServer {
      *
      * @param port                    port on which server needs to be started
      * @param transportServerListener @ITransportServerListener listener to listen the state of the server
-     * @param nettyTransportSession   @ITransportSession session routine that will be associated with each connection received
+     * @param nettyTransportSession   @ITransportSession session routine that will be associated
+     *                                with each connection received
      *                                on this server
      * @throws Exception throws exception if any during starting the server
      */
     @Override
-    public void start(int port, final ITransportServerListener transportServerListener,
-                      final ITransportSession nettyTransportSession)
+    public void start (final int port, final ITransportServerListener transportServerListener,
+            final ITransportSession nettyTransportSession)
             throws Exception {
         try {
             ServerBootstrap serverBootstrap = new ServerBootstrap();
@@ -66,41 +66,47 @@ public final class NettyTransportServer extends TransportServer {
                 serverBootstrap.option(entry.getKey(), entry.getValue());
             }
             // setting up child options
-            for (Map.Entry<ChannelOption, Object> entry : this.serverConfig.getChildChannelOptions().entrySet()) {
+            for (Map.Entry<ChannelOption, Object> entry : this.serverConfig.getChildChannelOptions()
+                    .entrySet()) {
                 serverBootstrap.childOption(entry.getKey(), entry.getValue());
             }
-            this.serverConfig.getChannelInitializer().setRuntimeHandlerProvider(new NettyChannelInitializer.RuntimeHandlerProvider() {
-
-                @Override
-                public void appendRuntimeHandler(final ChannelPipeline pipeline) {
-                    if (serverConfig.getSessionEventsExecutorFactory() == null) {
-                        logger.warn("No session events executor factory assigned\nMake sure you are not stealing time from worker group for better performance");
-                        pipeline.addLast(new NettyTransportSession(nettyTransportSession));
-                    } else {
-                        pipeline.addLast(serverConfig.getSessionEventsExecutorFactory().get(), new NettyTransportSession(nettyTransportSession));
-                    }
-                }
-            });
+            this.serverConfig.getChannelInitializer()
+                    .setRuntimeHandlerProvider(new NettyChannelInitializer.RuntimeHandlerProvider() {
+                        @Override
+                        public void appendRuntimeHandler (final ChannelPipeline pipeline) {
+                            if (serverConfig.getSessionEventsExecutorFactory() == null) {
+                                logger.warn("No session events executor factory assigned" +
+                                        "\nMake sure you are not stealing time from worker " +
+                                        "group for better performance");
+                                pipeline.addLast(new NettyTransportSession(nettyTransportSession));
+                            } else {
+                                pipeline.addLast(serverConfig.getSessionEventsExecutorFactory().get(),
+                                        new NettyTransportSession(nettyTransportSession));
+                            }
+                        }
+                    });
             this.bossGroup = this.serverConfig.getBossGroupFactory().get();
             this.workerGroup = this.serverConfig.getWorkerGroupFactory().get();
-
             serverBootstrap.group(this.bossGroup, this.workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .childHandler(this.serverConfig.getChannelInitializer());
             // bind server
-            serverBootstrap.bind(port).sync().channel().closeFuture().sync().addListener(new ChannelFutureListener() {
-                @Override
-                public void operationComplete(ChannelFuture future) throws Exception {
-                    transportServerListener.onClosed();
-                }
-            });
+            serverBootstrap.bind(port).sync().channel().closeFuture().sync()
+                    .addListener(new ChannelFutureListener() {
+                        @Override
+                        public void operationComplete (ChannelFuture future) throws Exception {
+                            logger.error("Server running on port {} closed", port);
+                            transportServerListener.onClosed();
+                        }
+                    });
         } catch (ChannelException exception) {
-            exception.printStackTrace();
+            logger.error("Server running on port {} closed", port, exception);
             throw exception;
         } catch (InterruptedException exception) {
-            exception.printStackTrace();
+            logger.error("Server running on port {} closed", port, exception);
             throw exception;
         } catch (Exception exception) {
+            logger.error("Server running on port {} closed", port, exception);
             throw exception;
         } finally {
             close();
@@ -113,11 +119,13 @@ public final class NettyTransportServer extends TransportServer {
      * @param hostname                hostname
      * @param port                    port on which server needs to be started
      * @param transportServerListener @ITransportServerListener listener to listen the state of the server
-     * @param nettyTransportSession   @ITransportSession associated with each connection being received on this server
+     * @param nettyTransportSession   @ITransportSession associated with each connection being received on
+     *                                this server
      */
     @Override
-    public void start(final String hostname, final int port, final ITransportServerListener transportServerListener,
-                      final ITransportSession nettyTransportSession) throws Exception {
+    public void start (final String hostname, final int port,
+            final ITransportServerListener transportServerListener,
+            final ITransportSession nettyTransportSession) throws Exception {
         try {
             ServerBootstrap serverBootstrap = new ServerBootstrap();
             // setting up options
@@ -125,38 +133,44 @@ public final class NettyTransportServer extends TransportServer {
                 serverBootstrap.option(entry.getKey(), entry.getValue());
             }
             // setting up child options
-            for (Map.Entry<ChannelOption, Object> entry : this.serverConfig.getChildChannelOptions().entrySet()) {
+            for (Map.Entry<ChannelOption, Object> entry :
+                    this.serverConfig.getChildChannelOptions().entrySet()) {
                 serverBootstrap.childOption(entry.getKey(), entry.getValue());
             }
-            this.serverConfig.getChannelInitializer().setRuntimeHandlerProvider(new NettyChannelInitializer.RuntimeHandlerProvider() {
+            this.serverConfig.getChannelInitializer()
+                    .setRuntimeHandlerProvider(new NettyChannelInitializer.RuntimeHandlerProvider() {
 
-                @Override
-                public void appendRuntimeHandler(final ChannelPipeline pipeline) {
-                    if (serverConfig.getSessionEventsExecutorFactory() == null)
-                        pipeline.addLast(new NettyTransportSession(nettyTransportSession));
-                    else
-                        pipeline.addLast(serverConfig.getSessionEventsExecutorFactory().get(), new NettyTransportSession(nettyTransportSession));
-                }
-            });
+                        @Override
+                        public void appendRuntimeHandler (final ChannelPipeline pipeline) {
+                            if (serverConfig.getSessionEventsExecutorFactory() == null)
+                                pipeline.addLast(new NettyTransportSession(nettyTransportSession));
+                            else
+                                pipeline.addLast(serverConfig.getSessionEventsExecutorFactory().get(),
+                                        new NettyTransportSession(nettyTransportSession));
+                        }
+                    });
             this.bossGroup = this.serverConfig.getBossGroupFactory().get();
             this.workerGroup = this.serverConfig.getWorkerGroupFactory().get();
             serverBootstrap.group(this.bossGroup, this.workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .childHandler(this.serverConfig.getChannelInitializer());
             // bind server
-            serverBootstrap.bind(hostname, port).sync().channel().closeFuture().sync().addListener(new ChannelFutureListener() {
-                @Override
-                public void operationComplete(ChannelFuture future) throws Exception {
-                    transportServerListener.onClosed();
-                }
-            });
+            serverBootstrap.bind(hostname, port).sync().channel().closeFuture().sync()
+                    .addListener(new ChannelFutureListener() {
+                        @Override
+                        public void operationComplete (ChannelFuture future) throws Exception {
+                            logger.error("Server running on host {} and port {} closed", hostname, port);
+                            transportServerListener.onClosed();
+                        }
+                    });
         } catch (ChannelException exception) {
-            exception.printStackTrace();
+            logger.error("Server running on host {} and port {} closed", hostname, port, exception);
             throw exception;
         } catch (InterruptedException exception) {
-            exception.printStackTrace();
+            logger.error("Server running on host {} and port {} closed", hostname, port, exception);
             throw exception;
         } catch (Exception exception) {
+            logger.error("Server running on host {} and port {} closed", hostname, port, exception);
             throw exception;
         } finally {
             close();
@@ -168,13 +182,14 @@ public final class NettyTransportServer extends TransportServer {
      *
      * @param port                    port on which server needs to be started
      * @param transportServerListener @ITransportServerListener listener to listen the state of the server
-     * @param transportSessionFactory @ITransportSessionFactory session routine that will be associated with each connection received
+     * @param transportSessionFactory @ITransportSessionFactory session routine that will be associated
+     *                                with each connection received
      *                                on this server
      * @throws Exception throws exception if any during starting the server
      */
     @Override
-    public void start(final int port, final ITransportServerListener transportServerListener,
-                      final ITransportSessionFactory transportSessionFactory) throws Exception {
+    public void start (final int port, final ITransportServerListener transportServerListener,
+            final ITransportSessionFactory transportSessionFactory) throws Exception {
         try {
             ServerBootstrap serverBootstrap = new ServerBootstrap();
             // setting up options
@@ -182,17 +197,20 @@ public final class NettyTransportServer extends TransportServer {
                 serverBootstrap.option(entry.getKey(), entry.getValue());
             }
             // setting up child options
-            for (Map.Entry<ChannelOption, Object> entry : this.serverConfig.getChildChannelOptions().entrySet()) {
+            for (Map.Entry<ChannelOption, Object> entry : this.serverConfig.getChildChannelOptions()
+                    .entrySet()) {
                 serverBootstrap.childOption(entry.getKey(), entry.getValue());
             }
-            this.serverConfig.getChannelInitializer().setRuntimeHandlerProvider(new NettyChannelInitializer.RuntimeHandlerProvider() {
+            this.serverConfig.getChannelInitializer().setRuntimeHandlerProvider(new NettyChannelInitializer
+                    .RuntimeHandlerProvider() {
 
                 @Override
-                public void appendRuntimeHandler(final ChannelPipeline pipeline) {
+                public void appendRuntimeHandler (final ChannelPipeline pipeline) {
                     if (serverConfig.getSessionEventsExecutorFactory() == null)
                         pipeline.addLast(new NettyTransportSession(transportSessionFactory.get()));
                     else
-                        pipeline.addLast(serverConfig.getSessionEventsExecutorFactory().get(), new NettyTransportSession(transportSessionFactory.get()));
+                        pipeline.addLast(serverConfig.getSessionEventsExecutorFactory().get(),
+                                new NettyTransportSession(transportSessionFactory.get()));
                 }
             });
             this.bossGroup = this.serverConfig.getBossGroupFactory().get();
@@ -201,19 +219,22 @@ public final class NettyTransportServer extends TransportServer {
                     .channel(NioServerSocketChannel.class)
                     .childHandler(this.serverConfig.getChannelInitializer());
             // bind server
-            serverBootstrap.bind(port).sync().channel().closeFuture().sync().addListener(new ChannelFutureListener() {
-                @Override
-                public void operationComplete(ChannelFuture future) throws Exception {
-                    transportServerListener.onClosed();
-                }
-            });
+            serverBootstrap.bind(port).sync().channel().closeFuture().sync()
+                    .addListener(new ChannelFutureListener() {
+                        @Override
+                        public void operationComplete (ChannelFuture future) throws Exception {
+                            logger.error("Server running on port {} closed", port);
+                            transportServerListener.onClosed();
+                        }
+                    });
         } catch (ChannelException exception) {
-            exception.printStackTrace();
+            logger.error("Server running on port {} closed", port, exception);
             throw exception;
         } catch (InterruptedException exception) {
-            exception.printStackTrace();
+            logger.error("Server running on port {} closed", port, exception);
             throw exception;
         } catch (Exception exception) {
+            logger.error("Server running on port {} closed", port, exception);
             throw exception;
         } finally {
             close();
@@ -227,12 +248,14 @@ public final class NettyTransportServer extends TransportServer {
      * @param hostname                hostname
      * @param port                    port on which server needs to be started
      * @param transportServerListener @ITransportServerListener listener to listen the state of the server
-     * @param transportSessionFactory @ITransportSessionFactory factory for session associated with server connections
+     * @param transportSessionFactory @ITransportSessionFactory factory for session associated with server
+     *                                connections
      * @throws Exception throws exception if any during starting the server
      */
     @Override
-    public void start(final String hostname, final int port, final ITransportServerListener transportServerListener,
-                      final ITransportSessionFactory transportSessionFactory) throws Exception {
+    public void start (final String hostname, final int port, final ITransportServerListener
+            transportServerListener,
+            final ITransportSessionFactory transportSessionFactory) throws Exception {
         try {
             ServerBootstrap serverBootstrap = new ServerBootstrap();
             // setting up options
@@ -240,37 +263,43 @@ public final class NettyTransportServer extends TransportServer {
                 serverBootstrap.option(entry.getKey(), entry.getValue());
             }
             // setting up child options
-            for (Map.Entry<ChannelOption, Object> entry : this.serverConfig.getChildChannelOptions().entrySet()) {
+            for (Map.Entry<ChannelOption, Object> entry : this.serverConfig.getChildChannelOptions()
+                    .entrySet()) {
                 serverBootstrap.childOption(entry.getKey(), entry.getValue());
             }
-            this.serverConfig.getChannelInitializer().setRuntimeHandlerProvider(new NettyChannelInitializer.RuntimeHandlerProvider() {
-                @Override
-                public void appendRuntimeHandler(ChannelPipeline pipeline) {
-                    if (serverConfig.getSessionEventsExecutorFactory() == null)
-                        pipeline.addLast(new NettyTransportSession(transportSessionFactory.get()));
-                    else
-                        pipeline.addLast(serverConfig.getSessionEventsExecutorFactory().get(), new NettyTransportSession(transportSessionFactory.get()));
-                }
-            });
+            this.serverConfig.getChannelInitializer()
+                    .setRuntimeHandlerProvider(new NettyChannelInitializer.RuntimeHandlerProvider() {
+                        @Override
+                        public void appendRuntimeHandler (ChannelPipeline pipeline) {
+                            if (serverConfig.getSessionEventsExecutorFactory() == null)
+                                pipeline.addLast(new NettyTransportSession(transportSessionFactory.get()));
+                            else
+                                pipeline.addLast(serverConfig.getSessionEventsExecutorFactory().get(),
+                                        new NettyTransportSession(transportSessionFactory.get()));
+                        }
+                    });
             this.bossGroup = this.serverConfig.getBossGroupFactory().get();
             this.workerGroup = this.serverConfig.getWorkerGroupFactory().get();
             serverBootstrap.group(this.bossGroup, this.workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .childHandler(this.serverConfig.getChannelInitializer());
             // bind server
-            serverBootstrap.bind(hostname, port).sync().channel().closeFuture().sync().addListener(new ChannelFutureListener() {
-                @Override
-                public void operationComplete(ChannelFuture future) throws Exception {
-                    transportServerListener.onClosed();
-                }
-            });
+            serverBootstrap.bind(hostname, port).sync().channel().closeFuture().sync()
+                    .addListener(new ChannelFutureListener() {
+                        @Override
+                        public void operationComplete (ChannelFuture future) throws Exception {
+                            logger.error("Server running on host {} and port {} closed", hostname, port);
+                            transportServerListener.onClosed();
+                        }
+                    });
         } catch (ChannelException exception) {
-            exception.printStackTrace();
+            logger.error("Server running on host {} and port {} closed", hostname, port, exception);
             throw exception;
         } catch (InterruptedException exception) {
-            exception.printStackTrace();
+            logger.error("Server running on host {} and port {} closed", hostname, port, exception);
             throw exception;
         } catch (Exception exception) {
+            logger.error("Server running on host {} and port {} closed", hostname, port, exception);
             throw exception;
         } finally {
             close();
@@ -281,7 +310,7 @@ public final class NettyTransportServer extends TransportServer {
      * Method to close server
      */
     @Override
-    protected void close() {
+    protected void close () {
         if (this.bossGroup != null)
             this.bossGroup.shutdownGracefully();
         if (this.workerGroup != null)

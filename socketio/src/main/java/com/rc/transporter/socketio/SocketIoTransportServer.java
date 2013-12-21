@@ -104,7 +104,7 @@ public final class SocketIoTransportServer extends TransportServer {
                         }
                     });
                 } catch (Exception e) {
-                    logger.error("Error ", e);
+                    logger.error("Error in server running on {} port", port, e);
                     transportServerListener.onClosed();
                 }
             }
@@ -136,7 +136,7 @@ public final class SocketIoTransportServer extends TransportServer {
                         }
                     });
                 } catch (Exception e) {
-                    logger.error("Error ", e);
+                    logger.error("Error in server running on {} port", port, e);
                     transportServerListener.onClosed();
                 }
             }
@@ -169,7 +169,7 @@ public final class SocketIoTransportServer extends TransportServer {
                         }
                     });
                 } catch (Exception e) {
-                    logger.error("Error ", e);
+                    logger.error("Error in the server running on host {} and port {}", hostname, port, e);
                     transportServerListener.onClosed();
                 }
             }
@@ -216,7 +216,7 @@ public final class SocketIoTransportServer extends TransportServer {
                         }
                     });
                 } catch (Exception e) {
-                    logger.error("Error ", e);
+                    logger.error("Error in server running on host {} and port {}", hostname, port, e);
                     transportServerListener.onClosed();
                 }
             }
@@ -261,7 +261,7 @@ public final class SocketIoTransportServer extends TransportServer {
                         }
                     });
                 } catch (Exception e) {
-                    logger.error("Error ", e);
+                    logger.error("Error in server running on port {}", port, e);
                     transportServerListener.onClosed();
                 }
             }
@@ -307,7 +307,7 @@ public final class SocketIoTransportServer extends TransportServer {
                         }
                     });
                 } catch (Exception e) {
-                    logger.error("Error ", e);
+                    logger.error("Error in server running on host {} and port {}", hostname, port, e);
                     transportServerListener.onClosed();
                 }
             }

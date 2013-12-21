@@ -91,10 +91,27 @@ public class SocketIoTransportSession implements ISocketIOTransportSession {
      * @param data   - received object
      */
     @Override
-    public void onData (SocketIOClient client, String data, AckRequest ackSender) {
+    public void onData (final SocketIOClient client, final String data, final AckRequest ackSender) {
         try {
             int retries = 0;
-            Mutex mutex = null;
+            Mutex mutex = this.connectionCatalogEntryLock.get(client.getSessionId());
+            if (mutex != null) {
+                mutex.acquire();
+                while (retries < MAX_HASH_MAP_CHECKS) {
+                    try {
+                        this.connectionCatalog.get(client.getSessionId()).onData(data);
+                        mutex.release();
+                        return;
+                    } catch (Exception e) {
+                        logger.error("Error while calling on data {} on {} retry", client.getSessionId(),
+                                retries, e);
+                        Thread.sleep(200);
+                        ++retries;
+                    }
+                }
+                mutex.release();
+                return;
+            }
             while (retries < MAX_HASH_MAP_CHECKS) {
                 mutex = this.connectionCatalogEntryLock.get(client.getSessionId());
                 if (mutex == null) {
@@ -106,13 +123,23 @@ public class SocketIoTransportSession implements ISocketIOTransportSession {
             }
             if (mutex == null) {
                 logger.error("Socketio channel onData called before onConnected with data", data);
-                client.disconnect();
                 return;
             }
             mutex.acquire();
-            logger.trace("inside on data " + data);
-            this.connectionCatalog.get(client.getSessionId()).onData(data);
+            retries = 0;
+            while (retries < MAX_HASH_MAP_CHECKS) {
+                try {
+                    this.connectionCatalog.get(client.getSessionId()).onData(data);
+                    break;
+                } catch (Exception e) {
+                    logger.error("Error while calling on data {} on {} retry", client.getSessionId(),
+                            retries, e);
+                    Thread.sleep(200);
+                    ++retries;
+                }
+            }
             mutex.release();
+            logger.trace("inside on data " + data);
         } catch (Exception e) {
             logger.error("Error while sending data", e);
         }
@@ -129,7 +156,6 @@ public class SocketIoTransportSession implements ISocketIOTransportSession {
             logger.error("While processing onDisconnect", e);
         }
     }
-
 
 
 }
