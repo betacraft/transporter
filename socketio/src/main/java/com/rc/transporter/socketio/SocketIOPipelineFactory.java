@@ -19,7 +19,7 @@ final class SocketIOPipelineFactory extends SocketIOChannelInitializer {
     /**
      * logger
      */
-    private static final Logger logger= LoggerFactory.getLogger(SocketIOPipelineFactory.class);
+    private static final Logger logger = LoggerFactory.getLogger(SocketIOPipelineFactory.class);
     /**
      * Channel handlers
      */

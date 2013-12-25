@@ -94,24 +94,7 @@ public class SocketIoTransportSession implements ISocketIOTransportSession {
     public void onData (final SocketIOClient client, final String data, final AckRequest ackSender) {
         try {
             int retries = 0;
-            Mutex mutex = this.connectionCatalogEntryLock.get(client.getSessionId());
-            if (mutex != null) {
-                mutex.acquire();
-                while (retries < MAX_HASH_MAP_CHECKS) {
-                    try {
-                        this.connectionCatalog.get(client.getSessionId()).onData(data);
-                        mutex.release();
-                        return;
-                    } catch (Exception e) {
-                        logger.error("Error while calling on data {} on {} retry", client.getSessionId(),
-                                retries, e);
-                        Thread.sleep(200);
-                        ++retries;
-                    }
-                }
-                mutex.release();
-                return;
-            }
+            Mutex mutex = null;
             while (retries < MAX_HASH_MAP_CHECKS) {
                 mutex = this.connectionCatalogEntryLock.get(client.getSessionId());
                 if (mutex == null) {

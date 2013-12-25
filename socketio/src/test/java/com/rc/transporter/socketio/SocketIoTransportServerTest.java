@@ -82,7 +82,7 @@ public class SocketIoTransportServerTest extends TestCase {
 
                     @Override
                     public boolean validate (Object data) {
-                        if(!data.toString().contains("stream"))
+                        if (!data.toString().contains("stream"))
                             return false;
                         ScheduledExecutorService
                                 sender = Executors.newSingleThreadScheduledExecutor();
@@ -93,8 +93,13 @@ public class SocketIoTransportServerTest extends TestCase {
                                 channel.sendData(new DefaultLastHttpContent(Unpooled.copiedBuffer
                                         ("test", CharsetUtil.UTF_8)));
                             }
-                        }, 0,2, TimeUnit.SECONDS);
+                        }, 0, 2, TimeUnit.SECONDS);
                         return true;
+                    }
+
+                    @Override
+                    public boolean isStandalone () {
+                        return false;
                     }
 
 

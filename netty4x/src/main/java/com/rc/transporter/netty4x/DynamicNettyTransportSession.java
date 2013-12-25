@@ -1,10 +1,10 @@
 package com.rc.transporter.netty4x;
 
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -73,10 +73,25 @@ public class DynamicNettyTransportSession<I, O> extends SimpleChannelInboundHand
             if (transportSession.validate((I) msg)) {
                 logger.trace("session validated");
                 isValidated.set(true);
+                // removing all handlers if the underlying session is standalone
+                if (transportSession.isStandalone()) {
+                    for (Map.Entry<String, ChannelHandler> handler : ctx.pipeline().toMap().entrySet()) {
+                        if (handler.getValue().equals(this)) {
+                            logger.trace("keeping " + handler.getKey());
+                            continue;
+                        }
+                        if (handler.getValue() instanceof ChannelOutboundHandler
+                                || handler.getValue() instanceof ChannelOutboundHandlerAdapter)
+                            continue;
+                        logger.trace("Removing " + handler.getKey());
+                        ctx.pipeline().remove(handler.getValue());
+                    }
+                }
             } else {
                 isClosed.set(true);
                 logger.trace("Removing dynamic transport session");
                 ctx.pipeline().remove(transportSession.getName());
+                ctx.fireChannelRead(msg);
             }
             return;
         }
