@@ -78,7 +78,6 @@ public class SocketIoTransportSession implements ISocketIOTransportSession {
             this.connectionCatalog.put(client.getSessionId(), session);
             mutex.release();
             session.onConnected(new SocketIoChannel(client));
-
         } catch (Exception e) {
             logger.error("While processing onConnect", e);
         }

@@ -4,6 +4,7 @@ import com.rc.transporter.core.ITransportSession;
 import com.rc.transporter.core.TransportChannel;
 import com.rc.transporter.core.TransportServer;
 import com.rc.transporter.netty4x.DynamicTransportSession;
+import com.rc.transporter.netty4x.DynamicTransportSessionAddPosition;
 import com.rc.transporter.netty4x.IDynamicNettyTransportSessionFactory;
 import com.rc.transporter.netty4x.IDynamicTransportSession;
 import io.netty.buffer.Unpooled;
@@ -103,6 +104,12 @@ public class SocketIoTransportServerTest extends TestCase {
                     }
 
 
+                    @Override
+                    public DynamicTransportSessionAddPosition addAt () {
+                        return DynamicTransportSessionAddPosition.ADD_LAST;
+                    }
+
+
                     /**
                      * Method to write header
                      */
@@ -126,6 +133,13 @@ public class SocketIoTransportServerTest extends TestCase {
             public String getName () {
                 return "test";  //To change body of implemented methods use File | Settings | File Templates.
             }
+
+            @Override
+            public DynamicTransportSessionAddPosition addAt () {
+                return DynamicTransportSessionAddPosition.ADD_LAST;
+            }
+
+
         });
         this.socketIoTransportServer = new SocketIoTransportServer(socketIoServerConfig);
 

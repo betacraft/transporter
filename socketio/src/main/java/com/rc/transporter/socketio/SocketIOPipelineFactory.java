@@ -4,6 +4,8 @@ import com.corundumstudio.socketio.SocketIOChannelInitializer;
 import com.rc.transporter.netty4x.DynamicNettyTransportSession;
 import com.rc.transporter.netty4x.IDynamicNettyTransportSessionFactory;
 import io.netty.channel.Channel;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +50,6 @@ final class SocketIOPipelineFactory extends SocketIOChannelInitializer {
      * @param handler
      */
     public void addHandler (final IDynamicNettyTransportSessionFactory handler) {
-
         if (this.handlers == null) {
             this.handlers = new ArrayList<IDynamicNettyTransportSessionFactory>();
         }
@@ -71,8 +72,17 @@ final class SocketIOPipelineFactory extends SocketIOChannelInitializer {
     protected void initChannel (Channel ch) throws Exception {
         super.initChannel(ch);
         for (IDynamicNettyTransportSessionFactory transportSessionFactory : this.handlers) {
-            ch.pipeline().addLast(transportSessionFactory.getName(),
-                    new DynamicNettyTransportSession(transportSessionFactory.get()));
+            switch (transportSessionFactory.addAt()) {
+                case ADD_FIRST:
+                    ch.pipeline().addFirst(transportSessionFactory.getName(),
+                            new DynamicNettyTransportSession(transportSessionFactory.get()));
+                    break;
+                case ADD_LAST:
+                    ch.pipeline().addLast(transportSessionFactory.getName(),
+                            new DynamicNettyTransportSession(transportSessionFactory.get()));
+                    break;
+            }
         }
+        ch.pipeline().addFirst("logger", new LoggingHandler(LogLevel.TRACE));
     }
 }

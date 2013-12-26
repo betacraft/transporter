@@ -31,4 +31,7 @@ public interface IDynamicTransportSession<I, O> extends ITransportSession<I, O> 
      */
     public boolean isStandalone ();
 
+
+    public DynamicTransportSessionAddPosition addAt ();
+
 }

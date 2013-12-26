@@ -48,6 +48,7 @@ public class DynamicNettyTransportSession<I, O> extends SimpleChannelInboundHand
         this.nettyChannel = new NettyChannel<O>(ctx);
         transportSession.onConnected(this.nettyChannel);
         logger.trace("Got channel connection");
+        ctx.read();
     }
 
     /**
@@ -58,6 +59,7 @@ public class DynamicNettyTransportSession<I, O> extends SimpleChannelInboundHand
     public DynamicNettyTransportSession (IDynamicTransportSession<I, O> transportSession) {
         this.transportSession = transportSession;
     }
+
 
     /**
      * @param ctx the {@link io.netty.channel.ChannelHandlerContext} which this {@link io.netty.channel
@@ -81,11 +83,13 @@ public class DynamicNettyTransportSession<I, O> extends SimpleChannelInboundHand
                             continue;
                         }
                         if (handler.getValue() instanceof ChannelOutboundHandler
-                                || handler.getValue() instanceof ChannelOutboundHandlerAdapter)
+                                || handler.getValue() instanceof ChannelOutboundHandlerAdapter
+                                || handler.getKey().equals("logger"))
                             continue;
                         logger.trace("Removing " + handler.getKey());
-                        ctx.pipeline().remove(handler.getValue());
+                        ctx.pipeline().remove(handler.getKey());
                     }
+
                 }
             } else {
                 isClosed.set(true);
@@ -95,7 +99,8 @@ public class DynamicNettyTransportSession<I, O> extends SimpleChannelInboundHand
             }
             return;
         }
-        transportSession.onData((I) msg);
+        if (!isClosed.get())
+            transportSession.onData((I) msg);
     }
 
     /**

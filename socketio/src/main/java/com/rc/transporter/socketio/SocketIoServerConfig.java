@@ -1,6 +1,7 @@
 package com.rc.transporter.socketio;
 
 import com.corundumstudio.socketio.Configuration;
+import com.rc.transporter.netty4x.DynamicTransportSessionAddPosition;
 import com.rc.transporter.netty4x.IDynamicNettyTransportSessionFactory;
 import com.rc.transporter.netty4x.IDynamicTransportSession;
 import org.slf4j.Logger;
@@ -80,6 +81,11 @@ public final class SocketIoServerConfig {
             @Override
             public String getName () {
                 return customRequestHandler.getName();
+            }
+
+            @Override
+            public DynamicTransportSessionAddPosition addAt () {
+                return customRequestHandler.addAt();
             }
         });
     }
