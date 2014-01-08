@@ -4,6 +4,8 @@ import com.corundumstudio.socketio.SocketIOChannelInitializer;
 import com.rc.transporter.netty4x.DynamicNettyTransportSession;
 import com.rc.transporter.netty4x.IDynamicNettyTransportSessionFactory;
 import io.netty.channel.Channel;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,6 +83,6 @@ final class SocketIOPipelineFactory extends SocketIOChannelInitializer {
                     break;
             }
         }
-        //ch.pipeline().addFirst("logger", new LoggingHandler(LogLevel.TRACE));
+        ch.pipeline().addFirst("logger", new LoggingHandler(LogLevel.TRACE));
     }
 }
