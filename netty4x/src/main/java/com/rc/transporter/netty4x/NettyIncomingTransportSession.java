@@ -1,6 +1,6 @@
 package com.rc.transporter.netty4x;
 
-import com.rc.transporter.core.ITransportSession;
+import com.rc.transporter.core.ITransportIncomingSession;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
@@ -12,19 +12,20 @@ import org.slf4j.LoggerFactory;
  * Date  : 9/21/13
  * Time  : 3:44 AM
  */
-public class NettyTransportSession<I, O> extends SimpleChannelInboundHandler<Object> {
+public class NettyIncomingTransportSession<I, O> extends SimpleChannelInboundHandler<Object> {
     /**
      * Logger
      */
-    private static final Logger logger = LoggerFactory.getLogger(NettyTransportSession.class);
+    private static final Logger logger = LoggerFactory.getLogger(NettyIncomingTransportSession.class);
     /**
      * @NettyChannel associated with this session
      */
-    private NettyChannel<O> nettyChannel;
+    protected NettyChannel<O> nettyChannel;
     /**
-     * Underlying @ITransportSession
+     * Underlying @ITransportIncomingSession
      */
-    private ITransportSession<I, O> transportSession;
+    protected ITransportIncomingSession<I, O> transportSession;
+
 
 
     /**
@@ -44,11 +45,12 @@ public class NettyTransportSession<I, O> extends SimpleChannelInboundHandler<Obj
     /**
      * Constructor
      *
-     * @param transportSession @ITransportSession which receives event
+     * @param transportSession @ITransportIncomingSession which receives event
      */
-    public NettyTransportSession (ITransportSession<I, O> transportSession) {
+    public NettyIncomingTransportSession (final ITransportIncomingSession<I, O> transportSession) {
         this.transportSession = transportSession;
     }
+
 
     /**
      * @param ctx the {@link io.netty.channel.ChannelHandlerContext} which this {@link io.netty.channel
@@ -86,8 +88,6 @@ public class NettyTransportSession<I, O> extends SimpleChannelInboundHandler<Obj
         super.channelInactive(ctx);
         transportSession.onDisconnected();
         logger.info("Channel inactive " + ctx.name());
-        if (this.nettyChannel != null)
-            this.nettyChannel.close();
     }
 
     /**
@@ -103,4 +103,6 @@ public class NettyTransportSession<I, O> extends SimpleChannelInboundHandler<Obj
         if (this.nettyChannel != null)
             this.nettyChannel.closeChannel();
     }
+
+
 }

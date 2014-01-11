@@ -18,10 +18,10 @@ public abstract class TransportServer {
     }
 
     /**
-     * Transport session factory for non sharable ITransportSession
+     * Transport session factory for non sharable ITransportIncomingSession
      */
     public interface ITransportSessionFactory {
-        ITransportSession get();
+        ITransportIncomingSession get();
     }
 
     /**
@@ -42,12 +42,12 @@ public abstract class TransportServer {
      *
      * @param port                    port on which server needs to be started
      * @param transportServerListener @ITransportServerListener listener to listen the state of the server
-     * @param transportSession        @ITransportSession session routine that will be associated with each connection received
+     * @param transportSession        @ITransportIncomingSession session routine that will be associated with each connection received
      *                                on this server
      * @throws Exception throws exception if any during starting the server
      */
     public abstract void start(final int port,
-                               final ITransportServerListener transportServerListener, final ITransportSession transportSession)
+                               final ITransportServerListener transportServerListener, final ITransportIncomingSession transportSession)
             throws Exception;
 
 
@@ -57,12 +57,12 @@ public abstract class TransportServer {
      * @param hostname                hostname
      * @param port                    port on which server needs to be started
      * @param transportServerListener @ITransportServerListener listener to listen the state of the server
-     * @param transportSession        @ITransportSession session routine that will be associated with each connection received
+     * @param transportSession        @ITransportIncomingSession session routine that will be associated with each connection received
      *                                on this server
      * @throws Exception throws exception if any during starting the server
      */
     public abstract void start(final String hostname, final int port,
-                               final ITransportServerListener transportServerListener, final ITransportSession transportSession)
+                               final ITransportServerListener transportServerListener, final ITransportIncomingSession transportSession)
             throws Exception;
 
 

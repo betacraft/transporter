@@ -7,7 +7,7 @@ package com.rc.transporter.netty4x;
  */
 public interface IDynamicNettyTransportSessionFactory {
 
-    public IDynamicTransportSession get ();
+    public IDynamicTransportIncomingSession get ();
 
     public String getName ();
 

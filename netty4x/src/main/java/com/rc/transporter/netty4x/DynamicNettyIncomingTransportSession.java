@@ -13,25 +13,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Date  : 9/21/13
  * Time  : 3:44 AM
  */
-public class DynamicNettyTransportSession<I, O> extends SimpleChannelInboundHandler<Object> {
+public class DynamicNettyIncomingTransportSession<I, O> extends NettyIncomingTransportSession {
     /**
      * Logger
      */
-    private static final Logger logger = LoggerFactory.getLogger(DynamicNettyTransportSession.class);
-    /**
-     * @NettyChannel associated with this session
-     */
-    private NettyChannel<O> nettyChannel;
-    /**
-     * Underlying @ITransportSession
-     */
-    private IDynamicTransportSession<I, O> transportSession;
+    private static final Logger logger = LoggerFactory.getLogger(DynamicNettyIncomingTransportSession.class);
     /**
      * is removed
      */
     private AtomicBoolean isClosed = new AtomicBoolean(false);
-
-
+    /**
+     * validated
+     */
     private AtomicBoolean isValidated = new AtomicBoolean(false);
 
 
@@ -54,10 +47,10 @@ public class DynamicNettyTransportSession<I, O> extends SimpleChannelInboundHand
     /**
      * Constructor
      *
-     * @param transportSession @ITransportSession which receives event
+     * @param transportSession @ITransportIncomingSession which receives event
      */
-    public DynamicNettyTransportSession (IDynamicTransportSession<I, O> transportSession) {
-        this.transportSession = transportSession;
+    public DynamicNettyIncomingTransportSession (IDynamicTransportIncomingSession<I, O> transportSession) {
+        super(transportSession);
     }
 
 
@@ -72,11 +65,11 @@ public class DynamicNettyTransportSession<I, O> extends SimpleChannelInboundHand
     protected void channelRead0 (ChannelHandlerContext ctx, Object msg) throws Exception {
         if (!isValidated.get()) {
             logger.trace("Got data " + msg.toString());
-            if (transportSession.validate((I) msg)) {
+            if (((IDynamicTransportIncomingSession) transportSession).validate((I) msg)) {
                 logger.trace("session validated");
                 isValidated.set(true);
                 // removing all handlers if the underlying session is standalone
-                if (transportSession.isStandalone()) {
+                if (((IDynamicTransportIncomingSession) transportSession).isStandalone()) {
                     for (Map.Entry<String, ChannelHandler> handler : ctx.pipeline().toMap().entrySet()) {
                         if (handler.getValue().equals(this)) {
                             logger.trace("keeping " + handler.getKey());
@@ -94,7 +87,7 @@ public class DynamicNettyTransportSession<I, O> extends SimpleChannelInboundHand
             } else {
                 isClosed.set(true);
                 logger.trace("Removing dynamic transport session");
-                ctx.pipeline().remove(transportSession.getName());
+                ctx.pipeline().remove(((IDynamicTransportIncomingSession) transportSession).getName());
                 ctx.fireChannelRead(msg);
             }
             return;
@@ -103,17 +96,6 @@ public class DynamicNettyTransportSession<I, O> extends SimpleChannelInboundHand
             transportSession.onData((I) msg);
     }
 
-    /**
-     * Calls {@link io.netty.channel.ChannelHandlerContext#fireUserEventTriggered(Object)} to forward
-     * to the next {@link io.netty.channel.ChannelInboundHandler} in the {@link io.netty.channel
-     * .ChannelPipeline}.
-     * <p/>
-     * Sub-classes may override this method to change behavior.
-     */
-    @Override
-    public void userEventTriggered (ChannelHandlerContext ctx, Object evt) throws Exception {
-        super.userEventTriggered(ctx, evt);
-    }
 
     /**
      * Calls {@link io.netty.channel.ChannelHandlerContext#fireChannelInactive()} to forward
@@ -129,7 +111,6 @@ public class DynamicNettyTransportSession<I, O> extends SimpleChannelInboundHand
             return;
         transportSession.onDisconnected();
         logger.info("Channel inactive " + ctx.name());
-        this.nettyChannel.close();
     }
 
     /**

@@ -1,13 +1,13 @@
 package com.rc.transporter.netty4x;
 
-import com.rc.transporter.core.ITransportSession;
+import com.rc.transporter.core.ITransportIncomingSession;
 
 /**
  * Author: akshay
  * Date  : 11/27/13
  * Time  : 1:03 AM
  */
-public interface IDynamicTransportSession<I, O> extends ITransportSession<I, O> {
+public interface IDynamicTransportIncomingSession<I, O> extends ITransportIncomingSession<I, O> {
     /**
      * Name of the session
      * this name will be associated with the Handler if applicable

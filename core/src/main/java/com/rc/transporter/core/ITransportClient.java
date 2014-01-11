@@ -12,13 +12,14 @@ public interface ITransportClient<I, O> {
      *
      * @param host             hostname
      * @param port             port
-     * @param transportSession @TransportSession to listen to the events associated wtih session
+     * @param transportSession @TransportIncomingSession to listen to the events associated wtih session
      */
-    public void connect(final String host, final int port, ITransportSession<I, O> transportSession) throws Exception;
+    public void connect (final String host, final int port,
+            final ITransportOutgoingSession<I, O> transportSession) throws Exception;
 
     /**
      * Method to close client
      */
-    public void close();
+    public void close ();
 
 }
