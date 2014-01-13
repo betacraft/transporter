@@ -11,9 +11,9 @@ public interface ITransportIncomingSession<I, O> {
     /**
      * Callback called when connection is received in session
      *
-     * @param channel @TransportChannel associated with this session
+     * @param channel @ITransportChannel associated with this session
      */
-    public void onConnected (TransportChannel<O> channel);
+    public void onConnected (ITransportChannel<O> channel);
 
     /**
      * Callback called when connection is disconnected

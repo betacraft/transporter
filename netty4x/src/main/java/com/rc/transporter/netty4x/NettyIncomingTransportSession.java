@@ -3,6 +3,7 @@ package com.rc.transporter.netty4x;
 import com.rc.transporter.core.ITransportIncomingSession;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.socket.ChannelInputShutdownEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,21 +28,6 @@ public class NettyIncomingTransportSession<I, O> extends SimpleChannelInboundHan
     protected ITransportIncomingSession<I, O> transportSession;
 
 
-
-    /**
-     * Calls {@link io.netty.channel.ChannelHandlerContext#fireChannelActive()} to forward
-     * to the next {@link io.netty.channel.ChannelInboundHandler} in the {@link io.netty.channel
-     * .ChannelPipeline}.
-     * <p/>
-     * Sub-classes may override this method to change behavior.
-     */
-    @Override
-    public void channelActive (ChannelHandlerContext ctx) throws Exception {
-        super.channelActive(ctx);
-        this.nettyChannel = new NettyChannel<O>(ctx);
-        transportSession.onConnected(this.nettyChannel);
-    }
-
     /**
      * Constructor
      *
@@ -51,6 +37,13 @@ public class NettyIncomingTransportSession<I, O> extends SimpleChannelInboundHan
         this.transportSession = transportSession;
     }
 
+    @Override
+    public void channelActive (ChannelHandlerContext ctx) throws Exception {
+        super.channelActive(ctx);
+        this.nettyChannel = new NettyChannel<O>(ctx);
+        if (transportSession != null)
+            transportSession.onConnected(this.nettyChannel);
+    }
 
     /**
      * @param ctx the {@link io.netty.channel.ChannelHandlerContext} which this {@link io.netty.channel
@@ -61,18 +54,20 @@ public class NettyIncomingTransportSession<I, O> extends SimpleChannelInboundHan
      */
     @Override
     protected void channelRead0 (ChannelHandlerContext ctx, Object msg) throws Exception {
-        transportSession.onData((I) msg);
+        logger.debug("got data");
+        if (transportSession != null)
+            transportSession.onData((I) msg);
     }
 
-    /**
-     * Calls {@link io.netty.channel.ChannelHandlerContext#fireUserEventTriggered(Object)} to forward
-     * to the next {@link io.netty.channel.ChannelInboundHandler} in the {@link io.netty.channel
-     * .ChannelPipeline}.
-     * <p/>
-     * Sub-classes may override this method to change behavior.
-     */
+
     @Override
     public void userEventTriggered (ChannelHandlerContext ctx, Object evt) throws Exception {
+        logger.debug("User event " + evt.toString());
+        if (evt instanceof ChannelInputShutdownEvent) {
+            //TODO check if this is correct
+            // for now triggering close socket event
+            ctx.close();
+        }
         super.userEventTriggered(ctx, evt);
     }
 
@@ -86,7 +81,8 @@ public class NettyIncomingTransportSession<I, O> extends SimpleChannelInboundHan
     @Override
     public void channelInactive (ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
-        transportSession.onDisconnected();
+        if (transportSession != null)
+            transportSession.onDisconnected();
         logger.info("Channel inactive " + ctx.name());
     }
 
@@ -99,10 +95,11 @@ public class NettyIncomingTransportSession<I, O> extends SimpleChannelInboundHan
     @Override
     public void exceptionCaught (ChannelHandlerContext ctx, Throwable cause) throws Exception {
         logger.error("Exception caught ", cause);
-        transportSession.onError(cause);
+        if (transportSession != null) {
+            transportSession.onError(cause);
+        }
         if (this.nettyChannel != null)
-            this.nettyChannel.closeChannel();
+            this.nettyChannel.close();
     }
-
 
 }

@@ -126,6 +126,6 @@ public class DynamicNettyIncomingTransportSession<I, O> extends NettyIncomingTra
         if (isClosed.get() || !isValidated.get())
             return;
         transportSession.onError(cause);
-        this.nettyChannel.closeChannel();
+        this.nettyChannel.close();
     }
 }
