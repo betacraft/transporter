@@ -1,7 +1,7 @@
 package com.rc.transporter.socketio;
 
 import com.corundumstudio.socketio.SocketIOChannelInitializer;
-import com.rc.transporter.netty4x.DynamicNettyTransportSession;
+import com.rc.transporter.netty4x.DynamicNettyIncomingTransportSession;
 import com.rc.transporter.netty4x.IDynamicNettyTransportSessionFactory;
 import io.netty.channel.Channel;
 import io.netty.handler.logging.LogLevel;
@@ -75,11 +75,11 @@ final class SocketIOPipelineFactory extends SocketIOChannelInitializer {
             switch (transportSessionFactory.addAt()) {
                 case ADD_FIRST:
                     ch.pipeline().addFirst(transportSessionFactory.getName(),
-                            new DynamicNettyTransportSession(transportSessionFactory.get()));
+                            new DynamicNettyIncomingTransportSession(transportSessionFactory.get()));
                     break;
                 case ADD_LAST:
                     ch.pipeline().addLast(transportSessionFactory.getName(),
-                            new DynamicNettyTransportSession(transportSessionFactory.get()));
+                            new DynamicNettyIncomingTransportSession(transportSessionFactory.get()));
                     break;
             }
         }
