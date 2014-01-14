@@ -1,6 +1,9 @@
 package com.rc.transporter.netty4x;
 
-import io.netty.channel.*;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelOutboundHandler;
+import io.netty.channel.ChannelOutboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +56,12 @@ public class DynamicNettyIncomingTransportSession<I, O> extends NettyIncomingTra
         super(transportSession);
     }
 
+
+    @Override
+    public void userEventTriggered (ChannelHandlerContext ctx, Object evt) throws Exception {
+        logger.debug("User event " + evt.toString());
+        super.userEventTriggered(ctx, evt);
+    }
 
     /**
      * @param ctx the {@link io.netty.channel.ChannelHandlerContext} which this {@link io.netty.channel
