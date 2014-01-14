@@ -78,10 +78,11 @@ public final class NettyTransportServer extends TransportServer {
                                 logger.warn("No session events executor factory assigned" +
                                         "\nMake sure you are not stealing time from worker " +
                                         "group for better performance");
-                                pipeline.addLast(new NettyIncomingTransportSession(nettyTransportSession));
+                                pipeline.addLast
+                                        (new NettyIncomingTransportSession(nettyTransportSession, true));
                             } else {
                                 pipeline.addLast(serverConfig.getSessionEventsExecutorFactory().get(),
-                                        new NettyIncomingTransportSession(nettyTransportSession));
+                                        new NettyIncomingTransportSession(nettyTransportSession, true));
                             }
                         }
                     });
@@ -119,7 +120,8 @@ public final class NettyTransportServer extends TransportServer {
      * @param hostname                hostname
      * @param port                    port on which server needs to be started
      * @param transportServerListener @ITransportServerListener listener to listen the state of the server
-     * @param nettyTransportSession   @ITransportIncomingSession associated with each connection being received on
+     * @param nettyTransportSession   @ITransportIncomingSession associated with each connection being
+     *                                received on
      *                                this server
      */
     @Override
@@ -143,10 +145,11 @@ public final class NettyTransportServer extends TransportServer {
                         @Override
                         public void appendRuntimeHandler (final ChannelPipeline pipeline) {
                             if (serverConfig.getSessionEventsExecutorFactory() == null)
-                                pipeline.addLast(new NettyIncomingTransportSession(nettyTransportSession));
+                                pipeline.addLast(new NettyIncomingTransportSession(nettyTransportSession,
+                                        true));
                             else
                                 pipeline.addLast(serverConfig.getSessionEventsExecutorFactory().get(),
-                                        new NettyIncomingTransportSession(nettyTransportSession));
+                                        new NettyIncomingTransportSession(nettyTransportSession, true));
                         }
                     });
             this.bossGroup = this.serverConfig.getBossGroupFactory().get();
@@ -182,7 +185,8 @@ public final class NettyTransportServer extends TransportServer {
      *
      * @param port                    port on which server needs to be started
      * @param transportServerListener @ITransportServerListener listener to listen the state of the server
-     * @param transportSessionFactory @ITransportIncomingSessionFactory session routine that will be associated
+     * @param transportSessionFactory @ITransportIncomingSessionFactory session routine that will be
+     *                                associated
      *                                with each connection received
      *                                on this server
      * @throws Exception throws exception if any during starting the server
@@ -207,10 +211,11 @@ public final class NettyTransportServer extends TransportServer {
                 @Override
                 public void appendRuntimeHandler (final ChannelPipeline pipeline) {
                     if (serverConfig.getSessionEventsExecutorFactory() == null)
-                        pipeline.addLast(new NettyIncomingTransportSession(transportSessionFactory.get()));
+                        pipeline.addLast(new NettyIncomingTransportSession(transportSessionFactory.get(),
+                                true));
                     else
                         pipeline.addLast(serverConfig.getSessionEventsExecutorFactory().get(),
-                                new NettyIncomingTransportSession(transportSessionFactory.get()));
+                                new NettyIncomingTransportSession(transportSessionFactory.get(), true));
                 }
             });
             this.bossGroup = this.serverConfig.getBossGroupFactory().get();
@@ -248,7 +253,8 @@ public final class NettyTransportServer extends TransportServer {
      * @param hostname                hostname
      * @param port                    port on which server needs to be started
      * @param transportServerListener @ITransportServerListener listener to listen the state of the server
-     * @param transportSessionFactory @ITransportIncomingSessionFactory factory for session associated with server
+     * @param transportSessionFactory @ITransportIncomingSessionFactory factory for session associated with
+     *                                server
      *                                connections
      * @throws Exception throws exception if any during starting the server
      */
@@ -272,10 +278,13 @@ public final class NettyTransportServer extends TransportServer {
                         @Override
                         public void appendRuntimeHandler (ChannelPipeline pipeline) {
                             if (serverConfig.getSessionEventsExecutorFactory() == null)
-                                pipeline.addLast(new NettyIncomingTransportSession(transportSessionFactory.get()));
+                                pipeline.addLast
+                                        (new NettyIncomingTransportSession(transportSessionFactory.get(),
+                                                true));
                             else
                                 pipeline.addLast(serverConfig.getSessionEventsExecutorFactory().get(),
-                                        new NettyIncomingTransportSession(transportSessionFactory.get()));
+                                        new NettyIncomingTransportSession(transportSessionFactory.get(),
+                                                true));
                         }
                     });
             this.bossGroup = this.serverConfig.getBossGroupFactory().get();

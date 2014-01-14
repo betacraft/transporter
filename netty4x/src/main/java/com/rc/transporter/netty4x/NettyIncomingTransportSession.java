@@ -7,6 +7,8 @@ import io.netty.channel.socket.ChannelInputShutdownEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * Netty transport system
  * Author: akshay
@@ -26,15 +28,20 @@ public class NettyIncomingTransportSession<I, O> extends SimpleChannelInboundHan
      * Underlying @ITransportIncomingSession
      */
     protected ITransportIncomingSession<I, O> transportSession;
-
+    /**
+     * Detect user event for disconnection
+     */
+    protected AtomicBoolean detectUserEventsForDisconnection = new AtomicBoolean(true);
 
     /**
      * Constructor
      *
      * @param transportSession @ITransportIncomingSession which receives event
      */
-    public NettyIncomingTransportSession (final ITransportIncomingSession<I, O> transportSession) {
+    public NettyIncomingTransportSession (final ITransportIncomingSession<I, O> transportSession,
+            final boolean detectUserEventForDisconnection) {
         this.transportSession = transportSession;
+        this.detectUserEventsForDisconnection.set(detectUserEventForDisconnection);
     }
 
     @Override
@@ -62,13 +69,17 @@ public class NettyIncomingTransportSession<I, O> extends SimpleChannelInboundHan
 
     @Override
     public void userEventTriggered (ChannelHandlerContext ctx, Object evt) throws Exception {
-        logger.debug("User event " + evt.toString());
-        if (evt instanceof ChannelInputShutdownEvent) {
-            //TODO check if this is correct
-            // for now triggering close socket event
-            ctx.close();
-        }
         super.userEventTriggered(ctx, evt);
+        logger.debug("User event " + evt.toString());
+        if (this.detectUserEventsForDisconnection.get()) {
+            if (evt instanceof ChannelInputShutdownEvent) {
+                //TODO check if this is correct
+                // for now triggering close socket event
+                logger.trace("Closing session because of channel input shutdown event");
+                ctx.close();
+            }
+        }
+
     }
 
     /**
