@@ -61,7 +61,6 @@ public class NettyIncomingTransportSession<I, O> extends SimpleChannelInboundHan
      */
     @Override
     protected void channelRead0 (ChannelHandlerContext ctx, Object msg) throws Exception {
-        logger.debug("got data");
         if (transportSession != null)
             transportSession.onData((I) msg);
     }

@@ -45,7 +45,8 @@ public class SocketIoTransportSession implements ISocketIOTransportSession {
     }
 
 
-    public ISocketIOTransportSession setSharableTransportSession (final ITransportIncomingSession transportSession) {
+    public ISocketIOTransportSession setSharableTransportSession (final ITransportIncomingSession
+            transportSession) {
         this.clientSessionFactory = new TransportServer.ITransportIncomingSessionFactory() {
             @Override
             public ITransportIncomingSession get () {
@@ -129,7 +130,7 @@ public class SocketIoTransportSession implements ISocketIOTransportSession {
 
     @Override
     public void onDisconnect (SocketIOClient client) {
-        logger.debug("SocketIO disconnected");
+        logger.debug("SocketIO disconnected" + client.getTransport().name());
         if (!this.connectionCatalog.containsKey(client.getSessionId()))
             return;
         try {
