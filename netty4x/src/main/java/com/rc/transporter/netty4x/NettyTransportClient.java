@@ -83,11 +83,7 @@ public class NettyTransportClient<I, O> implements ITransportClient<I, O> {
         try {
             this.underlyingSession = transportSession;
             this.nioEventLoopGroup = this.clientConfig.getWorkerGroupFactory().get();
-            if (this.clientConfig.getAutoRecover()) {
-                connectWithRecoveryLogic(host, port);
-            } else {
-                connectWithoutRecoveryLogic(host, port);
-            }
+            connectInternal(host, port);
         } catch (Exception exception) {
             logger.error("Exception while connection to {}:{}", host, port, exception);
             throw exception;
@@ -95,11 +91,8 @@ public class NettyTransportClient<I, O> implements ITransportClient<I, O> {
 
     }
 
-    private void connectWithoutRecoveryLogic (final String host, final int port) {
 
-    }
-
-    private void connectWithRecoveryLogic (final String host, final int port) {
+    private void connectInternal (final String host, final int port) {
         logger.debug("Connecting with recovery logic");
         this.nettyOutgoingTransportSession = new NettyOutgoingTransportSession(this.underlyingSession,
                 new NettyOutgoingChannelStateListener() {
@@ -145,8 +138,9 @@ public class NettyTransportClient<I, O> implements ITransportClient<I, O> {
                     @Override
                     public void operationComplete (ChannelFuture future) throws Exception {
                         logger.info("Client bootstrap closed");
-                        if (++retries < clientConfig.getAutoRecoverAttempts() && !isClosed.get()) {
-                            connectWithRecoveryLogic(host, port);
+                        if (++retries < clientConfig.getAutoRecoverAttempts() && !isClosed.get()
+                                && clientConfig.getAutoRecover()) {
+                            connectInternal(host, port);
                         } else {
                             if (underlyingSession != null)
                                 underlyingSession.onDisconnected();
