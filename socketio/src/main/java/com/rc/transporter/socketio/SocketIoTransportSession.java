@@ -71,6 +71,10 @@ public class SocketIoTransportSession implements ISocketIOTransportSession {
     public void onConnect (final SocketIOClient client) {
         logger.trace("SocketIO server got a new connection");
         try {
+            if (this.connectionCatalog.containsKey(client.getSessionId())) {
+                logger.error("Duplicate onConnect call");
+                return;
+            }
             Mutex mutex = new Mutex();
             mutex.acquire();
             this.connectionCatalogEntryLock.put(client.getSessionId(), mutex);
@@ -130,6 +134,11 @@ public class SocketIoTransportSession implements ISocketIOTransportSession {
     @Override
     public void onDisconnect (SocketIOClient client) {
         logger.debug("SocketIO disconnected");
+        try {
+            this.connectionCatalogEntryLock.remove(client.getSessionId());
+        } catch (Exception ignored) {
+
+        }
         if (!this.connectionCatalog.containsKey(client.getSessionId()))
             return;
         try {
