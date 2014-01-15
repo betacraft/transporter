@@ -1,5 +1,6 @@
 package com.rc.transporter.netty4x;
 
+import com.rc.transporter.core.ITransportIncomingSession;
 import io.netty.channel.*;
 import io.netty.channel.socket.ChannelInputShutdownEvent;
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ public class DynamicNettyIncomingTransportSession<I, O> extends SimpleChannelInb
     /**
      * Underlying @ITransportIncomingSession
      */
-    private IDynamicTransportIncomingSession<I, O> transportSession;
+    private ITransportIncomingSession<I, O> transportSession;
     /**
      * Detect user event for disconnection
      */
@@ -79,11 +80,11 @@ public class DynamicNettyIncomingTransportSession<I, O> extends SimpleChannelInb
     protected void channelRead0 (ChannelHandlerContext ctx, Object msg) throws Exception {
         if (!isValidated.get()) {
             logger.trace("Got data " + msg.toString());
-            if (transportSession.validate((I) msg)) {
+            if (((IDynamicTransportIncomingSession) transportSession).validate((I) msg)) {
                 logger.trace("session validated");
                 isValidated.set(true);
                 // removing all handlers if the underlying session is standalone
-                if (transportSession.isStandalone()) {
+                if (((IDynamicTransportIncomingSession) transportSession).isStandalone()) {
                     for (Map.Entry<String, ChannelHandler> handler : ctx.pipeline().toMap().entrySet()) {
                         if (handler.getValue().equals(this)) {
                             logger.trace("keeping " + handler.getKey());
@@ -106,7 +107,7 @@ public class DynamicNettyIncomingTransportSession<I, O> extends SimpleChannelInb
             }
             return;
         }
-        if (!isClosed.get() && transportSession != null)
+        if (!isClosed.get())
             transportSession.onData((I) msg);
     }
 
