@@ -6,14 +6,14 @@ package com.rc.transporter.core;
  * Date  : 9/21/13
  * Time  : 3:41 AM
  */
-public interface ITransportSession<I, O> {
+public interface ITransportIncomingSession<I, O> {
 
     /**
      * Callback called when connection is received in session
      *
-     * @param channel @TransportChannel associated with this session
+     * @param channel @ITransportChannel associated with this session
      */
-    public void onConnected (TransportChannel<O> channel);
+    public void onConnected (ITransportChannel<O> channel);
 
     /**
      * Callback called when connection is disconnected
@@ -33,9 +33,10 @@ public interface ITransportSession<I, O> {
      * @param data data
      */
     public void onData (I data);
+
     /**
      * Generic method for setting properties related with session
      */
-    public void setProperty(final String key, final Object value);
+    public void setProperty (final String key, final Object value);
 
 }

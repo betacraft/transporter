@@ -29,8 +29,8 @@ So ideally this library acts as an interface between your business logic and tra
 ## Supported frameworks
 
 - [x] Netty 4.x
-- [x] Netty 3.x
-- [x] Raw Sockets
+- ~~[x] Netty 3.x~~ not supported for version 2.0+
+- ~~[x] Raw Sockets~~ not supported for version 2.0+
 - [x] SocketIO
 - [ ] Java NIO (need help to complete)
 
