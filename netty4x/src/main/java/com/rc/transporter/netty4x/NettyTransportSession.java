@@ -3,6 +3,7 @@ package com.rc.transporter.netty4x;
 import com.rc.transporter.core.ITransportSession;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.socket.ChannelInputShutdownEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,6 +73,10 @@ public class NettyTransportSession<I, O> extends SimpleChannelInboundHandler<Obj
     @Override
     public void userEventTriggered (ChannelHandlerContext ctx, Object evt) throws Exception {
         super.userEventTriggered(ctx, evt);
+        if (evt instanceof ChannelInputShutdownEvent) {
+            if (transportSession != null)
+                transportSession.onDisconnected();
+        }
     }
 
     /**
