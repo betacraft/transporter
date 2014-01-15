@@ -15,6 +15,29 @@ public abstract class TransportChannel<M> {
      */
     protected final static Logger logger = LoggerFactory.getLogger(TransportChannel.class);
 
+
+    /**
+     * Channel state listener which is used internally
+     */
+    interface IChannelStateListener {
+        void onClose ();
+    }
+
+    /**
+     * Channel state listener associated with this channel
+     */
+    private IChannelStateListener channelStateListener;
+
+    /**
+     * Method to set channel state listener
+     *
+     * @param channelStateListener instance of @IChannelStateListener
+     */
+    void setChannelStateListener (final IChannelStateListener channelStateListener) {
+        this.channelStateListener = channelStateListener;
+    }
+
+
     /**
      * Method to push data on channel
      *
@@ -41,4 +64,13 @@ public abstract class TransportChannel<M> {
      */
     public abstract void setProperty (final String name, Object value);
 
+    /**
+     * Method to close channel
+     */
+    public void close () {
+        closeChannel();
+        if (this.channelStateListener == null)
+            return;
+        this.channelStateListener.onClose();
+    }
 }

@@ -6,7 +6,7 @@ package com.rc.transporter.core;
  * Date  : 9/21/13
  * Time  : 3:41 AM
  */
-public interface ITransportIncomingSession<I, O> {
+public interface ITransportSession<I, O> {
 
     /**
      * Callback called when connection is received in session
@@ -33,10 +33,9 @@ public interface ITransportIncomingSession<I, O> {
      * @param data data
      */
     public void onData (I data);
-
     /**
      * Generic method for setting properties related with session
      */
-    public void setProperty (final String key, final Object value);
+    public void setProperty(final String key, final Object value);
 
 }

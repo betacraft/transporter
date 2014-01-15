@@ -19,14 +19,14 @@ public class NettyTransportClientConfig {
      * Session event executor group factory
      */
     public interface SessionEventExecutorGroupFactory {
-        public EventExecutorGroup get ();
+        public EventExecutorGroup get();
     }
 
     /**
      * Nio event loop group factory
      */
     public interface NioEventLoopGroupFactory {
-        public NioEventLoopGroup get ();
+        public NioEventLoopGroup get();
     }
 
     /**
@@ -53,58 +53,14 @@ public class NettyTransportClientConfig {
      * Executor group alive flag
      */
     private AtomicBoolean keepExecutorGroupAlive = new AtomicBoolean(false);
-    /**
-     * Auto recover on disconnect
-     */
-    private AtomicBoolean autoRecover = new AtomicBoolean(false);
-    /**
-     * Auto recover attempts
-     */
-    private int autoRecoverAttempts = 3;
 
-
-    /**
-     * Getter for @autoRecover
-     *
-     * @return
-     */
-    public boolean getAutoRecover () {
-        return this.autoRecover.get();
-    }
-
-    /**
-     * Setter for @autoRecover
-     *
-     * @param autoRecover
-     */
-    public void setAutoRecover (final boolean autoRecover) {
-        this.autoRecover.set(autoRecover);
-    }
-
-    /**
-     * getter for @autoRecoverAttempts
-     *
-     * @return
-     */
-    public int getAutoRecoverAttempts () {
-        return this.autoRecoverAttempts;
-    }
-
-    /**
-     * setter for @autoRecoverAttempts
-     *
-     * @param autoRecoverAttempts
-     */
-    public void setAutoRecoverAttempts (final int autoRecoverAttempts) {
-        this.autoRecoverAttempts = autoRecoverAttempts;
-    }
 
     /**
      * Getter for @keepExecutorGroupAlive
      *
      * @return
      */
-    public boolean getKeepExecutorGroupAlive () {
+    public boolean getKeepExecutorGroupAlive() {
         return keepExecutorGroupAlive.get();
     }
 
@@ -114,7 +70,7 @@ public class NettyTransportClientConfig {
      *
      * @param keepExecutorGroupAlive
      */
-    public void setKeepExecutorGroupAlive (final boolean keepExecutorGroupAlive) {
+    public void setKeepExecutorGroupAlive(final boolean keepExecutorGroupAlive) {
         this.keepExecutorGroupAlive.set(keepExecutorGroupAlive);
     }
 
@@ -124,7 +80,7 @@ public class NettyTransportClientConfig {
      *
      * @return
      */
-    public boolean getKeepNioGroupAlive () {
+    public boolean getKeepNioGroupAlive() {
         return keepNioGroupAlive.get();
     }
 
@@ -133,7 +89,7 @@ public class NettyTransportClientConfig {
      *
      * @param keepNioGroupAlive
      */
-    public void setKeepNioGroupAlive (final boolean keepNioGroupAlive) {
+    public void setKeepNioGroupAlive(final boolean keepNioGroupAlive) {
         this.keepNioGroupAlive.set(keepNioGroupAlive);
     }
 
@@ -142,7 +98,7 @@ public class NettyTransportClientConfig {
      *
      * @return
      */
-    public SessionEventExecutorGroupFactory getSessionEventsExecutorFactory () {
+    public SessionEventExecutorGroupFactory getSessionEventsExecutorFactory() {
         return sessionEventsExecutorFactory;
     }
 
@@ -151,8 +107,7 @@ public class NettyTransportClientConfig {
      *
      * @param sessionEventsExecutorFactory
      */
-    public void setSessionEventsExecutorFactory (final SessionEventExecutorGroupFactory
-            sessionEventsExecutorFactory) {
+    public void setSessionEventsExecutorFactory(final SessionEventExecutorGroupFactory sessionEventsExecutorFactory) {
         this.sessionEventsExecutorFactory = sessionEventsExecutorFactory;
     }
 
@@ -161,7 +116,7 @@ public class NettyTransportClientConfig {
      *
      * @return
      */
-    public NettyChannelInitializer getChannelInitializer () {
+    public NettyChannelInitializer getChannelInitializer() {
         return channelInitializer;
     }
 
@@ -170,7 +125,7 @@ public class NettyTransportClientConfig {
      *
      * @param channelInitializer
      */
-    public void setChannelInitializer (NettyChannelInitializer channelInitializer) {
+    public void setChannelInitializer(NettyChannelInitializer channelInitializer) {
         this.channelInitializer = channelInitializer;
     }
 
@@ -179,7 +134,7 @@ public class NettyTransportClientConfig {
      *
      * @return
      */
-    public Map<ChannelOption, Object> getChannelOptions () {
+    public Map<ChannelOption, Object> getChannelOptions() {
         return channelOptions;
     }
 
@@ -188,7 +143,7 @@ public class NettyTransportClientConfig {
      *
      * @param channelOptions
      */
-    public void setChannelOptions (Map<ChannelOption, Object> channelOptions) {
+    public void setChannelOptions(Map<ChannelOption, Object> channelOptions) {
         this.channelOptions = channelOptions;
     }
 
@@ -198,7 +153,7 @@ public class NettyTransportClientConfig {
      * @param channelOption @ChannelOption
      * @param value         value
      */
-    public void addChannelOption (ChannelOption channelOption, Object value) {
+    public void addChannelOption(ChannelOption channelOption, Object value) {
         if (this.channelOptions == null)
             this.channelOptions = new HashMap<ChannelOption, Object>();
         this.channelOptions.put(channelOption, value);
@@ -209,7 +164,7 @@ public class NettyTransportClientConfig {
      *
      * @param channelOption @ChannelOption
      */
-    public void removeChannelOption (ChannelOption channelOption) {
+    public void removeChannelOption(ChannelOption channelOption) {
         if (this.channelOptions == null)
             return;
         this.channelOptions.remove(channelOption);
@@ -220,7 +175,7 @@ public class NettyTransportClientConfig {
      *
      * @return
      */
-    public NioEventLoopGroupFactory getWorkerGroupFactory () {
+    public NioEventLoopGroupFactory getWorkerGroupFactory() {
         return nioGroupFactory;
     }
 
@@ -229,7 +184,7 @@ public class NettyTransportClientConfig {
      *
      * @param workerGroup
      */
-    public void setWorkerGroupFactory (NioEventLoopGroupFactory workerGroup) {
+    public void setWorkerGroupFactory(NioEventLoopGroupFactory workerGroup) {
         this.nioGroupFactory = workerGroup;
     }
 
@@ -237,7 +192,7 @@ public class NettyTransportClientConfig {
     /**
      * Default constructor
      */
-    protected NettyTransportClientConfig () {
+    protected NettyTransportClientConfig() {
 
         this.channelOptions = new HashMap<ChannelOption, Object>();
     }
@@ -247,10 +202,10 @@ public class NettyTransportClientConfig {
      *
      * @param channelInitializer @ChannelInitializer for channel
      */
-    protected NettyTransportClientConfig (final NettyChannelInitializer channelInitializer) {
+    protected NettyTransportClientConfig(final NettyChannelInitializer channelInitializer) {
         this.nioGroupFactory = new NioEventLoopGroupFactory() {
             @Override
-            public NioEventLoopGroup get () {
+            public NioEventLoopGroup get() {
                 return new NioEventLoopGroup(0);
             }
         };
@@ -258,7 +213,7 @@ public class NettyTransportClientConfig {
         // initializing default channel options
         this.channelOptions = new HashMap<ChannelOption, Object>();
         this.channelOptions.put(ChannelOption.SO_SNDBUF, 1048576);
-        this.channelOptions.put(ChannelOption.SO_RCVBUF, 1048576);
+        this.channelOptions.put(ChannelOption.SO_RCVBUF,1048576);
         this.channelOptions.put(ChannelOption.ALLOW_HALF_CLOSURE, true);
         this.channelOptions.put(ChannelOption.TCP_NODELAY, true);
         this.channelOptions.put(ChannelOption.SO_KEEPALIVE, true);
@@ -268,17 +223,17 @@ public class NettyTransportClientConfig {
     /**
      * Constructor
      *
-     * @param nioGroupFactory    @NioEventLoopGroupFactory for worker
+     * @param nioGroupFactory @NioEventLoopGroupFactory for worker
      * @param channelInitializer @ChannelInitializer associated with channel
      */
-    protected NettyTransportClientConfig (final NioEventLoopGroupFactory nioGroupFactory,
-            final NettyChannelInitializer channelInitializer) {
+    protected NettyTransportClientConfig(final NioEventLoopGroupFactory nioGroupFactory,
+                                      final NettyChannelInitializer channelInitializer) {
         this.nioGroupFactory = nioGroupFactory;
         this.channelInitializer = channelInitializer;
         // initializing default channel options
         this.channelOptions = new HashMap<ChannelOption, Object>();
         this.channelOptions.put(ChannelOption.SO_SNDBUF, 1048576);
-        this.channelOptions.put(ChannelOption.SO_RCVBUF, 1048576);
+        this.channelOptions.put(ChannelOption.SO_RCVBUF,1048576);
         this.channelOptions.put(ChannelOption.ALLOW_HALF_CLOSURE, true);
         this.channelOptions.put(ChannelOption.TCP_NODELAY, true);
         this.channelOptions.put(ChannelOption.SO_KEEPALIVE, true);
@@ -288,12 +243,12 @@ public class NettyTransportClientConfig {
     /**
      * Factory
      *
-     * @param nioGroupFactory    @NioEventLoopGroupFactory for worker
+     * @param nioGroupFactory @NioEventLoopGroupFactory for worker
      * @param channelInitializer @ChannelInitializer associated with channel
      * @return
      */
-    public static NettyTransportClientConfig getDefault (final NioEventLoopGroupFactory nioGroupFactory,
-            final NettyChannelInitializer channelInitializer) {
+    public static NettyTransportClientConfig getDefault(final NioEventLoopGroupFactory nioGroupFactory,
+                                                        final NettyChannelInitializer channelInitializer) {
         return new NettyTransportClientConfig(nioGroupFactory, channelInitializer);
     }
 
@@ -303,7 +258,7 @@ public class NettyTransportClientConfig {
      *
      * @return
      */
-    public static NettyTransportClientConfig get () {
+    public static NettyTransportClientConfig get() {
         return new NettyTransportClientConfig();
     }
 }
