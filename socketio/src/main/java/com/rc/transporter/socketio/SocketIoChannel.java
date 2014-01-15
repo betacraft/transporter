@@ -1,8 +1,7 @@
 package com.rc.transporter.socketio;
 
 import com.corundumstudio.socketio.SocketIOClient;
-import com.rc.transporter.core.ITransportCallback;
-import com.rc.transporter.core.ITransportChannel;
+import com.rc.transporter.core.TransportChannel;
 import io.netty.buffer.ByteBuf;
 
 import java.nio.charset.Charset;
@@ -14,7 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Date  : 9/26/13
  * Time  : 6:31 PM
  */
-public final class SocketIoChannel implements ITransportChannel<Object> {
+public final class SocketIoChannel extends TransportChannel<Object> {
     /**
      * Socket client
      */
@@ -51,18 +50,6 @@ public final class SocketIoChannel implements ITransportChannel<Object> {
         throw new IllegalStateException("Unsupported data " + data.getClass().getName());
     }
 
-    @Override
-    public void sendData (Object data, ITransportCallback callback) {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void close () {
-        if (this.isClosed.getAndSet(true))
-            return;
-        this.socketIOClient.disconnect();
-    }
-
 
     /**
      * Method to send an event over socketio
@@ -71,10 +58,15 @@ public final class SocketIoChannel implements ITransportChannel<Object> {
      * @param data      data associated with the event
      */
     public void sendEvent (String eventName, Object data) {
-        if (this.socketIOClient != null)
-            this.socketIOClient.sendEvent(eventName, data);
+        this.socketIOClient.sendEvent(eventName, data);
     }
 
+    @Override
+    protected void closeChannel () {
+        if (this.isClosed.getAndSet(true))
+            return;
+        this.socketIOClient.disconnect();
+    }
 
     /**
      * Method to check if channel is open

@@ -3,7 +3,7 @@ package com.rc.transporter.socketio;
 import com.corundumstudio.socketio.Configuration;
 import com.rc.transporter.netty4x.DynamicTransportSessionAddPosition;
 import com.rc.transporter.netty4x.IDynamicNettyTransportSessionFactory;
-import com.rc.transporter.netty4x.IDynamicTransportIncomingSession;
+import com.rc.transporter.netty4x.IDynamicTransportSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,14 +67,14 @@ public final class SocketIoServerConfig {
      *
      * @param customRequestHandler
      */
-    public void addSharableCustomRequestHandler (final IDynamicTransportIncomingSession customRequestHandler) {
+    public void addSharableCustomRequestHandler (final IDynamicTransportSession customRequestHandler) {
         // lazy initialization is used so as to avoid an extra flag
         if (this.customRequestHandlers == null) {
             this.customRequestHandlers = new ArrayList<IDynamicNettyTransportSessionFactory>();
         }
         this.customRequestHandlers.add(new IDynamicNettyTransportSessionFactory() {
             @Override
-            public IDynamicTransportIncomingSession get () {
+            public IDynamicTransportSession get () {
                 return customRequestHandler;
             }
 

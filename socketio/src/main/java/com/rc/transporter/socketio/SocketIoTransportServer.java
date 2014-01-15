@@ -1,7 +1,7 @@
 package com.rc.transporter.socketio;
 
 import com.corundumstudio.socketio.SocketIOServer;
-import com.rc.transporter.core.ITransportIncomingSession;
+import com.rc.transporter.core.ITransportSession;
 import com.rc.transporter.core.TransportServer;
 import com.rc.transporter.netty4x.IDynamicNettyTransportSessionFactory;
 import io.netty.channel.ChannelFuture;
@@ -79,7 +79,7 @@ public final class SocketIoTransportServer extends TransportServer {
      */
     @Override
     public void start (final int port, final ITransportServerListener transportServerListener,
-            final ITransportIncomingSession transportSession) throws Exception {
+            final ITransportSession transportSession) throws Exception {
         this.socketIoServerWorker.submit(new Runnable() {
             @Override
             public void run () {
@@ -190,7 +190,7 @@ public final class SocketIoTransportServer extends TransportServer {
     @Override
     public void start (final String hostname, final int port, final ITransportServerListener
             transportServerListener,
-            final ITransportIncomingSession transportSession) throws Exception {
+            final ITransportSession transportSession) throws Exception {
         this.socketIoServerWorker.submit(new Runnable() {
             @Override
             public void run () {
@@ -235,7 +235,7 @@ public final class SocketIoTransportServer extends TransportServer {
      */
     @Override
     public void start (final int port, final ITransportServerListener transportServerListener,
-            final ITransportIncomingSessionFactory transportSessionFactory) throws Exception {
+            final ITransportSessionFactory transportSessionFactory) throws Exception {
         this.socketIoServerWorker.submit(new Runnable() {
             @Override
             public void run () {
@@ -281,7 +281,7 @@ public final class SocketIoTransportServer extends TransportServer {
     @Override
     public void start (final String hostname,
             final int port, final ITransportServerListener transportServerListener,
-            final ITransportIncomingSessionFactory transportSessionFactory) throws Exception {
+            final ITransportSessionFactory transportSessionFactory) throws Exception {
         this.socketIoServerWorker.submit(new Runnable() {
             @Override
             public void run () {

@@ -2,7 +2,7 @@ package com.rc.transporter.socketio;
 
 import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.SocketIOClient;
-import com.rc.transporter.core.ITransportIncomingSession;
+import com.rc.transporter.core.ITransportSession;
 import com.rc.transporter.core.TransportServer;
 import com.sun.corba.se.impl.orbutil.concurrent.Mutex;
 import org.slf4j.Logger;
@@ -25,11 +25,11 @@ public class SocketIoTransportSession implements ISocketIOTransportSession {
     /**
      * Connection catalog
      */
-    protected ConcurrentHashMap<UUID, ITransportIncomingSession> connectionCatalog;
+    protected ConcurrentHashMap<UUID, ITransportSession> connectionCatalog;
     /**
      * Client session factory for incoming connections
      */
-    protected TransportServer.ITransportIncomingSessionFactory clientSessionFactory;
+    protected TransportServer.ITransportSessionFactory clientSessionFactory;
     /**
      * Catalog locks for each entry
      */
@@ -40,26 +40,26 @@ public class SocketIoTransportSession implements ISocketIOTransportSession {
     /**
      * Initialization block
      */ {
-        this.connectionCatalog = new ConcurrentHashMap<UUID, ITransportIncomingSession>();
+        this.connectionCatalog = new ConcurrentHashMap<UUID, ITransportSession>();
         this.connectionCatalogEntryLock = new ConcurrentHashMap<UUID, Mutex>();
     }
 
 
-    public ISocketIOTransportSession setSharableTransportSession (final ITransportIncomingSession transportSession) {
-        this.clientSessionFactory = new TransportServer.ITransportIncomingSessionFactory() {
+    public ISocketIOTransportSession setSharableTransportSession (final ITransportSession transportSession) {
+        this.clientSessionFactory = new TransportServer.ITransportSessionFactory() {
             @Override
-            public ITransportIncomingSession get () {
+            public ITransportSession get () {
                 return transportSession;
             }
         };
         return this;
     }
 
-    public ISocketIOTransportSession setClientSessionFactory (final TransportServer
-            .ITransportIncomingSessionFactory transportSessionFactory) {
-        this.clientSessionFactory = new TransportServer.ITransportIncomingSessionFactory() {
+    public ISocketIOTransportSession setClientSessionFactory (final TransportServer.ITransportSessionFactory
+            transportSessionFactory) {
+        this.clientSessionFactory = new TransportServer.ITransportSessionFactory() {
             @Override
-            public ITransportIncomingSession get () {
+            public ITransportSession get () {
                 return transportSessionFactory.get();
             }
         };
@@ -74,7 +74,7 @@ public class SocketIoTransportSession implements ISocketIOTransportSession {
             Mutex mutex = new Mutex();
             mutex.acquire();
             this.connectionCatalogEntryLock.put(client.getSessionId(), mutex);
-            ITransportIncomingSession session = this.clientSessionFactory.get();
+            ITransportSession session = this.clientSessionFactory.get();
             this.connectionCatalog.put(client.getSessionId(), session);
             mutex.release();
             session.onConnected(new SocketIoChannel(client));

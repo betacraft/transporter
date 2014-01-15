@@ -33,8 +33,8 @@ public final class SocketIoServerNamespace {
      * @param path                 path of the namespace
      * @param clientSessionFactory @SocketIoServerSessionFactory for this namespace
      */
-    private SocketIoServerNamespace (final String path,
-            final TransportServer.ITransportIncomingSessionFactory clientSessionFactory) {
+    private SocketIoServerNamespace (final String path, final TransportServer.ITransportSessionFactory
+            clientSessionFactory) {
         this.path = path;
         this.socketIOTransportSessionFactory = new SocketIOTransportSessionFactory() {
             @Override
@@ -80,7 +80,7 @@ public final class SocketIoServerNamespace {
      * @return
      */
     public static SocketIoServerNamespace get (final String path,
-            final TransportServer.ITransportIncomingSessionFactory clientSessionFactory) {
+            final TransportServer.ITransportSessionFactory clientSessionFactory) {
         return new SocketIoServerNamespace(path, clientSessionFactory);
     }
 

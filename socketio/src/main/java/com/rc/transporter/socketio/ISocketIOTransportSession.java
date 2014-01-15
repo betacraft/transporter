@@ -3,7 +3,7 @@ package com.rc.transporter.socketio;
 import com.corundumstudio.socketio.listener.ConnectListener;
 import com.corundumstudio.socketio.listener.DataListener;
 import com.corundumstudio.socketio.listener.DisconnectListener;
-import com.rc.transporter.core.ITransportIncomingSession;
+import com.rc.transporter.core.ITransportSession;
 import com.rc.transporter.core.TransportServer;
 
 /**
@@ -14,9 +14,8 @@ import com.rc.transporter.core.TransportServer;
  */
 public interface ISocketIOTransportSession extends ConnectListener, DisconnectListener, DataListener<String> {
 
-    public ISocketIOTransportSession setSharableTransportSession (final ITransportIncomingSession
-            transportSession);
+    public ISocketIOTransportSession setSharableTransportSession (final ITransportSession transportSession);
 
-    public ISocketIOTransportSession setClientSessionFactory (final TransportServer
-            .ITransportIncomingSessionFactory transportSessionFactory);
+    public ISocketIOTransportSession setClientSessionFactory (final TransportServer.ITransportSessionFactory
+            transportSessionFactory);
 }

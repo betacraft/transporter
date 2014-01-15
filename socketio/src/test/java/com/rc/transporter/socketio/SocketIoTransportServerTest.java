@@ -1,12 +1,12 @@
 package com.rc.transporter.socketio;
 
-import com.rc.transporter.core.ITransportChannel;
-import com.rc.transporter.core.ITransportIncomingSession;
+import com.rc.transporter.core.ITransportSession;
+import com.rc.transporter.core.TransportChannel;
 import com.rc.transporter.core.TransportServer;
-import com.rc.transporter.netty4x.DynamicTransportIncomingSession;
+import com.rc.transporter.netty4x.DynamicTransportSession;
 import com.rc.transporter.netty4x.DynamicTransportSessionAddPosition;
 import com.rc.transporter.netty4x.IDynamicNettyTransportSessionFactory;
-import com.rc.transporter.netty4x.IDynamicTransportIncomingSession;
+import com.rc.transporter.netty4x.IDynamicTransportSession;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.DefaultHttpResponse;
 import io.netty.handler.codec.http.DefaultLastHttpContent;
@@ -44,13 +44,13 @@ public class SocketIoTransportServerTest extends TestCase {
         socketIoServerConfig.getConfiguration().setAllowCustomRequests(true);
         socketIoServerConfig.addCustomRequestHandlerFactory(new IDynamicNettyTransportSessionFactory() {
             @Override
-            public IDynamicTransportIncomingSession get () {
-                return new DynamicTransportIncomingSession() {
+            public IDynamicTransportSession get () {
+                return new DynamicTransportSession() {
 
-                    ITransportChannel channel;
+                    TransportChannel channel;
 
                     @Override
-                    public void onConnected (final ITransportChannel channel) {
+                    public void onConnected (final TransportChannel channel) {
                         logger.trace("commet Got connection");
                         this.channel = channel;
 
@@ -152,11 +152,11 @@ public class SocketIoTransportServerTest extends TestCase {
                     public void onClosed () {
                         countDownLatch.countDown();
                     }
-                }, new ITransportIncomingSession() {
-                    ITransportChannel channel;
+                }, new ITransportSession() {
+                    TransportChannel channel;
 
                     @Override
-                    public void onConnected (ITransportChannel channel) {
+                    public void onConnected (TransportChannel channel) {
                         logger.trace("socketioconnected");
                         this.channel = channel;
                         this.channel.sendData("test");
