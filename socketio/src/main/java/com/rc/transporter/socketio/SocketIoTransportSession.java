@@ -108,7 +108,9 @@ public class SocketIoTransportSession implements ISocketIOTransportSession {
                 ++retries;
             }
             if (mutex == null) {
-                logger.error("Socketio channel onData called before onConnected with data", data);
+                logger.error("Socketio channel onData called before onConnected with data or it was " +
+                        "already disconnected so disconnecting", data);
+                client.disconnect();
                 return;
             }
             mutex.acquire();
