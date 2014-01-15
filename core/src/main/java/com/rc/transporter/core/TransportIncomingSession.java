@@ -12,9 +12,9 @@ public abstract class TransportIncomingSession<I, O> implements ITransportIncomi
     /**
      * This callback ads channel state listener and does cleanup of the session if channel gets closed
      *
-     * @param channel @ITransportChannel associated with this session
+     * @param channel @TransportChannel associated with this session
      */
-    public void onConnected (ITransportChannel<O> channel) {
+    public void onConnected (TransportChannel<O> channel) {
         throw new IllegalStateException("This class is deprecated use ITransportIncomingSession instead");
     }
 }

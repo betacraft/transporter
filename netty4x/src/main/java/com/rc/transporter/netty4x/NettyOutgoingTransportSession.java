@@ -3,7 +3,6 @@ package com.rc.transporter.netty4x;
 import com.rc.transporter.core.ITransportOutgoingSession;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.channel.socket.ChannelInputShutdownEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +40,23 @@ public class NettyOutgoingTransportSession<I, O> extends SimpleChannelInboundHan
      */
     private AtomicBoolean isRecovered = new AtomicBoolean(false);
 
+    /**
+     * Calls {@link io.netty.channel.ChannelHandlerContext#fireChannelActive()} to forward
+     * to the next {@link io.netty.channel.ChannelInboundHandler} in the {@link io.netty.channel
+     * .ChannelPipeline}.
+     * <p/>
+     * Sub-classes may override this method to change behavior.
+     */
+    @Override
+    public void channelActive (ChannelHandlerContext ctx) throws Exception {
+        super.channelActive(ctx);
+        this.nettyChannel = new NettyChannel<O>(ctx);
+        if (this.isRecovered.get()) {
+            transportSession.onRecovered(this.nettyChannel);
+        } else {
+            transportSession.onConnected(this.nettyChannel);
+        }
+    }
 
     /**
      * Constructor
@@ -56,17 +72,6 @@ public class NettyOutgoingTransportSession<I, O> extends SimpleChannelInboundHan
     }
 
 
-    @Override
-    public void channelActive (ChannelHandlerContext ctx) throws Exception {
-        super.channelActive(ctx);
-        this.nettyChannel = new NettyChannel<O>(ctx);
-        if (this.isRecovered.get()) {
-            transportSession.onRecovered(this.nettyChannel);
-        } else {
-            transportSession.onConnected(this.nettyChannel);
-        }
-    }
-
     /**
      * @param ctx the {@link io.netty.channel.ChannelHandlerContext} which this {@link io.netty.channel
      *            .SimpleChannelInboundHandler}
@@ -76,20 +81,7 @@ public class NettyOutgoingTransportSession<I, O> extends SimpleChannelInboundHan
      */
     @Override
     protected void channelRead0 (ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (this.transportSession != null)
-            this.transportSession.onData((I) msg);
-    }
-
-    @Override
-    public void userEventTriggered (ChannelHandlerContext ctx, Object evt) throws Exception {
-        logger.debug("User event " + evt.toString());
-        if (evt instanceof ChannelInputShutdownEvent) {
-            //TODO check if this is correct
-            // for now triggering close socket event
-            ctx.close();
-        }
-        super.userEventTriggered(ctx, evt);
-
+        transportSession.onData((I) msg);
     }
 
 
@@ -102,13 +94,11 @@ public class NettyOutgoingTransportSession<I, O> extends SimpleChannelInboundHan
      */
     @Override
     public void channelInactive (ChannelHandlerContext ctx) throws Exception {
-        logger.info("Channel inactive");
         super.channelInactive(ctx);
         if (this.isClosed.get()) {
-            if (this.transportSession != null)
-                transportSession.onDisconnected();
+            transportSession.onDisconnected();
+            logger.info("Channel inactive " + ctx.name());
         } else {
-            logger.debug("session got dropped");
             this.sessionStateListener.onSessionDropped();
         }
     }
@@ -121,25 +111,20 @@ public class NettyOutgoingTransportSession<I, O> extends SimpleChannelInboundHan
      */
     @Override
     public void exceptionCaught (ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        logger.error("Exception caught ", cause);
         if (this.isClosed.get()) {
-            if (this.transportSession != null)
-                transportSession.onError(cause);
+            logger.error("Exception caught ", cause);
+            transportSession.onError(cause);
             if (this.nettyChannel != null)
-                this.nettyChannel.close();
+                this.nettyChannel.closeChannel();
         } else {
             this.sessionStateListener.onSessionDropped(cause);
         }
     }
 
 
-    /**
-     * Close session
-     */
     public void closeSession () {
         this.isClosed.set(true);
-        logger.debug("Closing session");
         if (this.nettyChannel != null)
-            this.nettyChannel.close();
+            this.nettyChannel.closeChannel();
     }
 }

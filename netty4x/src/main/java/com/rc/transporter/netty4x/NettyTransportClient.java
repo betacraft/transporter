@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -49,7 +50,7 @@ public class NettyTransportClient<I, O> implements ITransportClient<I, O> {
     /**
      * Underlying session
      */
-    private ITransportOutgoingSession underlyingSession;
+    private ITransportOutgoingSession undelyingSession;
     /**
      * Outgoing session associated with current connection
      */
@@ -58,7 +59,10 @@ public class NettyTransportClient<I, O> implements ITransportClient<I, O> {
      * Bootstrap for client
      */
     private Bootstrap bootstrap;
-
+    /**
+     * Handler name
+     */
+    private final static String HANDLER_NAME = "transporter_handler";
 
     /**
      * Constructor
@@ -81,12 +85,12 @@ public class NettyTransportClient<I, O> implements ITransportClient<I, O> {
     public void connect (final String host, final int port,
             final ITransportOutgoingSession<I, O> transportSession) throws Exception {
         try {
-            this.underlyingSession = transportSession;
+            this.undelyingSession = transportSession;
             this.nioEventLoopGroup = this.clientConfig.getWorkerGroupFactory().get();
             if (this.clientConfig.getAutoRecover()) {
                 connectWithRecoveryLogic(host, port);
             } else {
-                connectWithoutRecoveryLogic(host, port);
+
             }
         } catch (Exception exception) {
             logger.error("Exception while connection to {}:{}", host, port, exception);
@@ -95,40 +99,39 @@ public class NettyTransportClient<I, O> implements ITransportClient<I, O> {
 
     }
 
-    private void connectWithoutRecoveryLogic (final String host, final int port) {
-
-    }
-
     private void connectWithRecoveryLogic (final String host, final int port) {
-        logger.debug("Connecting with recovery logic");
-        this.nettyOutgoingTransportSession = new NettyOutgoingTransportSession(this.underlyingSession,
-                new NettyOutgoingChannelStateListener() {
-                    @Override
-                    public void onSessionDropped () {
-                        logger.info("Session dropped");
-                    }
+        while (retries < clientConfig.getAutoRecoverAttempts()) {
+            this.nettyOutgoingTransportSession = new NettyOutgoingTransportSession(this.undelyingSession,
+                    new NettyOutgoingChannelStateListener() {
+                        @Override
+                        public void onSessionDropped () {
 
-                    @Override
-                    public void onSessionDropped (Throwable cause) {
-                        logger.error("On session dropped", cause);
-                    }
-                }, retries != 0);
-        this.clientConfig.getChannelInitializer()
-                .setRuntimeHandlerProvider(new NettyChannelInitializer.RuntimeHandlerProvider() {
-                    @Override
-                    public void appendRuntimeHandler (final ChannelPipeline pipeline) {
-                        if (clientConfig.getSessionEventsExecutorFactory() == null) {
-                            logger.warn("No session events executor factory assigned" +
-                                    "\nMake sure you are not stealing time from worker group for " +
-                                    "better performance");
-                            pipeline.addLast(nettyOutgoingTransportSession);
-                        } else {
-                            executorGroup = clientConfig.getSessionEventsExecutorFactory().get();
-                            pipeline.addLast(executorGroup, nettyOutgoingTransportSession);
                         }
-                    }
-                });
-        if (this.bootstrap == null) {
+
+                        @Override
+                        public void onSessionDropped (Throwable cause) {
+                            logger.error("On session dropped", cause);
+                        }
+                    }, retries == 0);
+            this.clientConfig.getChannelInitializer()
+                    .setRuntimeHandlerProvider(new NettyChannelInitializer.RuntimeHandlerProvider() {
+                        @Override
+                        public void appendRuntimeHandler (final ChannelPipeline pipeline) {
+                            try {
+                                pipeline.remove(HANDLER_NAME);
+                            } catch (NoSuchElementException ignored) {
+                            }
+                            if (clientConfig.getSessionEventsExecutorFactory() == null) {
+                                logger.warn("No session events executor factory assigned" +
+                                        "\nMake sure you are not stealing time from worker group for " +
+                                        "better performance");
+                                pipeline.addLast(HANDLER_NAME, nettyOutgoingTransportSession);
+                            } else {
+                                executorGroup = clientConfig.getSessionEventsExecutorFactory().get();
+                                pipeline.addLast(executorGroup, HANDLER_NAME, nettyOutgoingTransportSession);
+                            }
+                        }
+                    });
             this.bootstrap = new Bootstrap()
                     .group(this.nioEventLoopGroup)
                     .channel(NioSocketChannel.class)
@@ -138,22 +141,20 @@ public class NettyTransportClient<I, O> implements ITransportClient<I, O> {
                     .entrySet()) {
                 bootstrap.option(channelOption.getKey(), channelOption.getValue());
             }
-        }
-        // staring the client
-        this.bootstrap.connect(host, port).channel().closeFuture()
-                .addListener(new ChannelFutureListener() {
-                    @Override
-                    public void operationComplete (ChannelFuture future) throws Exception {
-                        logger.info("Client bootstrap closed");
-                        if (++retries < clientConfig.getAutoRecoverAttempts() && !isClosed.get()) {
-                            connectWithRecoveryLogic(host, port);
-                        } else {
-                            if (underlyingSession != null)
-                                underlyingSession.onDisconnected();
-                            close();
+            // staring the client
+            bootstrap.connect(host, port).channel().closeFuture()
+                    .addListener(new ChannelFutureListener() {
+                        @Override
+                        public void operationComplete (ChannelFuture future) throws Exception {
+                            logger.info("Client bootstrap closed");
+                            if (++retries > clientConfig.getAutoRecoverAttempts() || isClosed.get()) {
+                                if (undelyingSession != null)
+                                    undelyingSession.onDisconnected();
+                            }
                         }
-                    }
-                });
+                    });
+            this.undelyingSession.onRecoveryStarted();
+        }
     }
 
     /**
@@ -163,9 +164,6 @@ public class NettyTransportClient<I, O> implements ITransportClient<I, O> {
     public void close () {
         logger.debug("Transport client is closed");
         this.isClosed.set(true);
-        if (this.nettyOutgoingTransportSession != null) {
-            this.nettyOutgoingTransportSession.closeSession();
-        }
         if (!this.clientConfig.getKeepExecutorGroupAlive() && this.executorGroup != null) {
             logger.debug("Shutting down executor group");
             this.executorGroup.shutdownGracefully();

@@ -10,7 +10,7 @@ public interface ITransportOutgoingSession<I, O> extends ITransportIncomingSessi
 
     public void onRecoveryStarted ();
 
-    public void onRecovered (ITransportChannel<O> channel);
+    public void onRecovered (TransportChannel<O> channel);
 
     public void onRecoveryFailed ();
 

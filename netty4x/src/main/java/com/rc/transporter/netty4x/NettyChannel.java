@@ -1,10 +1,8 @@
 package com.rc.transporter.netty4x;
 
-import com.rc.transporter.core.ITransportCallback;
-import com.rc.transporter.core.ITransportChannel;
+import com.rc.transporter.core.TransportChannel;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -13,12 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Date  : 9/21/13
  * Time  : 3:57 AM
  */
-public final class NettyChannel<M> implements ITransportChannel<M> {
-    /**
-     * Logger
-     */
-    private static final Logger logger = LoggerFactory.getLogger(NettyChannel.class);
-
+public final class NettyChannel<M> extends TransportChannel<M> {
     /**
      * Enum associated with property
      */
@@ -56,21 +49,15 @@ public final class NettyChannel<M> implements ITransportChannel<M> {
             this.nettyChannelHandlerContext.writeAndFlush(data);
     }
 
-    @Override
-    public void sendData (final M data, final ITransportCallback callback) {
-        if (isOpen())
-            this.nettyChannelHandlerContext.writeAndFlush(data);
-    }
-
     /**
      * Method to close this channel
      */
     @Override
-    public void close () {
-        logger.debug("Close channel request");
+    protected void closeChannel () {
+        logger.trace("Close channel request");
         if (this.channelClosed.getAndSet(true))
             return;
-        logger.debug("Closing channel");
+        logger.trace("Closing channel");
         this.nettyChannelHandlerContext.disconnect();
         this.nettyChannelHandlerContext.close();
     }
@@ -96,6 +83,16 @@ public final class NettyChannel<M> implements ITransportChannel<M> {
             logger.debug("Setting autoread to " + value);
             this.nettyChannelHandlerContext.channel().config().setAutoRead(((Boolean) value));
         }
+    }
+
+    public void sendDataWithPromise (M data,ChannelFutureListener channelFutureListener) {
+        if (isOpen())
+            this.nettyChannelHandlerContext.writeAndFlush(data).addListeners(channelFutureListener);
+    }
+
+
+    ChannelHandlerContext getNettyChannelHandlerContext () {
+        return this.nettyChannelHandlerContext;
     }
 
 }

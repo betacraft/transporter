@@ -3,19 +3,18 @@ package com.rc.transporter.netty4x;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
-import io.netty.channel.socket.SocketChannel;
 
 /**
  * Author: akshay
  * Date  : 9/26/13
  * Time  : 12:16 AM
  */
-public abstract class NettyChannelInitializer extends ChannelInitializer<SocketChannel> {
+public abstract class NettyChannelInitializer extends ChannelInitializer {
     /**
      * Runtime channel handler provider
      */
     interface RuntimeHandlerProvider {
-        void appendRuntimeHandler (final ChannelPipeline pipeline);
+        void appendRuntimeHandler(final ChannelPipeline pipeline);
     }
 
     /**
@@ -30,17 +29,14 @@ public abstract class NettyChannelInitializer extends ChannelInitializer<SocketC
 
 
     /**
-     * This method will be called once the {@link io.netty.channel.Channel} was registered. After the
-     * method returns this instance
-     * will be removed from the {@link io.netty.channel.ChannelPipeline} of the {@link io.netty.channel
-     * .Channel}.
+     * This method will be called once the {@link io.netty.channel.Channel} was registered. After the method returns this instance
+     * will be removed from the {@link io.netty.channel.ChannelPipeline} of the {@link io.netty.channel.Channel}.
      *
      * @param channel the {@link io.netty.channel.Channel} which was registered.
-     * @throws Exception is thrown if an error occours. In that case the {@link io.netty.channel.Channel}
-     *                   will be closed.
+     * @throws Exception is thrown if an error occours. In that case the {@link io.netty.channel.Channel} will be closed.
      */
     @Override
-    protected void initChannel (SocketChannel channel) throws Exception {
+    protected void initChannel(Channel channel) throws Exception {
         this.channel = channel;
         initializeChannel(this.channel.pipeline());
         if (this.runtimeHandlerProvider == null)
@@ -53,14 +49,14 @@ public abstract class NettyChannelInitializer extends ChannelInitializer<SocketC
      *
      * @param channelPipeline @ChannelPipeline
      */
-    protected abstract void initializeChannel (ChannelPipeline channelPipeline);
+    protected abstract void initializeChannel(ChannelPipeline channelPipeline);
 
     /**
      * Setter for @runtimeHandlerProvider
      *
      * @param runtimeHandlerProvider
      */
-    void setRuntimeHandlerProvider (final RuntimeHandlerProvider runtimeHandlerProvider) {
+    void setRuntimeHandlerProvider(final RuntimeHandlerProvider runtimeHandlerProvider) {
         this.runtimeHandlerProvider = runtimeHandlerProvider;
     }
 }
