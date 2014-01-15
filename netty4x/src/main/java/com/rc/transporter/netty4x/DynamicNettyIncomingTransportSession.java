@@ -1,8 +1,9 @@
 package com.rc.transporter.netty4x;
 
-import com.rc.transporter.core.ITransportIncomingSession;
-import io.netty.channel.*;
-import io.netty.channel.socket.ChannelInputShutdownEvent;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelOutboundHandler;
+import io.netty.channel.ChannelOutboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Date  : 9/21/13
  * Time  : 3:44 AM
  */
-public class DynamicNettyIncomingTransportSession<I, O> extends SimpleChannelInboundHandler<Object> {
+public class DynamicNettyIncomingTransportSession<I, O> extends NettyIncomingTransportSession {
     /**
      * Logger
      */
@@ -29,18 +30,6 @@ public class DynamicNettyIncomingTransportSession<I, O> extends SimpleChannelInb
      */
     private AtomicBoolean isValidated = new AtomicBoolean(false);
 
-    /**
-     * @NettyChannel associated with this session
-     */
-    private NettyChannel<O> nettyChannel;
-    /**
-     * Underlying @ITransportIncomingSession
-     */
-    private ITransportIncomingSession<I, O> transportSession;
-    /**
-     * Detect user event for disconnection
-     */
-    private AtomicBoolean detectUserEventsForDisconnection = new AtomicBoolean(false);
 
     /**
      * Calls {@link io.netty.channel.ChannelHandlerContext#fireChannelActive()} to forward
@@ -55,6 +44,7 @@ public class DynamicNettyIncomingTransportSession<I, O> extends SimpleChannelInb
         this.nettyChannel = new NettyChannel<O>(ctx);
         transportSession.onConnected(this.nettyChannel);
         logger.trace("Got channel connection");
+        ctx.read();
     }
 
     /**
@@ -62,12 +52,16 @@ public class DynamicNettyIncomingTransportSession<I, O> extends SimpleChannelInb
      *
      * @param transportSession @ITransportIncomingSession which receives event
      */
-    public DynamicNettyIncomingTransportSession (IDynamicTransportIncomingSession<I, O> transportSession,
-            final boolean detectUserEventForDisconnection) {
-        this.transportSession = transportSession;
-        this.detectUserEventsForDisconnection.set(detectUserEventForDisconnection);
+    public DynamicNettyIncomingTransportSession (IDynamicTransportIncomingSession<I, O> transportSession) {
+        super(transportSession);
     }
 
+
+    @Override
+    public void userEventTriggered (ChannelHandlerContext ctx, Object evt) throws Exception {
+        logger.debug("User event " + evt.toString());
+        super.userEventTriggered(ctx, evt);
+    }
 
     /**
      * @param ctx the {@link io.netty.channel.ChannelHandlerContext} which this {@link io.netty.channel
@@ -112,23 +106,6 @@ public class DynamicNettyIncomingTransportSession<I, O> extends SimpleChannelInb
     }
 
 
-    @Override
-    public void userEventTriggered (ChannelHandlerContext ctx, Object evt) throws Exception {
-        super.userEventTriggered(ctx, evt);
-        logger.debug("User event " + evt.toString());
-        if (isClosed.get() || !isValidated.get())
-            return;
-        if (this.detectUserEventsForDisconnection.get()) {
-            if (evt instanceof ChannelInputShutdownEvent) {
-                //TODO check if this is correct
-                // for now triggering close socket event
-                logger.trace("Closing session because of channel input shutdown event");
-                ctx.close();
-            }
-        }
-
-    }
-
     /**
      * Calls {@link io.netty.channel.ChannelHandlerContext#fireChannelInactive()} to forward
      * to the next {@link io.netty.channel.ChannelInboundHandler} in the {@link io.netty.channel
@@ -153,6 +130,7 @@ public class DynamicNettyIncomingTransportSession<I, O> extends SimpleChannelInb
      */
     @Override
     public void exceptionCaught (ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        super.exceptionCaught(ctx, cause);
         logger.error("Exception caught ", cause);
         if (isClosed.get() || !isValidated.get())
             return;

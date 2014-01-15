@@ -75,11 +75,11 @@ final class SocketIOPipelineFactory extends SocketIOChannelInitializer {
             switch (transportSessionFactory.addAt()) {
                 case ADD_FIRST:
                     ch.pipeline().addFirst(transportSessionFactory.getName(),
-                            new DynamicNettyIncomingTransportSession(transportSessionFactory.get(), true));
+                            new DynamicNettyIncomingTransportSession(transportSessionFactory.get()));
                     break;
                 case ADD_LAST:
                     ch.pipeline().addLast(transportSessionFactory.getName(),
-                            new DynamicNettyIncomingTransportSession(transportSessionFactory.get(), true));
+                            new DynamicNettyIncomingTransportSession(transportSessionFactory.get()));
                     break;
             }
         }
