@@ -117,6 +117,7 @@ public class DynamicNettyTransportSession<I, O> extends SimpleChannelInboundHand
         if (isClosed.get() || !isValidated.get())
             return;
         if (evt instanceof ChannelInputShutdownEvent) {
+            logger.error("Disconnecting channel because of input shutdown");
             if (transportSession != null)
                 transportSession.onDisconnected();
         }

@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
  * Transport session for socketio
@@ -34,7 +35,13 @@ public class SocketIoTransportSession implements ISocketIOTransportSession {
      * Catalog locks for each entry
      */
     protected ConcurrentHashMap<UUID, Mutex> connectionCatalogEntryLock;
-
+    /**
+     * Skip list for in process on connect
+     */
+    protected ConcurrentSkipListSet<UUID> inProcessConnectionIds;
+    /**
+     * Maximum hashmap checks
+     */
     protected static final int MAX_HASH_MAP_CHECKS = 3;
 
     /**
@@ -42,6 +49,7 @@ public class SocketIoTransportSession implements ISocketIOTransportSession {
      */ {
         this.connectionCatalog = new ConcurrentHashMap<UUID, ITransportSession>();
         this.connectionCatalogEntryLock = new ConcurrentHashMap<UUID, Mutex>();
+        this.inProcessConnectionIds = new ConcurrentSkipListSet<UUID>();
     }
 
 
@@ -71,8 +79,13 @@ public class SocketIoTransportSession implements ISocketIOTransportSession {
     public void onConnect (final SocketIOClient client) {
         logger.trace("SocketIO server got a new connection");
         try {
-            if (this.connectionCatalog.containsKey(client.getSessionId())) {
-                logger.error("Duplicate onConnect call");
+            if (this.inProcessConnectionIds.contains(client.getSessionId())) {
+                logger.error("onConnect was already fired for {}", client.getSessionId());
+                return;
+            }
+            this.inProcessConnectionIds.add(client.getSessionId());
+            if (this.connectionCatalogEntryLock.containsKey(client.getSessionId())) {
+                logger.error("onConnect was already fired for {}", client.getSessionId());
                 return;
             }
             Mutex mutex = new Mutex();
@@ -82,6 +95,7 @@ public class SocketIoTransportSession implements ISocketIOTransportSession {
             this.connectionCatalog.put(client.getSessionId(), session);
             mutex.release();
             session.onConnected(new SocketIoChannel(client));
+            this.inProcessConnectionIds.remove(client.getSessionId());
         } catch (Exception e) {
             logger.error("While processing onConnect", e);
         }
