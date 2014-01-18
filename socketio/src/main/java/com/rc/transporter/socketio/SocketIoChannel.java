@@ -1,6 +1,7 @@
 package com.rc.transporter.socketio;
 
 import com.corundumstudio.socketio.SocketIOClient;
+import com.corundumstudio.socketio.VoidAckCallback;
 import com.rc.transporter.core.TransportChannel;
 import io.netty.buffer.ByteBuf;
 
@@ -39,15 +40,43 @@ public final class SocketIoChannel extends TransportChannel<Object> {
      */
     @Override
     public void sendData (Object data) {
-        if (data instanceof String) {
-            this.socketIOClient.sendMessage((String) data);
-            return;
+        if (this.isOpen()) {
+            if (data instanceof String) {
+                this.socketIOClient.sendMessage((String) data);
+                return;
+            }
+            if (data instanceof ByteBuf) {
+                this.socketIOClient.sendMessage(((ByteBuf) data).toString(Charset.defaultCharset()));
+                return;
+            }
+            throw new IllegalStateException("Unsupported data " + data.getClass().getName());
         }
-        if (data instanceof ByteBuf) {
-            this.socketIOClient.sendMessage(((ByteBuf) data).toString(Charset.defaultCharset()));
-            return;
+    }
+
+    @Override
+    public void sendData (final Object data, final IDataSendListener dataSendListener) {
+        if (this.isOpen()) {
+            if (data instanceof String) {
+                this.socketIOClient.sendMessage((String) data, new VoidAckCallback() {
+                    @Override
+                    protected void onSuccess () {
+                        dataSendListener.sendComplete(data);
+                    }
+                });
+                return;
+            }
+            if (data instanceof ByteBuf) {
+                this.socketIOClient.sendMessage(((ByteBuf) data).toString(Charset.defaultCharset()),
+                        new VoidAckCallback() {
+                            @Override
+                            protected void onSuccess () {
+                                dataSendListener.sendComplete(data);
+                            }
+                        });
+                return;
+            }
+            throw new IllegalStateException("Unsupported data " + data.getClass().getName());
         }
-        throw new IllegalStateException("Unsupported data " + data.getClass().getName());
     }
 
 

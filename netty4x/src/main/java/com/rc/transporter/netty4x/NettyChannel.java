@@ -1,6 +1,7 @@
 package com.rc.transporter.netty4x;
 
 import com.rc.transporter.core.TransportChannel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 
@@ -49,6 +50,22 @@ public final class NettyChannel<M> extends TransportChannel<M> {
             this.nettyChannelHandlerContext.writeAndFlush(data);
     }
 
+    @Override
+    public void sendData (final M data, final IDataSendListener dataSendListener) {
+        if (isOpen()) {
+            this.nettyChannelHandlerContext.writeAndFlush(data).addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete (ChannelFuture future) throws Exception {
+                    if (future.isSuccess()) {
+                        dataSendListener.sendComplete(data);
+                    } else {
+                        dataSendListener.sendFailure(data, future.cause());
+                    }
+                }
+            });
+        }
+    }
+
     /**
      * Method to close this channel
      */
@@ -85,7 +102,7 @@ public final class NettyChannel<M> extends TransportChannel<M> {
         }
     }
 
-    public void sendDataWithPromise (M data,ChannelFutureListener channelFutureListener) {
+    public void sendDataWithPromise (M data, ChannelFutureListener channelFutureListener) {
         if (isOpen())
             this.nettyChannelHandlerContext.writeAndFlush(data).addListeners(channelFutureListener);
     }

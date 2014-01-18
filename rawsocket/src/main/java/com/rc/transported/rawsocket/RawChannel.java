@@ -44,6 +44,11 @@ public class RawChannel extends TransportChannel<byte[]> {
     }
 
     @Override
+    public void sendData (byte[] data, IDataSendListener dataSendListener) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
     protected void closeChannel() {
         if (this.socket == null)
             return;
