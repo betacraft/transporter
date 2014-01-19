@@ -65,6 +65,13 @@ public abstract class TransportChannel<M> {
     public abstract void sendData (M data, IDataSendListener dataSendListener);
 
     /**
+     * Method which sends data and closes connection
+     *
+     * @param data
+     */
+    public abstract void sendAndClose (M data);
+
+    /**
      * Method to close a channel
      */
     protected abstract void closeChannel ();

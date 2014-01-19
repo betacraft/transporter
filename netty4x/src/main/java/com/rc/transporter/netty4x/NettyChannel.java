@@ -66,6 +66,11 @@ public final class NettyChannel<M> extends TransportChannel<M> {
         }
     }
 
+    @Override
+    public void sendAndClose (M data) {
+        this.nettyChannelHandlerContext.write(data).addListener(ChannelFutureListener.CLOSE);
+    }
+
     /**
      * Method to close this channel
      */

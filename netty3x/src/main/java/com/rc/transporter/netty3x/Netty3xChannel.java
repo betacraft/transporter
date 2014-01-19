@@ -57,6 +57,11 @@ public final class Netty3xChannel<M> extends TransportChannel<M> {
         });
     }
 
+    @Override
+    public void sendAndClose (M data) {
+        this.channel.write(data).addListener(ChannelFutureListener.CLOSE);
+    }
+
     /**
      * Method to close channel
      */
