@@ -4,6 +4,7 @@ import com.rc.transporter.core.TransportChannel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPipeline;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -112,6 +113,10 @@ public final class NettyChannel<M> extends TransportChannel<M> {
             this.nettyChannelHandlerContext.writeAndFlush(data).addListeners(channelFutureListener);
     }
 
+
+    public ChannelPipeline getPipeline(){
+        return this.nettyChannelHandlerContext.pipeline();
+    }
 
     ChannelHandlerContext getNettyChannelHandlerContext () {
         return this.nettyChannelHandlerContext;
