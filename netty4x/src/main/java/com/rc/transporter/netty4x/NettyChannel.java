@@ -29,7 +29,7 @@ public final class NettyChannel<M> extends TransportChannel<M> {
     /**
      * Flag to check if channel closed
      */
-    private AtomicBoolean channelClosed = new AtomicBoolean(false);
+    private volatile AtomicBoolean channelClosed = new AtomicBoolean(false);
 
     /**
      * Constructor
@@ -114,7 +114,7 @@ public final class NettyChannel<M> extends TransportChannel<M> {
     }
 
 
-    public ChannelPipeline getPipeline(){
+    public ChannelPipeline getPipeline () {
         return this.nettyChannelHandlerContext.pipeline();
     }
 

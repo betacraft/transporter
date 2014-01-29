@@ -8,6 +8,7 @@ package com.rc.transporter.core;
  */
 public abstract class TransportSession<I, O> implements ITransportSession<I, O> {
 
+
     /**
      * This callback ads channel state listener and does cleanup of the session if channel gets closed
      *

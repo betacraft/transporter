@@ -68,7 +68,7 @@ final class SocketIOPipelineFactory extends SocketIOChannelInitializer {
 
 
     @Override
-    protected void initChannel (Channel ch) throws Exception {
+    protected void initChannel (final Channel ch) throws Exception {
         //ch.pipeline().addLast("logger", new LoggingHandler(LogLevel.TRACE));
         super.initChannel(ch);
         for (IDynamicNettyTransportSessionFactory transportSessionFactory : this.handlers) {

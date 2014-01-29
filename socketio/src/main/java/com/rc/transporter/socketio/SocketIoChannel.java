@@ -22,7 +22,7 @@ public final class SocketIoChannel extends TransportChannel<Object> {
     /**
      * Flag for close
      */
-    private AtomicBoolean isClosed = new AtomicBoolean(false);
+    private volatile AtomicBoolean isClosed = new AtomicBoolean(false);
 
     /**
      * Constructor

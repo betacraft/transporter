@@ -31,7 +31,7 @@ public final class NettyTransportServerConfig extends NettyTransportClientConfig
      *
      * @return
      */
-    public boolean getKeepBossGroupAlive() {
+    public boolean getKeepBossGroupAlive () {
         return keepBossGroupAlive.get();
     }
 
@@ -40,7 +40,7 @@ public final class NettyTransportServerConfig extends NettyTransportClientConfig
      *
      * @param keepBossGroupAlive
      */
-    public void setKeepBossGroupAlive(final boolean keepBossGroupAlive) {
+    public void setKeepBossGroupAlive (final boolean keepBossGroupAlive) {
         this.keepBossGroupAlive.set(keepBossGroupAlive);
     }
 
@@ -49,7 +49,7 @@ public final class NettyTransportServerConfig extends NettyTransportClientConfig
      *
      * @return
      */
-    public NioEventLoopGroupFactory getBossGroupFactory() {
+    public NioEventLoopGroupFactory getBossGroupFactory () {
         return bossGroupFactory;
     }
 
@@ -58,7 +58,7 @@ public final class NettyTransportServerConfig extends NettyTransportClientConfig
      *
      * @param bossGroupFactory
      */
-    public void setBossGroupFactory(NioEventLoopGroupFactory bossGroupFactory) {
+    public void setBossGroupFactory (NioEventLoopGroupFactory bossGroupFactory) {
         this.bossGroupFactory = bossGroupFactory;
     }
 
@@ -68,7 +68,7 @@ public final class NettyTransportServerConfig extends NettyTransportClientConfig
      *
      * @return
      */
-    public Map<ChannelOption, Object> getChildChannelOptions() {
+    public Map<ChannelOption, Object> getChildChannelOptions () {
         return childChannelOptions;
     }
 
@@ -77,7 +77,7 @@ public final class NettyTransportServerConfig extends NettyTransportClientConfig
      *
      * @param childChannelOptions
      */
-    public void setChildChannelOptions(Map<ChannelOption, Object> childChannelOptions) {
+    public void setChildChannelOptions (Map<ChannelOption, Object> childChannelOptions) {
         this.childChannelOptions = childChannelOptions;
     }
 
@@ -87,7 +87,7 @@ public final class NettyTransportServerConfig extends NettyTransportClientConfig
      * @param channelOption @ChannelOption
      * @param value         value
      */
-    public void addChildChannelOption(ChannelOption channelOption, Object value) {
+    public void addChildChannelOption (ChannelOption channelOption, Object value) {
         if (this.childChannelOptions == null)
             this.childChannelOptions = new HashMap<ChannelOption, Object>();
         this.childChannelOptions.put(channelOption, value);
@@ -98,7 +98,7 @@ public final class NettyTransportServerConfig extends NettyTransportClientConfig
      *
      * @param channelOption @ChannelOption
      */
-    public void removeChildChannelOption(ChannelOption channelOption) {
+    public void removeChildChannelOption (ChannelOption channelOption) {
         if (this.childChannelOptions == null)
             return;
         this.childChannelOptions.remove(channelOption);
@@ -108,7 +108,7 @@ public final class NettyTransportServerConfig extends NettyTransportClientConfig
     /**
      * Default constructor
      */
-    private NettyTransportServerConfig() {
+    private NettyTransportServerConfig () {
         super();
         this.childChannelOptions = new HashMap<ChannelOption, Object>();
     }
@@ -118,11 +118,11 @@ public final class NettyTransportServerConfig extends NettyTransportClientConfig
      *
      * @param channelInitializer @ChannelInitializer for connections
      */
-    private NettyTransportServerConfig(final NettyChannelInitializer channelInitializer) {
+    private NettyTransportServerConfig (final NettyChannelInitializer channelInitializer) {
         super(channelInitializer);
         this.bossGroupFactory = new NioEventLoopGroupFactory() {
             @Override
-            public NioEventLoopGroup get() {
+            public NioEventLoopGroup get () {
                 return new NioEventLoopGroup(0);
             }
         };
@@ -130,14 +130,11 @@ public final class NettyTransportServerConfig extends NettyTransportClientConfig
         addChannelOption(ChannelOption.SO_BACKLOG, 100);
         addChannelOption(ChannelOption.SO_KEEPALIVE, true);
         addChannelOption(ChannelOption.TCP_NODELAY, true);
-
         this.childChannelOptions = new HashMap<ChannelOption, Object>();
-        this.childChannelOptions.put(ChannelOption.ALLOW_HALF_CLOSURE, true);
         this.childChannelOptions.put(ChannelOption.SO_SNDBUF, 1048576);
         this.childChannelOptions.put(ChannelOption.SO_RCVBUF, 1048576);
         this.childChannelOptions.put(ChannelOption.TCP_NODELAY, true);
         this.childChannelOptions.put(ChannelOption.SO_KEEPALIVE, true);
-
     }
 
 
@@ -147,7 +144,7 @@ public final class NettyTransportServerConfig extends NettyTransportClientConfig
      * @param channelInitializer @ChannelInitializer for connections
      * @return instance of @NettyTransportServerConfig
      */
-    public static NettyTransportServerConfig getDefault(final NettyChannelInitializer channelInitializer) {
+    public static NettyTransportServerConfig getDefault (final NettyChannelInitializer channelInitializer) {
         return new NettyTransportServerConfig(channelInitializer);
     }
 
@@ -156,7 +153,7 @@ public final class NettyTransportServerConfig extends NettyTransportClientConfig
      *
      * @return instance of @NettyTransportServerConfig
      */
-    public static NettyTransportServerConfig get() {
+    public static NettyTransportServerConfig get () {
         return new NettyTransportServerConfig();
     }
 }
