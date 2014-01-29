@@ -69,7 +69,7 @@ public final class NettyChannel<M> extends TransportChannel<M> {
 
     @Override
     public void sendAndClose (M data) {
-        this.nettyChannelHandlerContext.write(data).addListener(ChannelFutureListener.CLOSE);
+        this.nettyChannelHandlerContext.writeAndFlush(data).addListener(ChannelFutureListener.CLOSE);
     }
 
     /**
