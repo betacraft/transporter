@@ -11,9 +11,10 @@ public interface ITransportSession<I, O> {
     /**
      * Callback called when connection is received in session
      *
-     * @param channel @TransportChannel associated with this session
+     * @param transportSessionInfo transport session info
+     * @param channel              @TransportChannel associated with this session
      */
-    public void onConnected (TransportChannel<O> channel);
+    public void onConnected (ITransportSessionInfo transportSessionInfo, TransportChannel<O> channel);
 
     /**
      * Callback called when connection is disconnected
@@ -33,9 +34,10 @@ public interface ITransportSession<I, O> {
      * @param data data
      */
     public void onData (I data);
+
     /**
      * Generic method for setting properties related with session
      */
-    public void setProperty(final String key, final Object value);
+    public void setProperty (final String key, final Object value);
 
 }
