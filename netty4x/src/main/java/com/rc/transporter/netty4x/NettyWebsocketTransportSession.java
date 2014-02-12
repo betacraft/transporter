@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Netty transport system
@@ -49,6 +50,10 @@ public class NettyWebsocketTransportSession<I, O> extends SimpleChannelInboundHa
      * Websocket version
      */
     private WebSocketVersion webSocketVersion;
+    /**
+     * Is session validataed
+     */
+    private AtomicBoolean isSessionValidated = new AtomicBoolean(false);
 
     /**
      * Default constructor
@@ -91,6 +96,7 @@ public class NettyWebsocketTransportSession<I, O> extends SimpleChannelInboundHa
      */
     @Override
     protected void channelRead0 (final ChannelHandlerContext ctx, final Object msg) throws Exception {
+
         if (msg instanceof CloseWebSocketFrame) {
             ((CloseWebSocketFrame) msg).retain();
             ctx.channel().close();
@@ -101,13 +107,18 @@ public class NettyWebsocketTransportSession<I, O> extends SimpleChannelInboundHa
             transportSession.onData((I) frame.text());
             frame.release();
         } else if (msg instanceof FullHttpRequest) {
-            logger.debug("Got request");
             FullHttpRequest req = (FullHttpRequest) msg;
-            logger.debug(req.toString());
             final QueryStringDecoder queryStringDecoder = new QueryStringDecoder(req.getUri());
             this.path = queryStringDecoder.path();
             this.parameters = queryStringDecoder.parameters();
             this.isSsl = req.getUri().contains("https");
+            if (!transportSession.validateRequestPath(this.path)) {
+                ctx.close();
+                return;
+            }
+            this.isSessionValidated.set(true);
+            logger.debug(req.toString());
+            if (this.isSsl) logger.trace("wss");
             WebSocketServerHandshakerFactory factory = new WebSocketServerHandshakerFactory(
                     getWebSocketLocation(req), null, false);
             WebSocketServerHandshaker handshaker = factory.newHandshaker(req);
@@ -120,7 +131,6 @@ public class NettyWebsocketTransportSession<I, O> extends SimpleChannelInboundHa
                                 nettyChannel);
                     }
                 });
-
             } else {
                 logger.error("Unsupported socket version exception");
                 HttpResponse res = new DefaultHttpResponse(
@@ -228,7 +238,8 @@ public class NettyWebsocketTransportSession<I, O> extends SimpleChannelInboundHa
     @Override
     public void channelInactive (ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
-        transportSession.onDisconnected();
+        if (this.isSessionValidated.get())
+            transportSession.onDisconnected();
         logger.info("Channel inactive " + ctx.name());
         if (this.nettyChannel != null)
             this.nettyChannel.close();
@@ -244,7 +255,8 @@ public class NettyWebsocketTransportSession<I, O> extends SimpleChannelInboundHa
     @Override
     public void exceptionCaught (ChannelHandlerContext ctx, Throwable cause) throws Exception {
         logger.error("Exception caught ", cause);
-        transportSession.onError(cause);
+        if (this.isSessionValidated.get())
+            transportSession.onError(cause);
         if (this.nettyChannel != null)
             this.nettyChannel.closeChannel();
     }

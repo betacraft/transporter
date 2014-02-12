@@ -40,5 +40,13 @@ public interface INettyWebsocketTransportSession<I, O> {
      */
     public void setProperty (final String key, final Object value);
 
+    /**
+     * Method to
+     *
+     * @param path
+     * @return if path is valid for the session or not
+     */
+    public boolean validateRequestPath (final String path);
+
 
 }
