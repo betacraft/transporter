@@ -113,6 +113,7 @@ public class NettyWebsocketTransportSession<I, O> extends SimpleChannelInboundHa
             this.parameters = queryStringDecoder.parameters();
             this.isSsl = req.getUri().contains("https");
             if (!transportSession.validateRequestPath(this.path)) {
+                req.retain();
                 ctx.close();
                 return;
             }

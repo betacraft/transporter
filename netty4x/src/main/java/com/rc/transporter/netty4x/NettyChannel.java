@@ -4,7 +4,6 @@ import com.rc.transporter.core.TransportChannel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPipeline;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -81,6 +80,7 @@ public final class NettyChannel<M> extends TransportChannel<M> {
         if (this.channelClosed.getAndSet(true))
             return;
         logger.trace("Closing channel");
+        this.nettyChannelHandlerContext.flush();
         this.nettyChannelHandlerContext.disconnect();
         this.nettyChannelHandlerContext.close();
     }
@@ -106,20 +106,6 @@ public final class NettyChannel<M> extends TransportChannel<M> {
             logger.debug("Setting autoread to " + value);
             this.nettyChannelHandlerContext.channel().config().setAutoRead(((Boolean) value));
         }
-    }
-
-    public void sendDataWithPromise (M data, ChannelFutureListener channelFutureListener) {
-        if (isOpen())
-            this.nettyChannelHandlerContext.writeAndFlush(data).addListeners(channelFutureListener);
-    }
-
-
-    public ChannelPipeline getPipeline () {
-        return this.nettyChannelHandlerContext.pipeline();
-    }
-
-    ChannelHandlerContext getNettyChannelHandlerContext () {
-        return this.nettyChannelHandlerContext;
     }
 
 }
