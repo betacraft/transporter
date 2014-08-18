@@ -113,6 +113,13 @@ public class DynamicNettyTransportSession<I, O> extends SimpleChannelInboundHand
     @Override
     public void userEventTriggered (ChannelHandlerContext ctx, Object evt) throws Exception {
         super.userEventTriggered(ctx, evt);
+        /*if (isClosed.get() || !isValidated.get())
+            return;
+        if (evt instanceof ChannelInputShutdownEvent) {
+            logger.error("Disconnecting channel because of input shutdown");
+            if (transportSession != null)
+                transportSession.onDisconnected();
+        }*/
     }
 
     /**

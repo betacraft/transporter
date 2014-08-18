@@ -40,7 +40,7 @@
         <dependency>
             <groupId>com.rainingclouds</groupId>
             <artifactId>core</artifactId>
-            <version>1.0-ALPHA-SNAPSHOT</version>
+            <version>1.1-ALPHA-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

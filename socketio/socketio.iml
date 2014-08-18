@@ -5,8 +5,8 @@
     <output-test url="file://$MODULE_DIR$/target/test-classes" />
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/main/resources" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
@@ -19,12 +19,18 @@
     <orderEntry type="library" name="Maven: ch.qos.logback:logback-classic:1.0.13" level="project" />
     <orderEntry type="library" name="Maven: ch.qos.logback:logback-core:1.0.13" level="project" />
     <orderEntry type="library" name="Maven: org.javassist:javassist:3.18.0-GA" level="project" />
-    <orderEntry type="library" name="Maven: com.corundumstudio.socketio:netty-socketio:1.5.5-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: io.netty:netty-all:4.0.14.Final-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: com.corundumstudio.socketio:netty-socketio:1.6.2-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-buffer:4.0.14.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-common:4.0.14.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-transport:4.0.14.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-handler:4.0.14.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-codec:4.0.14.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-codec-http:4.0.14.Final" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.2.4-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.2.4-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.2.3" level="project" />
-    <orderEntry type="module" module-name="netty4x" />
+    <orderEntry type="library" name="Maven: com.rainingclouds:netty4x:1.0-ALPHA-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-all:4.0.14.Final-SNAPSHOT" level="project" />
     <orderEntry type="module" module-name="core" />
   </component>
 </module>

@@ -23,6 +23,17 @@ public abstract class TransportChannel<M> {
         void onClose ();
     }
 
+
+    /**
+     * Data send listener
+     */
+    public interface IDataSendListener<M> {
+
+        void sendComplete (final M data);
+
+        void sendFailure (final M data, final Throwable cause);
+    }
+
     /**
      * Channel state listener associated with this channel
      */
@@ -45,6 +56,20 @@ public abstract class TransportChannel<M> {
      */
     public abstract void sendData (M data);
 
+    /**
+     * Method to send data with
+     *
+     * @param data             data to send
+     * @param dataSendListener data send listener
+     */
+    public abstract void sendData (M data, IDataSendListener dataSendListener);
+
+    /**
+     * Method which sends data and closes connection
+     *
+     * @param data
+     */
+    public abstract void sendAndClose (M data);
 
     /**
      * Method to close a channel

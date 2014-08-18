@@ -1,6 +1,7 @@
 package com.rc.transporter.netty4x;
 
 import com.rc.transporter.core.TransportChannel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 
@@ -27,7 +28,7 @@ public final class NettyChannel<M> extends TransportChannel<M> {
     /**
      * Flag to check if channel closed
      */
-    private AtomicBoolean channelClosed = new AtomicBoolean(false);
+    private volatile AtomicBoolean channelClosed = new AtomicBoolean(false);
 
     /**
      * Constructor
@@ -49,6 +50,27 @@ public final class NettyChannel<M> extends TransportChannel<M> {
             this.nettyChannelHandlerContext.writeAndFlush(data);
     }
 
+    @Override
+    public void sendData (final M data, final IDataSendListener dataSendListener) {
+        if (isOpen()) {
+            this.nettyChannelHandlerContext.writeAndFlush(data).addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete (ChannelFuture future) throws Exception {
+                    if (future.isSuccess()) {
+                        dataSendListener.sendComplete(data);
+                    } else {
+                        dataSendListener.sendFailure(data, future.cause());
+                    }
+                }
+            });
+        }
+    }
+
+    @Override
+    public void sendAndClose (M data) {
+        this.nettyChannelHandlerContext.writeAndFlush(data).addListener(ChannelFutureListener.CLOSE);
+    }
+
     /**
      * Method to close this channel
      */
@@ -58,6 +80,7 @@ public final class NettyChannel<M> extends TransportChannel<M> {
         if (this.channelClosed.getAndSet(true))
             return;
         logger.trace("Closing channel");
+        this.nettyChannelHandlerContext.flush();
         this.nettyChannelHandlerContext.disconnect();
         this.nettyChannelHandlerContext.close();
     }
@@ -83,16 +106,6 @@ public final class NettyChannel<M> extends TransportChannel<M> {
             logger.debug("Setting autoread to " + value);
             this.nettyChannelHandlerContext.channel().config().setAutoRead(((Boolean) value));
         }
-    }
-
-    public void sendDataWithPromise (M data,ChannelFutureListener channelFutureListener) {
-        if (isOpen())
-            this.nettyChannelHandlerContext.writeAndFlush(data).addListeners(channelFutureListener);
-    }
-
-
-    ChannelHandlerContext getNettyChannelHandlerContext () {
-        return this.nettyChannelHandlerContext;
     }
 
 }

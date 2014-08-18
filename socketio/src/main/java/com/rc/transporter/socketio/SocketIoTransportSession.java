@@ -35,6 +35,9 @@ public class SocketIoTransportSession implements ISocketIOTransportSession {
      */
     protected ConcurrentHashMap<UUID, Mutex> connectionCatalogEntryLock;
 
+    /**
+     * Maximum hashmap checks
+     */
     protected static final int MAX_HASH_MAP_CHECKS = 3;
 
     /**
@@ -69,8 +72,9 @@ public class SocketIoTransportSession implements ISocketIOTransportSession {
 
     @Override
     public void onConnect (final SocketIOClient client) {
-        logger.trace("SocketIO server got a new connection");
         try {
+            logger.trace("SocketIO server got a new connection {}:{}" + client.getNamespace(),
+                    client.getSessionId());
             Mutex mutex = new Mutex();
             mutex.acquire();
             this.connectionCatalogEntryLock.put(client.getSessionId(), mutex);
@@ -104,7 +108,9 @@ public class SocketIoTransportSession implements ISocketIOTransportSession {
                 ++retries;
             }
             if (mutex == null) {
-                logger.error("Socketio channel onData called before onConnected with data", data);
+                logger.error("Socketio channel onData called before onConnected with data or it was " +
+                        "already disconnected so disconnecting", data);
+                client.disconnect();
                 return;
             }
             mutex.acquire();
@@ -130,6 +136,11 @@ public class SocketIoTransportSession implements ISocketIOTransportSession {
     @Override
     public void onDisconnect (SocketIOClient client) {
         logger.debug("SocketIO disconnected");
+        try {
+            this.connectionCatalogEntryLock.remove(client.getSessionId());
+        } catch (Exception ignored) {
+
+        }
         if (!this.connectionCatalog.containsKey(client.getSessionId()))
             return;
         try {

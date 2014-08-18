@@ -72,6 +72,11 @@ public class NettyTransportSession<I, O> extends SimpleChannelInboundHandler<Obj
     @Override
     public void userEventTriggered (ChannelHandlerContext ctx, Object evt) throws Exception {
         super.userEventTriggered(ctx, evt);
+        /*if (evt instanceof ChannelInputShutdownEvent) {
+            logger.error("Disconnecting channel because of input shutdown");
+            if (transportSession != null)
+                transportSession.onDisconnected();
+        }*/
     }
 
     /**

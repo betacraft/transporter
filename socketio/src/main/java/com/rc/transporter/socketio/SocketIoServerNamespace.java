@@ -64,6 +64,7 @@ public final class SocketIoServerNamespace {
      * @param socketIOServer
      */
     protected void setOn (final SocketIOServer socketIOServer) {
+        logger.trace("Setting namespace {}", path);
         SocketIONamespace namespace = socketIOServer.addNamespace(this.path);
         ISocketIOTransportSession session = this.socketIOTransportSessionFactory.get();
         namespace.addConnectListener(session);

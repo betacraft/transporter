@@ -1,11 +1,10 @@
 package com.rc.transporter.socketio;
 
 import com.corundumstudio.socketio.SocketIOChannelInitializer;
+import com.corundumstudio.socketio.handler.WrongUrlHandler;
 import com.rc.transporter.netty4x.DynamicNettyTransportSession;
 import com.rc.transporter.netty4x.IDynamicNettyTransportSessionFactory;
 import io.netty.channel.Channel;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +68,8 @@ final class SocketIOPipelineFactory extends SocketIOChannelInitializer {
 
 
     @Override
-    protected void initChannel (Channel ch) throws Exception {
+    protected void initChannel (final Channel ch) throws Exception {
+        //ch.pipeline().addLast("logger", new LoggingHandler(LogLevel.TRACE));
         super.initChannel(ch);
         for (IDynamicNettyTransportSessionFactory transportSessionFactory : this.handlers) {
             switch (transportSessionFactory.addAt()) {
@@ -83,6 +83,6 @@ final class SocketIOPipelineFactory extends SocketIOChannelInitializer {
                     break;
             }
         }
-        ch.pipeline().addFirst("logger", new LoggingHandler(LogLevel.TRACE));
+        ch.pipeline().addLast(WRONG_URL_HANDLER, new WrongUrlHandler());
     }
 }

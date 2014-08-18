@@ -1,6 +1,7 @@
 package com.rc.transporter.socketio;
 
 import com.corundumstudio.socketio.SocketIOClient;
+import com.corundumstudio.socketio.VoidAckCallback;
 import com.rc.transporter.core.TransportChannel;
 import io.netty.buffer.ByteBuf;
 
@@ -21,7 +22,7 @@ public final class SocketIoChannel extends TransportChannel<Object> {
     /**
      * Flag for close
      */
-    private AtomicBoolean isClosed = new AtomicBoolean(false);
+    private volatile AtomicBoolean isClosed = new AtomicBoolean(false);
 
     /**
      * Constructor
@@ -39,12 +40,76 @@ public final class SocketIoChannel extends TransportChannel<Object> {
      */
     @Override
     public void sendData (Object data) {
+        if (!this.isOpen()) {
+            return;
+        }
         if (data instanceof String) {
             this.socketIOClient.sendMessage((String) data);
             return;
         }
         if (data instanceof ByteBuf) {
             this.socketIOClient.sendMessage(((ByteBuf) data).toString(Charset.defaultCharset()));
+            return;
+        }
+        throw new IllegalStateException("Unsupported data " + data.getClass().getName());
+
+    }
+
+    @Override
+    public void sendData (final Object data, final IDataSendListener dataSendListener) {
+        if (!this.isOpen()) {
+            return;
+        }
+        if (data instanceof String) {
+            this.socketIOClient.sendMessage((String) data, new VoidAckCallback() {
+                @Override
+                protected void onSuccess () {
+                    dataSendListener.sendComplete(data);
+                }
+            });
+            return;
+        }
+        if (data instanceof ByteBuf) {
+            this.socketIOClient.sendMessage(((ByteBuf) data).toString(Charset.defaultCharset()),
+                    new VoidAckCallback() {
+                        @Override
+                        protected void onSuccess () {
+                            dataSendListener.sendComplete(data);
+                        }
+                    });
+            return;
+        }
+        throw new IllegalStateException("Unsupported data " + data.getClass().getName());
+
+    }
+
+
+    @Override
+    public void sendAndClose (Object data) {
+        if (!this.isOpen())
+            return;
+        if (data instanceof String) {
+            this.socketIOClient.sendMessage((String) data, new VoidAckCallback() {
+                @Override
+                protected void onSuccess () {
+                    if (socketIOClient == null)
+                        return;
+                    socketIOClient.disconnect();
+                }
+            });
+            return;
+        }
+        if (data instanceof ByteBuf) {
+            this.socketIOClient.sendMessage(((ByteBuf) data).toString(Charset.defaultCharset()),
+                    new VoidAckCallback() {
+
+                        @Override
+                        protected void onSuccess () {
+                            if (socketIOClient == null)
+                                return;
+                            socketIOClient.disconnect();
+                        }
+                    });
             return;
         }
         throw new IllegalStateException("Unsupported data " + data.getClass().getName());
@@ -57,6 +122,7 @@ public final class SocketIoChannel extends TransportChannel<Object> {
      * @param eventName name of the event
      * @param data      data associated with the event
      */
+
     public void sendEvent (String eventName, Object data) {
         this.socketIOClient.sendEvent(eventName, data);
     }

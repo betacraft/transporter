@@ -31,7 +31,11 @@ public interface IDynamicTransportSession<I, O> extends ITransportSession<I, O> 
      */
     public boolean isStandalone ();
 
-
+    /**
+     * Where to add this session in the pipeline
+     *
+     * @return
+     */
     public DynamicTransportSessionAddPosition addAt ();
 
 }
