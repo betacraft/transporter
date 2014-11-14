@@ -85,7 +85,7 @@ public class NettyTransportClient<I, O> implements ITransportClient<I, O> {
             bootstrap.connect(host, port).channel().closeFuture().addListener(new ChannelFutureListener() {
                 @Override
                 public void operationComplete(ChannelFuture future) throws Exception {
-                    logger.info("Client bootstrap closed");
+                    logger.trace("Client bootstrap closed");
                     transportSession.onDisconnected();
                     close();
                 }

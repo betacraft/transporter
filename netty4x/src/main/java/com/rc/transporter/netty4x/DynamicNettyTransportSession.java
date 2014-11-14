@@ -135,7 +135,7 @@ public class DynamicNettyTransportSession<I, O> extends SimpleChannelInboundHand
         if (isClosed.get() || !isValidated.get())
             return;
         transportSession.onDisconnected();
-        logger.info("Channel inactive " + ctx.name());
+        logger.trace("Channel inactive " + ctx.name());
         this.nettyChannel.close();
     }
 

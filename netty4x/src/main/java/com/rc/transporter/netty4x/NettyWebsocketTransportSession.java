@@ -241,7 +241,7 @@ public class NettyWebsocketTransportSession<I, O> extends SimpleChannelInboundHa
         super.channelInactive(ctx);
         if (this.isSessionValidated.get())
             transportSession.onDisconnected();
-        logger.info("Channel inactive " + ctx.name());
+        logger.trace("Channel inactive " + ctx.name());
         if (this.nettyChannel != null)
             this.nettyChannel.close();
     }

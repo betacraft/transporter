@@ -90,7 +90,7 @@ public class NettyTransportSession<I, O> extends SimpleChannelInboundHandler<Obj
     public void channelInactive (ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
         transportSession.onDisconnected();
-        logger.info("Channel inactive " + ctx.name());
+        logger.trace("Channel inactive " + ctx.name());
         if (this.nettyChannel != null)
             this.nettyChannel.close();
     }
